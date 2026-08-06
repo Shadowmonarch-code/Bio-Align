@@ -1,0 +1,1038 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useCallback, useRef, useEffect } from 'react';
+     4→import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+     5→import {
+     6→  Upload,
+     7→  X,
+     8→  File,
+     9→  FileText,
+    10→  Dna,
+    11→  Database,
+    12→  Atom,
+    13→  Box,
+    14→  Hexagon,
+    15→  Layers,
+    16→  AlignCenterVertical,
+    17→  GitBranch,
+    18→  LayoutGrid,
+    19→  MapPin,
+    20→  Map,
+    21→  Table,
+    22→  Table2,
+    23→  Sheet,
+    24→  Braces,
+    25→  Code,
+    26→  Archive,
+    27→  ArchiveRestore,
+    28→  Package,
+    29→  PackageOpen,
+    30→  FileArchive,
+    31→  Lock,
+    32→  Shield,
+    33→  CheckCircle2,
+    34→  AlertCircle,
+    35→  Loader2,
+    36→  Eye,
+    37→  Trash2,
+    38→  List,
+    39→  Grid3X3,
+    40→  ChevronDown,
+    41→  ChevronUp,
+    42→  AlertTriangle,
+    43→  Info,
+    44→} from 'lucide-react';
+    45→import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+    46→import { Button } from '@/components/ui/button';
+    47→import { Progress } from '@/components/ui/progress';
+    48→import { Badge } from '@/components/ui/badge';
+    49→import {
+    50→  UploadedFile,
+    51→  BioFileType,
+    52→  CategoryInfo,
+    53→  FILE_CATEGORIES,
+    54→  BIO_FILE_TYPES,
+    55→  detectFileType,
+    56→  formatFileSize,
+    57→  truncateFilename,
+    58→  generateFileId,
+    59→  validateFile,
+    60→  readPreviewContent,
+    61→  getCategoryInfo,
+    62→} from '@/lib/file-types';
+    63→import { cn } from '@/lib/utils';
+    64→
+    65→// ============================================================================
+    66→// Icon Mapping Component
+    67→// ============================================================================
+    68→
+    69→interface IconProps {
+    70→  className?: string;
+    71→}
+    72→
+    73→const IconMap: Record<string, React.FC<IconProps>> = {
+    74→  Dna,
+    75→  FileText,
+    76→  Database,
+    77→  Atom,
+    78→  Box,
+    79→  Hexagon,
+    80→  Layers,
+    81→  AlignStartVertical: AlignCenterVertical,
+    82→  AlignCenterVertical,
+    83→  AlignEndVertical: AlignCenterVertical,
+    84→  GitBranch,
+    85→  LayoutGrid,
+    86→  MapPin,
+    87→  Map,
+    88→  Table,
+    89→  Table2,
+    90→  Sheet,
+    91→  Braces,
+    92→  Code,
+    93→  Archive,
+    94→  ArchiveRestore,
+    95→  Package,
+    96→  PackageOpen,
+    97→  FileArchive,
+    98→  Lock,
+    99→  Shield,
+   100→};
+   101→
+   102→function getFileIcon(bioType: BioFileType | null, className = 'size-5'): React.ReactElement {
+   103→  if (!bioType) return <File className={className} />;
+   104→  
+   105→  const IconComponent = IconMap[bioType.icon] || File;
+   106→  return <IconComponent className={className} />;
+   107→}
+   108→
+   109→// ============================================================================
+   110→// Custom Hook for Drag and Drop
+   111→// ============================================================================
+   112→
+   113→function useDragDrop(onFiles: (files: File[]) => void) {
+   114→  const [isDragging, setIsDragging] = useState(false);
+   115→  const dragCounter = useRef(0);
+   116→
+   117→  const handleDragEnter = useCallback((e: React.DragEvent) => {
+   118→    e.preventDefault();
+   119→    e.stopPropagation();
+   120→    dragCounter.current++;
+   121→    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+   122→      setIsDragging(true);
+   123→    }
+   124→  }, []);
+   125→
+   126→  const handleDragLeave = useCallback((e: React.DragEvent) => {
+   127→    e.preventDefault();
+   128→    e.stopPropagation();
+   129→    dragCounter.current--;
+   130→    if (dragCounter.current === 0) {
+   131→      setIsDragging(false);
+   132→    }
+   133→  }, []);
+   134→
+   135→  const handleDragOver = useCallback((e: React.DragEvent) => {
+   136→    e.preventDefault();
+   137→    e.stopPropagation();
+   138→  }, []);
+   139→
+   140→  const handleDrop = useCallback(
+   141→    (e: React.DragEvent) => {
+   142→      e.preventDefault();
+   143→      e.stopPropagation();
+   144→      setIsDragging(false);
+   145→      dragCounter.current = 0;
+   146→
+   147→      const files = Array.from(e.dataTransfer.files);
+   148→      if (files.length > 0) {
+   149→        onFiles(files);
+   150→      }
+   151→    },
+   152→    [onFiles]
+   153→  );
+   154→
+   155→  return {
+   156→    isDragging,
+   157→    handlers: {
+   158→      onDragEnter: handleDragEnter,
+   159→      onDragLeave: handleDragLeave,
+   160→      onDragOver: handleDragOver,
+   161→      onDrop: handleDrop,
+   162→    },
+   163→  };
+   164→}
+   165→
+   166→// ============================================================================
+   167→// Sub-Components
+   168→// ============================================================================
+   169→
+   170→/** Empty state illustration */
+   171→function EmptyState() {
+   172→  return (
+   173→    <motion.div
+   174→      initial={{ opacity: 0, y: 20 }}
+   175→      animate={{ opacity: 1, y: 0 }}
+   176→      exit={{ opacity: 0, y: -20 }}
+   177→      className="flex flex-col items-center justify-center py-8 text-center"
+   178→    >
+   179→      <motion.div
+   180→        animate={{
+   181→          y: [0, -10, 0],
+   182→          scale: [1, 1.05, 1],
+   183→        }}
+   184→        transition={{
+   185→          duration: 3,
+   186→          repeat: Infinity,
+   187→          ease: 'easeInOut',
+   188→        }}
+   189→        className="mb-4"
+   190→      >
+   191→        <div className="relative">
+   192→          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl" />
+   193→          <div className="relative bg-gradient-to-br from-[#C1121F]/10 to-[#C1121F]/5 p-6 rounded-full border-2 border-dashed border-[#C1121F]/30">
+   194→            <Upload className="size-12 text-[#C1121F]" />
+   195→          </div>
+   196→        </div>
+   197→      </motion.div>
+   198→      <h3 className="text-lg font-semibold text-foreground mb-2">
+   199→        No files uploaded yet
+   200→      </h3>
+   201→      <p className="text-sm text-muted-foreground max-w-xs">
+   202→        Drag and drop your bioinformatics files here or click to browse
+   203→      </p>
+   204→      
+   205→      {/* Supported formats preview */}
+   206→      <div className="mt-6 grid grid-cols-3 gap-2 text-xs">
+   207→        {FILE_CATEGORIES.slice(0, 3).map((cat) => (
+   208→          <div key={cat.id} className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-muted/50">
+   209→            {getFileIcon({ icon: cat.icon, extension: '', name: '', category: cat.id, mimeType: '', description: '', color: cat.color }, 'size-3')}
+   210→            <span className="text-muted-foreground">{cat.formats.length} {cat.name.split(' ')[0]}</span>
+   211→          </div>
+   212→        ))}
+   213→      </div>
+   214→    </motion.div>
+   215→  );
+   216→}
+   217→
+   218→/** Supported file types display */
+   219→function SupportedFormats() {
+   220→  const [expanded, setExpanded] = useState(false);
+   221→
+   222→  return (
+   223→    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+   224→      <CardContent className="p-4">
+   225→        <button
+   226→          onClick={() => setExpanded(!expanded)}
+   227→          className="w-full flex items-center justify-between text-left"
+   228→        >
+   229→          <div className="flex items-center gap-2">
+   230→            <Info className="size-4 text-muted-foreground" />
+   231→            <span className="text-sm font-medium">Supported Bioinformatics Formats</span>
+   232→          </div>
+   233→          {expanded ? (
+   234→            <ChevronUp className="size-4 text-muted-foreground" />
+   235→          ) : (
+   236→            <ChevronDown className="size-4 text-muted-foreground" />
+   237→          )}
+   238→        </button>
+   239→
+   240→        <AnimatePresence>
+   241→          {expanded && (
+   242→            <motion.div
+   243→              initial={{ height: 0, opacity: 0 }}
+   244→              animate={{ height: 'auto', opacity: 1 }}
+   245→              exit={{ height: 0, opacity: 0 }}
+   246→              transition={{ duration: 0.2 }}
+   247→              className="overflow-hidden"
+   248→            >
+   249→              <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+   250→                {FILE_CATEGORIES.map((category) => (
+   251→                  <CategoryBadge key={category.id} category={category} />
+   252→                ))}
+   253→              </div>
+   254→            </motion.div>
+   255→          )}
+   256→        </AnimatePresence>
+   257→
+   258→        {!expanded && (
+   259→          <div className="mt-3 flex flex-wrap gap-1.5">
+   260→            {FILE_CATEGORIES.map((category) => (
+   261→              <Badge
+   262→                key={category.id}
+   263→                variant="outline"
+   264→                className="text-xs py-0 h-6"
+   265→                style={{ borderColor: `${category.color}40`, color: category.color }}
+   266→              >
+   267→                {category.formats.slice(0, 2).join(', ')}
+   268→                {category.formats.length > 2 && ` +${category.formats.length - 2}`}
+   269→              </Badge>
+   270→            ))}
+   271→          </div>
+   272→        )}
+   273→      </CardContent>
+   274→    </Card>
+   275→  );
+   276→}
+   277→
+   278→/** Category badge component */
+   279→function CategoryBadge({ category }: { category: CategoryInfo }) {
+   280→  return (
+   281→    <motion.div
+   282→      whileHover={{ scale: 1.02 }}
+   283→      className="p-3 rounded-lg border bg-background/50 transition-colors hover:bg-background"
+   284→      style={{ borderColor: `${category.color}30` }}
+   285→    >
+   286→      <div className="flex items-center gap-2 mb-2">
+   287→        <div
+   288→          className="p-1.5 rounded-md"
+   289→          style={{ backgroundColor: `${category.color}15` }}
+   290→        >
+   291→          {getFileIcon(
+   292→            { icon: category.icon, extension: '', name: '', category: category.id, mimeType: '', description: '', color: category.color },
+   293→            'size-4'
+   294→          )}
+   295→        </div>
+   296→        <span className="font-medium text-sm">{category.name}</span>
+   297→      </div>
+   298→      <p className="text-xs text-muted-foreground mb-2">{category.description}</p>
+   299→      <div className="flex flex-wrap gap-1">
+   300→        {category.formats.map((format) => (
+   301→          <Badge
+   302→            key={format}
+   303→            variant="secondary"
+   304→            className="text-[10px] px-1.5 py-0 h-5 font-mono"
+   305→            style={{ backgroundColor: `${category.color}15`, color: category.color }}
+   306→          >
+   307→            {format}
+   308→          </Badge>
+   309→        ))}
+   310→      </div>
+   311→    </motion.div>
+   312→  );
+   313→}
+   314→
+   315→/** Single file item in the list */
+   316→function FileItem({
+   317→  file,
+   318→  onRemove,
+   319→  onPreview,
+   320→  viewMode,
+   321→}: {
+   322→  file: UploadedFile;
+   323→  onRemove: (id: string) => void;
+   324→  onPreview: (file: UploadedFile) => void;
+   325→  viewMode: 'grid' | 'list';
+   326→}) {
+   327→  const controls = useAnimation();
+   328→
+   329→  useEffect(() => {
+   330→    if (file.status === 'uploading') {
+   331→      controls.start({
+   332→        scale: [1, 1.02, 1],
+   333→        transition: { repeat: Infinity, duration: 1.5 },
+   334→      });
+   335→    }
+   336→  }, [file.status, controls]);
+   337→
+   338→  const statusConfig = {
+   339→    uploading: {
+   340→      icon: Loader2,
+   341→      color: 'text-blue-500',
+   342→      bgColor: 'bg-blue-500/10',
+   343→      label: 'Uploading...',
+   344→    },
+   345→    ready: {
+   346→      icon: CheckCircle2,
+   347→      color: 'text-green-500',
+   348→      bgColor: 'bg-green-500/10',
+   349→      label: 'Ready',
+   350→    },
+   351→    error: {
+   352→      icon: AlertCircle,
+   353→      color: 'text-red-500',
+   354→      bgColor: 'bg-red-500/10',
+   355→      label: 'Error',
+   356→    },
+   357→    previewing: {
+   358→      icon: Eye,
+   359→      color: 'text-purple-500',
+   360→      bgColor: 'bg-purple-500/10',
+   361→      label: 'Preview',
+   362→    },
+   363→  };
+   364→
+   365→  const status = statusConfig[file.status];
+   366→  const StatusIcon = status.icon;
+   367→
+   368→  if (viewMode === 'grid') {
+   369→    return (
+   370→      <motion.div
+   371→        layout
+   372→        initial={{ opacity: 0, scale: 0.9 }}
+   373→        animate={{ opacity: 1, scale: 1 }}
+   374→        exit={{ opacity: 0, scale: 0.9 }}
+   375→        whileHover={{ y: -2 }}
+   376→        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+   377→        className="group relative"
+   378→      >
+   379→        <Card className="h-full overflow-hidden border-border/50 hover:border-[#C1121F]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#C1121F]/5">
+   380→          <CardContent className="p-4">
+   381→            {/* Header */}
+   382→            <div className="flex items-start justify-between mb-3">
+   383→              <motion.div
+   384→                animate={controls}
+   385→                className={cn(
+   386→                  'p-2.5 rounded-lg transition-colors',
+   387→                  file.bioType?.color
+   388→                    ? `bg-[${file.bioType.color}10]`
+   389→                    : 'bg-muted'
+   390→                )}
+   391→                style={
+   392→                  file.bioType?.color
+   393→                    ? { backgroundColor: `${file.bioType.color}10` }
+   394→                    : undefined
+   395→                }
+   396→              >
+   397→                {getFileIcon(file.bioType, 'size-5')}
+   398→              </motion.div>
+   399→              
+   400→              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+   401→                {file.preview && (
+   402→                  <Button
+   403→                    size="icon"
+   404→                    variant="ghost"
+   405→                    className="size-7"
+   406→                    onClick={() => onPreview(file)}
+   407→                  >
+   408→                    <Eye className="size-3.5" />
+   409→                  </Button>
+   410→                )}
+   411→                <Button
+   412→                  size="icon"
+   413→                  variant="ghost"
+   414→                  className="size-7 text-destructive hover:text-destructive"
+   415→                  onClick={() => onRemove(file.id)}
+   416→                >
+   417→                  <X className="size-3.5" />
+   418→                </Button>
+   419→              </div>
+   420→            </div>
+   421→
+   422→            {/* File info */}
+   423→            <div className="space-y-2">
+   424→              <p className="text-sm font-medium truncate" title={file.name}>
+   425→                {truncateFilename(file.name, 20)}
+   426→              </p>
+   427→              
+   428→              <div className="flex items-center gap-2">
+   429→                <Badge
+   430→                  variant="secondary"
+   431→                  className="text-[10px] h-5 font-mono"
+   432→                  style={
+   433→                    file.bioType?.color
+   434→                      ? {
+   435→                          backgroundColor: `${file.bioType.color}15`,
+   436→                          color: file.bioType.color,
+   437→                        }
+   438→                      : undefined
+   439→                  }
+   440→                >
+   441→                  {file.bioType?.name || 'Unknown'}
+   442→                </Badge>
+   443→                
+   444→                <span className="text-xs text-muted-foreground">
+   445→                  {formatFileSize(file.size)}
+   446→                </span>
+   447→              </div>
+   448→
+   449→              {/* Progress bar for uploading */}
+   450→              {file.status === 'uploading' && (
+   451→                <Progress value={file.progress} className="h-1.5" />
+   452→              )}
+   453→
+   454→              {/* Status indicator */}
+   455→              <div className="flex items-center gap-1.5">
+   456→                <StatusIcon className={cn('size-3.5', status.color)} />
+   457→                <span className={cn('text-xs', status.color)}>
+   458→                  {file.error || status.label}
+   459→                </span>
+   460→              </div>
+   461→            </div>
+   462→          </CardContent>
+   463→        </Card>
+   464→      </motion.div>
+   465→    );
+   466→  }
+   467→
+   468→  // List view
+   469→  return (
+   470→    <motion.div
+   471→      layout
+   472→      initial={{ opacity: 0, x: -20 }}
+   473→      animate={{ opacity: 1, x: 0 }}
+   474→      exit={{ opacity: 0, x: -20 }}
+   475→      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+   476→      className="group"
+   477→    >
+   478→      <div className="flex items-center gap-4 p-3 rounded-lg border border-border/50 hover:border-[#C1121F]/30 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:shadow-sm">
+   479→        {/* Icon */}
+   480→        <motion.div
+   481→          animate={controls}
+   482→          className={cn(
+   483→            'p-2 rounded-lg shrink-0',
+   484→            file.bioType?.color ? '' : 'bg-muted'
+   485→          )}
+   486→          style={
+   487→            file.bioType?.color
+   488→              ? { backgroundColor: `${file.bioType.color}10` }
+   489→              : undefined
+   490→          }
+   491→        >
+   492→          {getFileIcon(file.bioType, 'size-4')}
+   493→        </motion.div>
+   494→
+   495→        {/* File info */}
+   496→        <div className="flex-1 min-w-0">
+   497→          <div className="flex items-center gap-2">
+   498→            <p className="text-sm font-medium truncate" title={file.name}>
+   499→              {truncateFilename(file.name, 35)}
+   500→            </p>
+   501→            <Badge
+   502→              variant="secondary"
+   503→              className="text-[10px] h-5 shrink-0 font-mono"
+   504→              style={
+   505→                file.bioType?.color
+   506→                  ? {
+   507→                      backgroundColor: `${file.bioType.color}15`,
+   508→                      color: file.bioType.color,
+   509→                    }
+   510→                  : undefined
+   511→              }
+   512→            >
+   513→              {file.bioType?.name || 'Unknown'}
+   514→            </Badge>
+   515→          </div>
+   516→          
+   517→          <div className="flex items-center gap-3 mt-1">
+   518→            <span className="text-xs text-muted-foreground">
+   519→              {formatFileSize(file.size)}
+   520→            </span>
+   521→            
+   522→            {file.status === 'uploading' && (
+   523→              <div className="flex items-center gap-2 flex-1 max-w-[150px]">
+   524→                <Progress value={file.progress} className="h-1.5 flex-1" />
+   525→                <span className="text-xs text-muted-foreground">
+   526→                  {file.progress}%
+   527→                </span>
+   528→              </div>
+   529→            )}
+   530→
+   531→            <div className={cn('flex items-center gap-1', status.bgColor, 'px-1.5 rounded')}>
+   532→              <StatusIcon className={cn('size-3', status.color)} />
+   533→              <span className={cn('text-[10px]', status.color)}>
+   534→                {file.error || status.label}
+   535→              </span>
+   536→            </div>
+   537→          </div>
+   538→        </div>
+   539→
+   540→        {/* Actions */}
+   541→        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+   542→          {file.preview && (
+   543→            <Button
+   544→              size="icon"
+   545→              variant="ghost"
+   546→              className="size-8"
+   547→              onClick={() => onPreview(file)}
+   548→            >
+   549→              <Eye className="size-4" />
+   550→            </Button>
+   551→          )}
+   552→          <Button
+   553→            size="icon"
+   554→            variant="ghost"
+   555→            className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+   556→            onClick={() => onRemove(file.id)}
+   557→          >
+   558→            <Trash2 className="size-4" />
+   559→          </Button>
+   560→        </div>
+   561→      </div>
+   562→    </motion.div>
+   563→  );
+   564→}
+   565→
+   566→/** Preview dialog content */
+   567→function PreviewDialog({
+   568→  file,
+   569→  onClose,
+   570→}: {
+   571→  file: UploadedFile;
+   572→  onClose: () => void;
+   573→}) {
+   574→  return (
+   575→    <motion.div
+   576→      initial={{ opacity: 0 }}
+   577→      animate={{ opacity: 1 }}
+   578→      exit={{ opacity: 0 }}
+   579→      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+   580→      onClick={onClose}
+   581→    >
+   582→      <motion.div
+   583→        initial={{ scale: 0.95, opacity: 0 }}
+   584→        animate={{ scale: 1, opacity: 1 }}
+   585→        exit={{ scale: 0.95, opacity: 0 }}
+   586→        onClick={(e) => e.stopPropagation()}
+   587→        className="w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-xl shadow-2xl"
+   588→      >
+   589→        <Card className="border-border">
+   590→          <CardHeader className="pb-3">
+   591→            <div className="flex items-center justify-between">
+   592→              <div className="flex items-center gap-3">
+   593→                <div
+   594→                  className="p-2 rounded-lg"
+   595→                  style={
+   596→                    file.bioType?.color
+   597→                      ? { backgroundColor: `${file.bioType.color}10` }
+   598→                      : undefined
+   599→                  }
+   600→                >
+   601→                  {getFileIcon(file.bioType, 'size-5')}
+   602→                </div>
+   603→                <div>
+   604→                  <CardTitle className="text-base">{file.name}</CardTitle>
+   605→                  <CardDescription>
+   606→                    {file.bioType?.name || 'Unknown'} • {formatFileSize(file.size)}
+   607→                  </CardDescription>
+   608→                </div>
+   609→              </div>
+   610→              <Button size="icon" variant="ghost" onClick={onClose}>
+   611→                <X className="size-4" />
+   612→              </Button>
+   613→            </div>
+   614→          </CardHeader>
+   615→          <CardContent className="pt-0">
+   616→            <div className="rounded-lg bg-muted/50 border overflow-auto max-h-[400px]">
+   617→              <pre className="p-4 text-xs font-mono whitespace-pre-wrap break-all leading-relaxed">
+   618→                {file.preview || 'Preview not available'}
+   619→              </pre>
+   620→            </div>
+   621→            {file.preview && (
+   622→              <p className="mt-2 text-xs text-muted-foreground text-right">
+   623→                Showing first {file.preview.split('\n').length} lines
+   624→              </p>
+   625→            )}
+   626→          </CardContent>
+   627→        </Card>
+   628→      </motion.div>
+   629→    </motion.div>
+   630→  );
+   631→}
+   632→
+   633→// ============================================================================
+   634→// Main Component
+   635→// ============================================================================
+   636→
+   637→export default function FileUpload() {
+   638→  const [files, setFiles] = useState<UploadedFile[]>([]);
+   639→  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+   640→  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
+   641→  const fileInputRef = useRef<HTMLInputElement>(null);
+   642→
+   643→  // Handle new files being added
+   644→  const handleFiles = useCallback(async (newFiles: File[]) => {
+   645→    const uploadedFiles: UploadedFile[] = [];
+   646→
+   647→    for (const file of newFiles) {
+   648→      const validation = validateFile(file);
+   649→      const bioType = detectFileType(file.name);
+   650→      let preview: string | undefined;
+   651→
+   652→      // Try to read preview for text-based files
+   653→      if (bioType && !bioType.mimeType.startsWith('application/')) {
+   654→        try {
+   655→          preview = await readPreviewContent(file);
+   656→        } catch {
+   657→          preview = undefined;
+   658→        }
+   659→      }
+   660→
+   661→      uploadedFiles.push({
+   662→        id: generateFileId(),
+   663→        name: file.name,
+   664→        size: file.size,
+   665→        type: file.type || bioType?.mimeType || 'application/octet-stream',
+   666→        bioType,
+   667→        lastModified: file.lastModified,
+   668→        status: validation.valid ? 'uploading' : 'error',
+   669→        progress: 0,
+   670→        error: validation.errors[0],
+   671→        preview,
+   672→        file,
+   673→      });
+   674→    }
+   675→
+   676→    setFiles((prev) => [...prev, ...uploadedFiles]);
+   677→
+   678→    // Simulate upload progress for each file
+   679→    uploadedFiles.forEach((uploadedFile) => {
+   680→      if (uploadedFile.status !== 'error') {
+   681→        // Start upload simulation
+   682→        let progress = 0;
+   683→        const interval = setInterval(() => {
+   684→          progress += Math.random() * 30 + 10;
+   685→          if (progress >= 100) {
+   686→            progress = 100;
+   687→            clearInterval(interval);
+   688→            setFiles((prev) =>
+   689→              prev.map((f) =>
+   690→                f.id === uploadedFile.id ? { ...f, status: 'ready' as const, progress: 100 } : f
+   691→              )
+   692→            );
+   693→          } else {
+   694→            setFiles((prev) =>
+   695→              prev.map((f) =>
+   696→                f.id === uploadedFile.id ? { ...f, progress: Math.min(progress, 99) } : f
+   697→              )
+   698→            );
+   699→          }
+   700→        }, 200);
+   701→      }
+   702→    });
+   703→  }, []);
+   704→
+   705→  // Remove a single file
+   706→  const removeFile = useCallback((id: string) => {
+   707→    setFiles((prev) => prev.filter((f) => f.id !== id));
+   708→  }, []);
+   709→
+   710→  // Clear all files
+   711→  const clearAll = useCallback(() => {
+   712→    setFiles([]);
+   713→  }, []);
+   714→
+   715→  // Open file browser
+   716→  const openFileBrowser = () => {
+   717→    fileInputRef.current?.click();
+   718→  };
+   719→
+   720→  // Handle file input change
+   721→  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   722→    if (e.target.files && e.target.files.length > 0) {
+   723→      handleFiles(Array.from(e.target.files));
+   724→      e.target.value = '';
+   725→    }
+   726→  };
+   727→
+   728→  // Drag and drop hook
+   729→  const { isDragging, handlers } = useDragDrop(handleFiles);
+   730→
+   731→  // Calculate stats
+   732→  const totalSize = files.reduce((acc, f) => acc + f.size, 0);
+   733→  const readyCount = files.filter((f) => f.status === 'ready').length;
+   734→  const errorCount = files.filter((f) => f.status === 'error').length;
+   735→
+   736→  return (
+   737→    <div className="w-full space-y-6">
+   738→      {/* Hidden file input */}
+   739→      <input
+   740→        ref={fileInputRef}
+   741→        type="file"
+   742→        multiple
+   743→        accept=".fasta,.fa,.fna,.faa,.fastq,.fq,.gb,.genbank,.embl,.pdb,.ent,.cif,.mcif,.mol,.mol2,.sdf,.sam,.bam,.cram,.vcf,.bed,.gff,.gff3,.gtf,.csv,.tsv,.txt,.xlsx,.xls,.json,.xml,.zip,.gz,.gzip,.tar,.tar.gz,.bz2,.rar,.7z"
+   744→        onChange={handleInputChange}
+   745→        className="hidden"
+   746→      />
+   747→
+   748→      {/* Upload Zone */}
+   749→      <motion.div
+   750→        {...handlers}
+   751→        onClick={openFileBrowser}
+   752→        whileHover={{ scale: 1.005 }}
+   753→        whileTap={{ scale: 0.995 }}
+   754→        animate={isDragging ? { scale: 1.02 } : {}}
+   755→        className={cn(
+   756→          'relative cursor-pointer rounded-xl border-2 border-dashed p-8 md:p-12 transition-all duration-300',
+   757→          'hover:border-[#C1121F]/50 hover:bg-[#C1121F]/[0.02]',
+   758→          isDragging
+   759→            ? 'border-[#C1121F] bg-[#C1121F]/[0.05]'
+   760→            : 'border-border hover:border-[#C1121F]/30'
+   761→        )}
+   762→      >
+   763→        {/* Glassmorphism effect overlay */}
+   764→        <div
+   765→          className={cn(
+   766→            'absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 pointer-events-none',
+   767→            'bg-gradient-to-br from-white/[0.08] to-transparent backdrop-blur-[2px]',
+   768→            isDragging && 'opacity-100'
+   769→          )}
+   770→          style={{
+   771→            boxShadow: isDragging
+   772→              ? 'inset 0 0 30px rgba(193, 18, 31, 0.1)'
+   773→              : undefined,
+   774→          }}
+   775→        />
+   776→
+   777→        <div className="relative z-10 flex flex-col items-center justify-center text-center">
+   778→          {/* Animated upload icon */}
+   779→          <motion.div
+   780→            animate={
+   781→              isDragging
+   782→                ? {
+   783→                    scale: [1, 1.2, 1],
+   784→                    rotate: [0, 5, -5, 0],
+   785→                  }
+   786→                : {
+   787→                    y: [0, -8, 0],
+   788→                  }
+   789→            }
+   790→            transition={
+   791→              isDragging
+   792→                ? { duration: 0.5, repeat: Infinity }
+   793→                : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+   794→            }
+   795→            className="mb-4"
+   796→          >
+   797→            <div
+   798→              className={cn(
+   799→                'relative p-4 md:p-6 rounded-full transition-colors duration-300',
+   800→                isDragging
+   801→                  ? 'bg-[#C1121F]/10'
+   802→                  : 'bg-muted hover:bg-[#C1121F]/5'
+   803→              )}
+   804→            >
+   805→              <Upload
+   806→                className={cn(
+   807→                  'size-8 md:size-10 transition-colors duration-300',
+   808→                  isDragging ? 'text-[#C1121F]' : 'text-muted-foreground'
+   809→                )}
+   810→              />
+   811→              
+   812→              {/* Pulse effect when dragging */}
+   813→              {isDragging && (
+   814→                <motion.div
+   815→                  className="absolute inset-0 rounded-full border-2 border-[#C1121F]"
+   816→                  animate={{
+   817→                    scale: [1, 1.5],
+   818→                    opacity: [0.5, 0],
+   819→                  }}
+   820→                  transition={{
+   821→                    duration: 1,
+   822→                    repeat: Infinity,
+   823→                  }}
+   824→                />
+   825→              )}
+   826→            </div>
+   827→          </motion.div>
+   828→
+   829→          {/* Text content */}
+   830→          <AnimatePresence mode="wait">
+   831→            {isDragging ? (
+   832→              <motion.div
+   833→                key="dragging"
+   834→                initial={{ opacity: 0, y: 10 }}
+   835→                animate={{ opacity: 1, y: 0 }}
+   836→                exit={{ opacity: 0, y: -10 }}
+   837→              >
+   838→                <h3 className="text-lg font-semibold text-[#C1121F] mb-1">
+   839→                  Drop files here
+   840→                </h3>
+   841→                <p className="text-sm text-muted-foreground">
+   842→                  Release to upload your files
+   843→                </p>
+   844→              </motion.div>
+   845→            ) : (
+   846→              <motion.div
+   847→                key="idle"
+   848→                initial={{ opacity: 0, y: 10 }}
+   849→                animate={{ opacity: 1, y: 0 }}
+   850→                exit={{ opacity: 0, y: -10 }}
+   851→              >
+   852→                <h3 className="text-lg font-semibold mb-1">
+   853→                  Drag & drop bioinformatics files
+   854→                </h3>
+   855→                <p className="text-sm text-muted-foreground mb-3">
+   856→                  or click to browse your computer
+   857→                </p>
+   858→                <Button
+   859→                  type="button"
+   860→                  variant="outline"
+   861→                  size="sm"
+   862→                  className="gap-2"
+   863→                  onClick={(e) => {
+   864→                    e.stopPropagation();
+   865→                    openFileBrowser();
+   866→                  }}
+   867→                >
+   868→                  <Upload className="size-4" />
+   869→                  Browse Files
+   870→                </Button>
+   871→              </motion.div>
+   872→            )}
+   873→          </AnimatePresence>
+   874→
+   875→          {/* Quick format badges */}
+   876→          {!isDragging && (
+   877→            <motion.div
+   878→              initial={{ opacity: 0 }}
+   879→              animate={{ opacity: 1 }}
+   880→              transition={{ delay: 0.2 }}
+   881→              className="mt-6 flex flex-wrap justify-center gap-1.5"
+   882→            >
+   883→              {['FASTA', 'FASTQ', 'PDB', 'VCF', 'BAM', 'CSV'].map((format) => (
+   884→                <Badge
+   885→                  key={format}
+   886→                  variant="outline"
+   887→                  className="text-[10px] font-mono px-1.5 py-0 h-5"
+   888→                >
+   889→                  .{format.toLowerCase()}
+   890→                </Badge>
+   891→              ))}
+   892→              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+   893→                +{Object.keys(BIO_FILE_TYPES).length - 6} more
+   894→              </Badge>
+   895→            </motion.div>
+   896→          )}
+   897→        </div>
+   898→      </motion.div>
+   899→
+   900→      {/* Supported Formats Section */}
+   901→      <SupportedFormats />
+   902→
+   903→      {/* Files Section */}
+   904→      {files.length > 0 && (
+   905→        <motion.div
+   906→          initial={{ opacity: 0, y: 20 }}
+   907→          animate={{ opacity: 1, y: 0 }}
+   908→          className="space-y-4"
+   909→        >
+   910→          {/* Toolbar */}
+   911→          <div className="flex items-center justify-between">
+   912→            <div className="flex items-center gap-4">
+   913→              <h3 className="text-lg font-semibold">
+   914→                Uploaded Files{' '}
+   915→                <span className="text-muted-foreground font-normal">
+   916→                  ({files.length})
+   917→                </span>
+   918→              </h3>
+   919→              
+   920→              {/* Stats */}
+   921→              <div className="hidden sm:flex items-center gap-3 text-sm text-muted-foreground">
+   922→                <span className="flex items-center gap-1">
+   923→                  <CheckCircle2 className="size-3.5 text-green-500" />
+   924→                  {readyCount} ready
+   925→                </span>
+   926→                {errorCount > 0 && (
+   927→                  <span className="flex items-center gap-1">
+   928→                    <AlertCircle className="size-3.5 text-red-500" />
+   929→                    {errorCount} errors
+   930→                  </span>
+   931→                )}
+   932→                <span>{formatFileSize(totalSize)} total</span>
+   933→              </div>
+   934→            </div>
+   935→
+   936→            <div className="flex items-center gap-2">
+   937→              {/* View toggle */}
+   938→              <div className="hidden sm:flex items-center border rounded-md p-0.5">
+   939→                <Button
+   940→                  size="icon"
+   941→                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+   942→                  className="size-7"
+   943→                  onClick={() => setViewMode('list')}
+   944→                >
+   945→                  <List className="size-3.5" />
+   946→                </Button>
+   947→                <Button
+   948→                  size="icon"
+   949→                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+   950→                  className="size-7"
+   951→                  onClick={() => setViewMode('grid')}
+   952→                >
+   953→                  <Grid3X3 className="size-3.5" />
+   954→                </Button>
+   955→              </div>
+   956→
+   957→              {/* Clear all button */}
+   958→              <Button
+   959→                variant="outline"
+   960→                size="sm"
+   961→                className="gap-1.5 text-destructive hover:text-destructive"
+   962→                onClick={clearAll}
+   963→              >
+   964→                <Trash2 className="size-3.5" />
+   965→                Clear All
+   966→              </Button>
+   967→            </div>
+   968→          </div>
+   969→
+   970→          {/* Mobile stats */}
+   971→          <div className="sm:hidden flex items-center gap-3 text-xs text-muted-foreground">
+   972→            <span className="flex items-center gap-1">
+   973→              <CheckCircle2 className="size-3 text-green-500" />
+   974→              {readyCount} ready
+   975→            </span>
+   976→            {errorCount > 0 && (
+   977→              <span className="flex items-center gap-1">
+   978→                <AlertCircle className="size-3 text-red-500" />
+   979→                {errorCount} errors
+   980→              </span>
+   981→            )}
+   982→            <span>{formatFileSize(totalSize)}</span>
+   983→          </div>
+   984→
+   985→          {/* File list/grid */}
+   986→          <AnimatePresence mode="popLayout">
+   987→            {viewMode === 'grid' ? (
+   988→              <motion.div
+   989→                layout
+   990→                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+   991→              >
+   992→                <AnimatePresence>
+   993→                  {files.map((file) => (
+   994→                    <FileItem
+   995→                      key={file.id}
+   996→                      file={file}
+   997→                      onRemove={removeFile}
+   998→                      onPreview={setPreviewFile}
+   999→                      viewMode={viewMode}
+  1000→                    />
+  1001→                  ))}
+  1002→                </AnimatePresence>
+  1003→              </motion.div>
+  1004→            ) : (
+  1005→              <motion.div
+  1006→                layout
+  1007→                className="space-y-2"
+  1008→              >
+  1009→                <AnimatePresence>
+  1010→                  {files.map((file) => (
+  1011→                    <FileItem
+  1012→                      key={file.id}
+  1013→                      file={file}
+  1014→                      onRemove={removeFile}
+  1015→                      onPreview={setPreviewFile}
+  1016→                      viewMode={viewMode}
+  1017→                    />
+  1018→                  ))}
+  1019→                </AnimatePresence>
+  1020→              </motion.div>
+  1021→            )}
+  1022→          </AnimatePresence>
+  1023→        </motion.div>
+  1024→      )}
+  1025→
+  1026→      {/* Empty State */}
+  1027→      {files.length === 0 && <EmptyState />}
+  1028→
+  1029→      {/* Preview Dialog */}
+  1030→      <AnimatePresence>
+  1031→        {previewFile && (
+  1032→          <PreviewDialog file={previewFile} onClose={() => setPreviewFile(null)} />
+  1033→        )}
+  1034→      </AnimatePresence>
+  1035→    </div>
+  1036→  );
+  1037→}
+  1038→

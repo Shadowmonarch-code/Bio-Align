@@ -517,7 +517,11 @@ function EmptyState({
 }
 
 // ==================== MAIN TOOLS CATALOG COMPONENT ====================
-export default function ToolsCatalog() {
+interface ToolsCatalogProps {
+  onToolSelect?: (toolId: string) => void
+}
+
+export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
   // State
   const [isLoading, setIsLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -651,9 +655,12 @@ export default function ToolsCatalog() {
 
   // Handle tool launch
   const handleLaunch = React.useCallback((tool: BioTool) => {
-    console.log(`Launching tool: ${tool.name}`)
-    // In a real app, this would navigate to the tool page
-  }, [])
+    console.log(`Launching tool: ${tool.name} (${tool.id})`)
+    // Call the parent's onToolSelect callback if provided
+    if (onToolSelect) {
+      onToolSelect(tool.id)
+    }
+  }, [onToolSelect])
 
   // Clear search
   const clearSearch = React.useCallback(() => {

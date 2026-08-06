@@ -351,6 +351,67 @@ Could you provide more details about what you're working on? For example:
 This will help me give you more specific guidance!`;
 }
 
+// API configuration
+const AI_API_ENDPOINT = "/api/ai/chat";
+const API_TIMEOUT_MS = 30000; // 30 second timeout
+const MAX_HISTORY_MESSAGES = 10;
+
+/**
+ * Calls the real AI API endpoint with the user's message and conversation history.
+ * Returns the AI response content on success, or throws an error on failure.
+ */
+async function callAI_API(message: string, history: Message[]): Promise<string> {
+  // Get recent messages for context (last MAX_HISTORY_MESSAGES)
+  const recentHistory = history.slice(-MAX_HISTORY_MESSAGES).map((msg) => ({
+    role: msg.role,
+    content: msg.content,
+  }));
+
+  // Create abort controller for timeout handling
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(AI_API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message,
+        history: recentHistory,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(`API error (${response.status}): ${errorData.error || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.content && !data.response && !data.message) {
+      throw new Error("Invalid API response format");
+    }
+
+    // Support different response formats from the API
+    return data.content || data.response || data.message || "";
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    // Re-throw abort errors with a clearer message
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("API request timed out");
+    }
+
+    // Re-throw other errors
+    throw error;
+  }
+}
+
 function generateId(): string {
   return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -412,20 +473,36 @@ export function useAIChat(options: UseAIChatOptions = {}) {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // Simulate AI response delay
-    await new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 1200));
+    let aiResponseContent: string;
 
-    // Generate mock response
+    try {
+      // First, try calling the real AI API
+      aiResponseContent = await callAI_API(content, messages);
+      
+      if (!aiResponseContent || !aiResponseContent.trim()) {
+        throw new Error("Empty response from API");
+      }
+
+      console.log("AI API response received successfully");
+    } catch (error) {
+      // Log the error for debugging
+      console.warn("AI API call failed, falling back to mock response:", error);
+      
+      // Fall back to mock response when API fails
+      aiResponseContent = generateMockResponse(content);
+    }
+
+    // Create and add the AI response message
     const aiResponse: Message = {
       id: generateId(),
       role: "assistant",
-      content: generateMockResponse(content),
+      content: aiResponseContent,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, aiResponse]);
     setIsLoading(false);
-  }, [isLoading]);
+  }, [isLoading, messages]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);

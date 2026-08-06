@@ -3,9 +3,12 @@ import ZAI from 'z-ai-web-dev-sdk';
 
 // POST /api/ai/chat - AI Bioinformatics Assistant
 export async function POST(request: NextRequest) {
+  let message = '';
+  
   try {
     const body = await request.json();
-    const { message, history = [] } = body;
+    message = body.message || '';
+    const { history = [] } = body;
 
     if (!message) {
       return NextResponse.json(

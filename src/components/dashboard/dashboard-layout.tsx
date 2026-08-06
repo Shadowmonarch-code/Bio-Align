@@ -59,7 +59,8 @@ interface DashboardLayoutProps {
   title?: string
   subtitle?: string
   actions?: React.ReactNode
-  breadcrumbs?: Array<{ label: string; href?: string }>
+  breadcrumbs?: Array<{ label: string; href?: string; onClick?: () => void }>
+  onSidebarNavigate?: (view: string, toolId?: string) => void
 }
 
 // Search Dialog Component (simplified - can be enhanced with cmdk)
@@ -362,6 +363,7 @@ export default function DashboardLayout({
   subtitle,
   actions,
   breadcrumbs = [],
+  onSidebarNavigate,
 }: DashboardLayoutProps) {
   const sidebarState = useSidebarState()
 
@@ -380,6 +382,7 @@ export default function DashboardLayout({
           <DashboardSidebar
             collapsed={sidebarState.collapsed}
             onToggle={sidebarState.toggle}
+            onNavigate={onSidebarNavigate}
           />
         </div>
 
@@ -387,6 +390,7 @@ export default function DashboardLayout({
         <MobileSidebar
           open={sidebarState.mobileOpen}
           onClose={() => sidebarState.setMobileOpen(false)}
+          onNavigate={onSidebarNavigate}
         />
 
         {/* Main Content Area */}
@@ -416,10 +420,14 @@ export default function DashboardLayout({
                     {displayBreadcrumbs.map((crumb, index) => (
                       <React.Fragment key={crumb.label}>
                         <BreadcrumbItem>
-                          {index === displayBreadcrumbs.length - 1 || !crumb.href ? (
+                          {index === displayBreadcrumbs.length - 1 || (!crumb.href && !('onClick' in crumb)) ? (
                             <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                          ) : 'onClick' in crumb && crumb.onClick ? (
+                            <button onClick={crumb.onClick} className="flex items-center gap-1.5 hover:text-biored transition-colors">
+                              {crumb.label}
+                            </button>
                           ) : (
-                            <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                            <BreadcrumbLink href={crumb.href || '#'}>{crumb.label}</BreadcrumbLink>
                           )}
                         </BreadcrumbItem>
                         {index < displayBreadcrumbs.length - 1 && (

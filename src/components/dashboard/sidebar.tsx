@@ -61,6 +61,37 @@ interface NavGroup {
   items: NavItem[]
 }
 
+/**
+ * Extracts view name and optional toolId from an href
+ * Maps URL paths to internal view names for navigation
+ */
+function getNavigationTarget(href: string): { view: string; toolId?: string } {
+  // Tool items - map to analysis view with toolId
+  if (href.startsWith("/dashboard/tools/")) {
+    const toolId = href.replace("/dashboard/tools/", "")
+    return { view: "analysis", toolId }
+  }
+
+  // Main navigation items
+  switch (href) {
+    case "/dashboard":
+      return { view: "dashboard" }
+    case "/dashboard/workspaces":
+      return { view: "workspaces" }
+    case "/dashboard/databases":
+      return { view: "databases" }
+    case "/dashboard/ai-assistant":
+      return { view: "ai-assistant" }
+    case "/docs":
+      return { view: "documentation" }
+    case "/dashboard/settings":
+      return { view: "settings" }
+    default:
+      // Fallback: use the path as view name
+      return { view: href.replace(/^\//, "") }
+  }
+}
+
 // Navigation data
 const mainNavItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isActive: true },
@@ -92,12 +123,25 @@ function SidebarContent({
   activeItem,
   toolsOpen,
   setToolsOpen,
+  onNavigate,
 }: {
   collapsed: boolean
   activeItem: string
   toolsOpen: boolean
   setToolsOpen: (open: boolean) => void
+  onNavigate?: (view: string, toolId?: string) => void
 }) {
+  // Handle navigation click
+  const handleNavClick = React.useCallback(
+    (href: string) => {
+      if (onNavigate) {
+        const { view, toolId } = getNavigationTarget(href)
+        onNavigate(view, toolId)
+      }
+    },
+    [onNavigate]
+  )
+
   const renderNavItem = (item: NavItem, isSubItem = false) => {
     const isActive = item.href === activeItem || item.isActive
     
@@ -114,6 +158,7 @@ function SidebarContent({
                 isActive && "bg-biored/10 text-biored hover:bg-biored/15 hover:text-biored",
                 !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
+              onClick={() => handleNavClick(item.href)}
             >
               <item.icon className={cn("size-4 shrink-0", isActive && "text-biored")} />
             </Button>
@@ -136,6 +181,7 @@ function SidebarContent({
           isActive && "bg-biored/10 text-biored hover:bg-biored/15 hover:text-biored font-medium",
           !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         )}
+        onClick={() => handleNavClick(item.href)}
       >
         {isActive && (
           <motion.div
@@ -212,6 +258,7 @@ function SidebarContent({
                     variant="ghost"
                     size="default"
                     className="w-full justify-center h-10 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={() => onNavigate?.("tools")}
                   >
                     <Wrench className="size-4" />
                   </Button>
@@ -225,6 +272,7 @@ function SidebarContent({
                     variant="ghost"
                     size="default"
                     className="w-full justify-between h-10 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={() => onNavigate?.("tools")}
                   >
                     <div className="flex items-center gap-3">
                       <Wrench className="size-4 shrink-0" />
@@ -305,10 +353,12 @@ export function DashboardSidebar({
   collapsed = false,
   onToggle,
   activeItem = "/dashboard",
+  onNavigate,
 }: {
   collapsed?: boolean
   onToggle?: () => void
   activeItem?: string
+  onNavigate?: (view: string, toolId?: string) => void
 }) {
   const [toolsOpen, setToolsOpen] = React.useState(true)
 
@@ -329,6 +379,7 @@ export function DashboardSidebar({
           activeItem={activeItem}
           toolsOpen={toolsOpen}
           setToolsOpen={setToolsOpen}
+          onNavigate={onNavigate}
         />
 
         {/* Collapse Toggle Button */}
@@ -361,10 +412,12 @@ export function MobileSidebar({
   open,
   onClose,
   activeItem = "/dashboard",
+  onNavigate,
 }: {
   open: boolean
   onClose: () => void
   activeItem?: string
+  onNavigate?: (view: string, toolId?: string) => void
 }) {
   const [toolsOpen, setToolsOpen] = React.useState(true)
 
@@ -379,6 +432,7 @@ export function MobileSidebar({
           activeItem={activeItem}
           toolsOpen={toolsOpen}
           setToolsOpen={setToolsOpen}
+          onNavigate={onNavigate}
         />
       </SheetContent>
     </Sheet>

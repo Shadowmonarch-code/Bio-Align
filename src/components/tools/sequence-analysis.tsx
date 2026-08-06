@@ -124,9 +124,30 @@ interface AnalysisResult {
   timestamp: Date;
 }
 
-export default function SequenceAnalysisTool() {
+interface SequenceAnalysisToolProps {
+  selectedTool?: string | null;
+}
+
+export default function SequenceAnalysisTool({ selectedTool }: SequenceAnalysisToolProps) {
   // State
-  const [activeTool, setActiveTool] = useState<ToolId>('pairwise');
+  // Map tool IDs from sidebar to internal tool IDs
+  const getInitialTool = (): ToolId => {
+    if (!selectedTool) return 'pairwise';
+    const toolMap: Record<string, ToolId> = {
+      'sequence': 'pairwise',
+      'blast': 'blast',
+      'orf': 'orf',
+      'reverse-complement': 'reverse-complement',
+      'translate': 'translation',
+      'gc-content': 'gc-content',
+      'motif-search': 'motif-search',
+      'pattern-search': 'pattern-search',
+      'restriction-map': 'restriction-map',
+    };
+    return toolMap[selectedTool] || 'pairwise';
+  };
+  
+  const [activeTool, setActiveTool] = useState<ToolId>(getInitialTool);
   const [sequence1, setSequence1] = useState('');
   const [sequence2, setSequence2] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);

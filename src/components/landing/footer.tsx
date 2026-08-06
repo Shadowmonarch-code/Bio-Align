@@ -14,6 +14,8 @@ import {
   ChevronRight,
   Heart,
   Globe,
+  Users,
+  Award,
 } from 'lucide-react';
 
 // Footer link configuration
@@ -134,7 +136,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-[#0A0A0A] text-white overflow-hidden">
+    <footer className="relative bg-[#0A0A0A] text-white overflow-hidden mt-auto">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Subtle grid pattern */}
@@ -240,6 +242,72 @@ export default function Footer() {
               </motion.div>
             ))}
           </div>
+
+          {/* Credits Section - Prominent Developer Attribution */}
+          <motion.div
+            variants={itemVariants}
+            className="mb-16 md:mb-20"
+          >
+            <div className="relative p-6 md:p-8 rounded-2xl overflow-hidden">
+              {/* Gradient background with BioAlign theme */}
+              <div className="absolute inset-0 bg-gradient-to-br from-biored/[0.15] via-biored/[0.05] to-transparent" />
+              
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-biored/[0.1] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-biored/[0.05] rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+              
+              {/* Border glow effect */}
+              <div className="absolute inset-0 rounded-2xl border border-biored/20" />
+              
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                {/* Left side - Credits info */}
+                <div className="flex flex-col items-center md:items-start gap-3 text-center md:text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Award className="w-5 h-5 text-biored" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-biored/80">Credits & Attribution</span>
+                  </div>
+                  
+                  {/* Main developer credit - Prominent display */}
+                  <div className="flex items-center gap-3">
+                    <Users className="w-6 h-6 text-biored hidden sm:block" />
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Developed by</p>
+                      <p className="text-xl md:text-2xl font-bold">
+                        <span className="bg-gradient-to-r from-biored to-red-400 bg-clip-text text-transparent">
+                          CBSH
+                        </span>
+                        <span className="text-gray-400 mx-2">&</span>
+                        <span className="bg-gradient-to-r from-biored to-red-400 bg-clip-text text-transparent">
+                          RPCAU
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Individual contributor credit - Smaller note */}
+                  <div className="flex items-center gap-2 mt-1 pt-3 border-t border-white/10">
+                    <Heart className="w-4 h-4 text-biored/70 fill-current" />
+                    <p className="text-sm text-gray-500">
+                      Special thanks to{' '}
+                      <span className="text-gray-300 font-medium hover:text-biored transition-colors cursor-pointer">
+                        Toufik Mahata
+                      </span>
+                      {' '}for contributions
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right side - Decorative badge */}
+                <div className="hidden md:flex flex-col items-center justify-center">
+                  <div className="relative w-24 h-24 rounded-full bg-biored/10 border border-biored/30 flex items-center justify-center">
+                    <Dna className="w-10 h-10 text-biored animate-pulse" />
+                    <div className="absolute inset-0 rounded-full bg-biored/5 animate-ping" style={{ animationDuration: '3s' }} />
+                  </div>
+                  <p className="mt-3 text-xs text-gray-500 uppercase tracking-wider">BioAlign Project</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Divider */}
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-10" />

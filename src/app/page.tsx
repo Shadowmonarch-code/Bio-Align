@@ -18,17 +18,20 @@ import AIAssistant from '@/components/dashboard/ai-assistant'
 import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
 
-type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload'
+// View types for the application
+type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings'
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
 
+  // Main navigation handler - switches between views
   const handleNavigate = useCallback((view: string) => {
     setCurrentView(view as ViewType)
     window.scrollTo(0, 0)
   }, [])
 
+  // Tool selection handler - opens analysis view with specific tool
   const handleToolSelect = useCallback((toolId: string) => {
     if (toolId === 'all') {
       setCurrentView('tools')
@@ -36,6 +39,23 @@ export default function Home() {
       setSelectedTool(toolId)
       setCurrentView('analysis')
     }
+    window.scrollTo(0, 0)
+  }, [])
+
+  // Sidebar navigation handler - handles both view and tool navigation
+  const handleSidebarNavigate = useCallback((view: string, toolId?: string) => {
+    if (toolId) {
+      setSelectedTool(toolId)
+      setCurrentView('analysis')
+    } else {
+      setCurrentView(view as ViewType)
+    }
+    window.scrollTo(0, 0)
+  }, [])
+
+  // Go back to landing page
+  const handleGoHome = useCallback(() => {
+    setCurrentView('landing')
     window.scrollTo(0, 0)
   }, [])
 
@@ -142,21 +162,22 @@ export default function Home() {
   // Render Dashboard View
   if (currentView === 'dashboard') {
     return (
-      <main className="min-h-screen">
+      <main className="min-h-screen flex flex-col">
         <DashboardLayout
           title="Dashboard"
           subtitle="Welcome back! Here's your research overview."
-          breadcrumbs={[{ label: 'Home', href: '#' }, { label: 'Dashboard' }]}
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard' }]}
           actions={
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
                 Upload Files
               </Button>
-              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
+              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
                 Browse Tools
               </Button>
             </div>
           }
+          onSidebarNavigate={handleSidebarNavigate}
         >
           <div className="space-y-8">
             {/* Quick Stats */}
@@ -240,6 +261,12 @@ export default function Home() {
         </DashboardLayout>
 
         <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
       </main>
     )
   }
@@ -247,21 +274,33 @@ export default function Home() {
   // Render Tools Catalog
   if (currentView === 'tools') {
     return (
-      <main className="min-h-screen">
+      <main className="min-h-screen flex flex-col">
         <DashboardLayout
           title="Tools Catalog"
           subtitle="Browse and launch 84+ bioinformatics tools"
-          breadcrumbs={[{ label: 'Home', href: '#' }, { label: 'Tools' }]}
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Tools' }]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('landing')} className="cursor-pointer">
-              Back to Home
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
+              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                Dashboard
+              </Button>
+            </div>
           }
+          onSidebarNavigate={handleSidebarNavigate}
         >
           <ToolsCatalog onToolSelect={handleToolSelect} />
         </DashboardLayout>
 
         <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
       </main>
     )
   }
@@ -269,12 +308,12 @@ export default function Home() {
   // Render Tool Analysis Page
   if (currentView === 'analysis') {
     return (
-      <main className="min-h-screen">
+      <main className="min-h-screen flex flex-col">
         <DashboardLayout
           title={selectedTool ? `${selectedTool} Analysis` : 'Sequence Analysis'}
           subtitle="Perform comprehensive sequence analysis"
           breadcrumbs={[
-            { label: 'Home', href: '#' },
+            { label: 'Home', href: '#', onClick: handleGoHome },
             { label: 'Tools', href: '#', onClick: () => handleNavigate('tools') },
             { label: selectedTool || 'Analysis', href: '#' }
           ]}
@@ -288,11 +327,18 @@ export default function Home() {
               </Button>
             </div>
           }
+          onSidebarNavigate={handleSidebarNavigate}
         >
-          <SequenceAnalysisTool />
+          <SequenceAnalysisTool selectedTool={selectedTool} />
         </DashboardLayout>
 
         <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
       </main>
     )
   }
@@ -300,22 +346,28 @@ export default function Home() {
   // Render File Upload Page
   if (currentView === 'upload') {
     return (
-      <main className="min-h-screen">
+      <main className="min-h-screen flex flex-col">
         <DashboardLayout
           title="File Upload"
           subtitle="Upload your bioinformatics data files"
           breadcrumbs={[
-            { label: 'Home', href: '#' },
+            { label: 'Home', href: '#', onClick: handleGoHome },
             { label: 'Upload', href: '#' }
           ]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-              ← Dashboard
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                ← Dashboard
+              </Button>
+              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
+                Tools
+              </Button>
+            </div>
           }
+          onSidebarNavigate={handleSidebarNavigate}
         >
           <div className="max-w-4xl mx-auto space-y-6">
-            <FileUpload showFullOptions={true} />
+            <FileUpload />
             
             {/* Supported Formats Info */}
             <div className="p-6 rounded-xl border bg-card">
@@ -330,7 +382,7 @@ export default function Home() {
                   { category: 'Archive', formats: ['ZIP', 'GZ', 'TAR', 'BZ2'] },
                 ].map((group, i) => (
                   <div key={i} className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs font-medium text-primary mb-2">{group.category}</p>
+                    <p className="text-xs font-medium text-biored mb-2">{group.category}</p>
                     <div className="flex flex-wrap gap-1">
                       {group.formats.map((fmt, j) => (
                         <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-background border">
@@ -346,9 +398,86 @@ export default function Home() {
         </DashboardLayout>
 
         <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
       </main>
     )
   }
 
-  return null
+  // Render Databases View
+  if (currentView === 'databases') {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <DashboardLayout
+          title="Databases"
+          subtitle="Connect to biological databases"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Databases' }]}
+          actions={
+            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+              ← Dashboard
+            </Button>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <div className="space-y-6">
+            {/* Database Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', status: 'Connected', color: 'bg-blue-500' },
+                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', status: 'Connected', color: 'bg-green-500' },
+                { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', status: 'Connected', color: 'bg-purple-500' },
+                { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', status: 'Connected', color: 'bg-orange-500' },
+                { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', status: 'Available', color: 'bg-teal-500' },
+                { name: 'ClinVar', desc: 'Clinical variants database', icon: '🏥', status: 'Available', color: 'bg-red-500' },
+              ].map((db, i) => (
+                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all cursor-pointer group">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${db.color} text-white`}>
+                      {db.status}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">{db.name}</h3>
+                  <p className="text-sm text-muted-foreground">{db.desc}</p>
+                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1">
+                    Connect →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DashboardLayout>
+
+        <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
+    )
+  }
+
+  // Fallback - return landing if view not recognized
+  return (
+    <main className="min-h-screen flex flex-col">
+      <Navbar onNavigate={handleNavigate} />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">Page Not Found</h1>
+          <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+          <Button onClick={handleGoHome} className="bg-biored hover:bg-biored-dark text-white cursor-pointer">
+            Go Home
+          </Button>
+        </div>
+      </div>
+      <FooterSection />
+      <AIAssistant />
+    </main>
+  )
 }
