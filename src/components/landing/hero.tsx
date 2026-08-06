@@ -291,7 +291,12 @@ const statCardVariants = {
 };
 
 // ============ Main Hero Section Component ============
-export default function HeroSection() {
+interface HeroSectionProps {
+  onStartClick?: () => void;
+  onExploreClick?: () => void;
+}
+
+export default function HeroSection({ onStartClick, onExploreClick }: HeroSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: '-100px' });
   
@@ -388,13 +393,19 @@ export default function HeroSection() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-[#C1121F] hover:bg-[#9B0F1A] rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden">
+            <button 
+              onClick={onStartClick}
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-[#C1121F] hover:bg-[#9B0F1A] rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden cursor-pointer"
+            >
               <span className="relative z-10">Start Analyzing</span>
               <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </button>
 
-            <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-white/5 border-2 border-gray-200 dark:border-gray-800 hover:border-[#C1121F] dark:hover:border-red-500 rounded-xl hover:bg-white dark:hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm">
+            <button 
+              onClick={onExploreClick}
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-white/5 border-2 border-gray-200 dark:border-gray-800 hover:border-[#C1121F] dark:hover:border-red-500 rounded-xl hover:bg-white dark:hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm cursor-pointer"
+            >
               Explore Tools
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#C1121F] dark:text-red-500" />
             </button>

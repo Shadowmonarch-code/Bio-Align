@@ -24,14 +24,18 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
 
-  const handleNavigate = useCallback((view: ViewType) => {
-    setCurrentView(view)
+  const handleNavigate = useCallback((view: string) => {
+    setCurrentView(view as ViewType)
     window.scrollTo(0, 0)
   }, [])
 
   const handleToolSelect = useCallback((toolId: string) => {
-    setSelectedTool(toolId)
-    setCurrentView('analysis')
+    if (toolId === 'all') {
+      setCurrentView('tools')
+    } else {
+      setSelectedTool(toolId)
+      setCurrentView('analysis')
+    }
     window.scrollTo(0, 0)
   }, [])
 
@@ -43,7 +47,10 @@ export default function Home() {
         
         {/* Hero Section */}
         <section id="hero">
-          <HeroSection onStartClick={() => handleNavigate('dashboard')} />
+          <HeroSection 
+            onStartClick={() => handleNavigate('dashboard')}
+            onExploreClick={() => handleNavigate('tools')}
+          />
         </section>
 
         {/* Partners/Trusted By */}
@@ -58,7 +65,7 @@ export default function Home() {
 
         {/* Popular Tools Showcase */}
         <section id="tools" className="py-24 bg-muted/30">
-          <ToolsShowcase onLaunchTool={(toolId) => handleToolSelect(toolId)} />
+          <ToolsShowcase onLaunchTool={handleToolSelect} />
         </section>
 
         {/* Research Workflow */}
@@ -101,7 +108,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                   <Button 
                     size="lg"
-                    className="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+                    className="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg cursor-pointer"
                     onClick={() => handleNavigate('dashboard')}
                   >
                     Get Started Free
@@ -109,7 +116,7 @@ export default function Home() {
                   <Button 
                     size="lg"
                     variant="outline"
-                    className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
+                    className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
                     onClick={() => handleNavigate('tools')}
                   >
                     Explore All Tools
@@ -142,10 +149,10 @@ export default function Home() {
           breadcrumbs={[{ label: 'Home', href: '#' }, { label: 'Dashboard' }]}
           actions={
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => handleNavigate('upload')}>
+              <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
                 Upload Files
               </Button>
-              <Button onClick={() => handleNavigate('tools')}>
+              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
                 Browse Tools
               </Button>
             </div>
@@ -160,7 +167,7 @@ export default function Home() {
                 { title: 'Storage Used', value: '2.4 GB', change: 'of 10 GB', icon: '💾' },
                 { title: 'API Calls', value: '1,234', change: '-12% vs last week', icon: '🔌' },
               ].map((stat, i) => (
-                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow">
+                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow cursor-pointer hover:border-primary/30">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{stat.title}</p>
@@ -185,7 +192,7 @@ export default function Home() {
                     { action: 'Multiple alignment started', time: '1 day ago', type: 'pending' },
                     { action: 'GC Content analysis', time: '2 days ago', type: 'success' },
                   ].map((activity, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
                       <div className={`w-2 h-2 rounded-full ${
                         activity.type === 'success' ? 'bg-green-500' :
                         activity.type === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
@@ -214,7 +221,7 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => handleToolSelect(tool.tool)}
-                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-primary/5 hover:border-primary/30 transition-colors text-left"
+                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-primary/5 hover:border-primary/30 transition-colors text-left cursor-pointer"
                     >
                       <span>{tool.icon}</span>
                       <span className="text-sm font-medium">{tool.name}</span>
@@ -246,7 +253,7 @@ export default function Home() {
           subtitle="Browse and launch 84+ bioinformatics tools"
           breadcrumbs={[{ label: 'Home', href: '#' }, { label: 'Tools' }]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('landing')}>
+            <Button variant="outline" onClick={() => handleNavigate('landing')} className="cursor-pointer">
               Back to Home
             </Button>
           }
@@ -272,9 +279,14 @@ export default function Home() {
             { label: selectedTool || 'Analysis', href: '#' }
           ]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('tools')}>
-              ← All Tools
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+                ← All Tools
+              </Button>
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                Dashboard
+              </Button>
+            </div>
           }
         >
           <SequenceAnalysisTool />
@@ -297,7 +309,7 @@ export default function Home() {
             { label: 'Upload', href: '#' }
           ]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('dashboard')}>
+            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
               ← Dashboard
             </Button>
           }

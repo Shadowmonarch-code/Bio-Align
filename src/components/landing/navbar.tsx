@@ -16,6 +16,8 @@ import {
   GraduationCap,
   CreditCard,
   ArrowRight,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -29,6 +31,15 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Navigation links configuration
 const navLinks = [
@@ -70,20 +81,11 @@ const navLinks = [
   },
 ];
 
-// Animation variants (using tuple types for framer-motion compatibility)
-const navbarVariants = {
-  hidden: { y: -100, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1] as const,
-      staggerChildren: 0.1,
-    },
-  },
-};
+interface NavbarProps {
+  onNavigate?: (view: string) => void;
+}
 
+// Animation variants (using tuple types for framer-motion compatibility)
 const linkVariants = {
   hidden: { opacity: 0, y: -10 },
   visible: {
@@ -96,52 +98,13 @@ const linkVariants = {
   },
 };
 
-const mobileMenuVariants = {
-  hidden: {
-    opacity: 0,
-    x: "100%",
-    transition: {
-      duration: 0.3,
-      ease: "easeInOut" as const,
-    },
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1] as const,
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
-    },
-  },
-  exit: {
-    opacity: 0,
-    x: "100%",
-    transition: {
-      duration: 0.3,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
-const mobileLinkVariants = {
-  hidden: { opacity: 0, x: 20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.3,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-};
-
-export default function Navbar() {
+export default function Navbar({ onNavigate }: NavbarProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
+  const [authMode, setAuthMode] = React.useState<'signin' | 'signup'>('signin');
   const { theme, setTheme } = useTheme();
 
   // Handle mount state for theme
@@ -177,9 +140,20 @@ export default function Navbar() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  // Close mobile menu on route change
-  const handleLinkClick = (href: string) => {
+  // Handle navigation click
+  const handleNavClick = (href: string) => {
     setIsMobileOpen(false);
+    
+    // Check if it's a special navigation action
+    if (onNavigate) {
+      if (href === '#dashboard' || href === '#get-started') {
+        onNavigate('dashboard');
+        window.scrollTo({ top: 0 });
+        return;
+      }
+    }
+    
+    // Regular anchor scrolling
     const elementId = href.substring(1);
     const element = document.getElementById(elementId);
     if (element) {
@@ -187,12 +161,43 @@ export default function Navbar() {
     }
   };
 
+  // Handle Get Started button click
+  const handleGetStarted = () => {
+    if (onNavigate) {
+      onNavigate('dashboard');
+      window.scrollTo({ top: 0 });
+    }
+  };
+
+  // Handle Sign In button click
+  const handleSignIn = () => {
+    setShowAuthModal(true);
+    setAuthMode('signin');
+  };
+
+  // Handle Sign Up button click  
+  const handleSignUp = () => {
+    setShowAuthModal(true);
+    setAuthMode('signup');
+  };
+
+  // Handle form submission
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // For demo purposes - just close modal and navigate to dashboard
+    setShowAuthModal(false);
+    if (onNavigate) {
+      onNavigate('dashboard');
+      window.scrollTo({ top: 0 });
+    }
+  };
+
   return (
     <>
       <motion.header
-        initial="hidden"
-        animate="visible"
-        variants={navbarVariants}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
         className={cn(
           "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300",
           isScrolled
@@ -207,7 +212,7 @@ export default function Navbar() {
           )}
         >
           {/* Logo */}
-          <motion.div variants={linkVariants} className="flex items-center gap-2">
+          <motion.div className="flex items-center gap-2">
             <a
               href="#"
               className="group flex items-center gap-2.5 no-underline"
@@ -228,20 +233,17 @@ export default function Navbar() {
           </motion.div>
 
           {/* Desktop Navigation Links */}
-          <motion.div
-            variants={linkVariants}
-            className="hidden lg:flex items-center gap-1"
-          >
+          <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick(link.href);
+                  handleNavClick(link.href);
                 }}
                 className={cn(
-                  "relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+                  "relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer",
                   "hover:text-foreground hover:bg-accent/10",
                   activeSection === link.href.substring(1)
                     ? "text-biored font-semibold"
@@ -263,20 +265,17 @@ export default function Navbar() {
                 )}
               </a>
             ))}
-          </motion.div>
+          </div>
 
           {/* Right Side Actions */}
-          <motion.div
-            variants={linkVariants}
-            className="flex items-center gap-2 sm:gap-3"
-          >
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Theme Toggle */}
             {mounted && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}
-                className="relative size-9 rounded-full overflow-hidden hover:bg-accent/10"
+                className="relative size-9 rounded-full overflow-hidden hover:bg-accent/10 cursor-pointer"
                 aria-label="Toggle theme"
               >
                 <AnimatePresence mode="wait" initial={false}>
@@ -311,15 +310,18 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="sm"
-              className="hidden sm:inline-flex text-muted-foreground hover:text-foreground hover:bg-accent/10"
+              onClick={handleSignIn}
+              className="hidden sm:inline-flex text-muted-foreground hover:text-foreground hover:bg-accent/10 cursor-pointer gap-2"
             >
+              <LogIn className="size-4" />
               Sign In
             </Button>
 
             {/* Get Started CTA Button */}
             <Button
               size="sm"
-              className="hidden sm:inline-flex bg-biored hover:bg-biored-dark text-white shadow-lg shadow-biored/25 hover:shadow-biored/40 transition-all duration-300 group"
+              onClick={handleGetStarted}
+              className="hidden sm:inline-flex bg-biored hover:bg-biored-dark text-white shadow-lg shadow-biored/25 hover:shadow-biored/40 transition-all duration-300 group cursor-pointer"
             >
               Get Started
               <ArrowRight className="size-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -330,21 +332,13 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden size-9 hover:bg-accent/10"
-                asChild
+                className="lg:hidden size-9 hover:bg-accent/10 cursor-pointer"
+                onClick={() => setIsMobileOpen(true)}
               >
-                <SheetTriggerWrapper setIsMobileOpen={setIsMobileOpen}>
-                  <Menu className="size-5" />
-                </SheetTriggerWrapper>
+                <Menu className="size-5" />
               </Button>
               <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 bg-background/95 backdrop-blur-xl">
-                <motion.div
-                  variants={mobileMenuVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="flex flex-col h-full"
-                >
+                <div className="flex flex-col h-full">
                   {/* Mobile Header */}
                   <SheetHeader className="p-6 pb-4">
                     <div className="flex items-center justify-between">
@@ -365,23 +359,19 @@ export default function Navbar() {
 
                   {/* Mobile Navigation Links */}
                   <div className="flex-1 overflow-y-auto py-4 px-2 scrollbar-hide">
-                    <motion.nav className="flex flex-col gap-1">
-                      {navLinks.map((link, index) => {
+                    <nav className="flex flex-col gap-1">
+                      {navLinks.map((link) => {
                         const Icon = link.icon;
                         return (
-                          <motion.a
+                          <a
                             key={link.name}
                             href={link.href}
-                            custom={index}
-                            variants={mobileLinkVariants}
-                            whileHover={{ x: 4 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={(e) => {
                               e.preventDefault();
-                              handleLinkClick(link.href);
+                              handleNavClick(link.href);
                             }}
                             className={cn(
-                              "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 no-underline",
+                              "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 no-underline cursor-pointer",
                               "hover:bg-accent/10",
                               activeSection === link.href.substring(1)
                                 ? "bg-biored/10 text-biored font-medium"
@@ -395,21 +385,10 @@ export default function Navbar() {
                                 {link.description}
                               </span>
                             </div>
-                            {activeSection === link.href.substring(1) && (
-                              <motion.div
-                                layoutId="mobileActiveNav"
-                                className="ml-auto size-2 rounded-full bg-biored"
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 380,
-                                  damping: 30,
-                                }}
-                              />
-                            )}
-                          </motion.a>
+                          </a>
                         );
                       })}
-                    </motion.nav>
+                    </nav>
                   </div>
 
                   <Separator className="bg-border/50" />
@@ -418,68 +397,135 @@ export default function Navbar() {
                   <div className="p-6 space-y-3">
                     <Button
                       variant="outline"
-                      className="w-full h-11 border-border hover:bg-accent/10"
-                      asChild
+                      className="w-full h-11 border-border hover:bg-accent/10 cursor-pointer gap-2"
+                      onClick={() => {
+                        setIsMobileOpen(false);
+                        handleSignIn();
+                      }}
                     >
-                      <SheetClose asChild>
-                        <a href="#signin" className="no-underline">
-                          Sign In
-                        </a>
-                      </SheetClose>
+                      <LogIn className="size-4" />
+                      Sign In
                     </Button>
                     <Button
-                      className="w-full h-11 bg-biored hover:bg-biored-dark text-white shadow-lg shadow-biored/25"
-                      asChild
+                      className="w-full h-11 bg-biored hover:bg-biored-dark text-white shadow-lg shadow-biored/25 cursor-pointer"
+                      onClick={() => {
+                        setIsMobileOpen(false);
+                        handleGetStarted();
+                      }}
                     >
-                      <SheetClose asChild>
-                        <a href="#get-started" className="no-underline flex items-center justify-center gap-2">
-                          Get Started
-                          <ArrowRight className="size-4" />
-                        </a>
-                      </SheetClose>
+                      Get Started
+                      <ArrowRight className="size-4 ml-2" />
                     </Button>
                   </div>
-                </motion.div>
+                </div>
               </SheetContent>
             </Sheet>
-          </motion.div>
+          </div>
         </nav>
       </motion.header>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
       <div className="h-16" />
+
+      {/* Authentication Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="relative">
+            {/* Header gradient */}
+            <div className="bg-gradient-to-br from-biored to-biored-dark p-6 text-white">
+              <DialogTitle className="text-xl font-bold text-center">
+                {authMode === 'signin' ? 'Welcome Back' : 'Join BioAlign'}
+              </DialogTitle>
+              <DialogDescription className="text-white/80 text-center mt-1">
+                {authMode === 'signin' 
+                  ? 'Sign in to access your bioinformatics workspace' 
+                  : 'Create your free account to start analyzing'}
+              </DialogDescription>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleAuthSubmit} className="p-6 space-y-4">
+              {authMode === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input id="name" placeholder="Dr. Jane Smith" required />
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" placeholder="jane@university.edu" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="••••••••" required />
+              </div>
+
+              {authMode === 'signin' && (
+                <div className="flex justify-end">
+                  <button type="button" className="text-xs text-biored hover:underline">
+                    Forgot password?
+                  </button>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full bg-biored hover:bg-biored-dark text-white cursor-pointer">
+                {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+              </Button>
+
+              {/* Social Login Options */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <Button type="button" variant="outline" className="cursor-pointer">
+                  <svg className="size-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                </Button>
+                <Button type="button" variant="outline" className="cursor-pointer">
+                  <svg className="size-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </Button>
+                <Button type="button" variant="outline" className="cursor-pointer">
+                  ORCID
+                </Button>
+              </div>
+
+              {/* Toggle between signin/signup */}
+              <p className="text-center text-sm text-muted-foreground">
+                {authMode === 'signin' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <button 
+                      type="button" 
+                      onClick={() => setAuthMode('signup')}
+                      className="text-biored hover:underline font-medium cursor-pointer"
+                    >
+                      Sign up
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <button 
+                      type="button" 
+                      onClick={() => setAuthMode('signin')}
+                      className="text-biored hover:underline font-medium cursor-pointer"
+                    >
+                      Sign in
+                    </button>
+                  </>
+                )}
+              </p>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
-  );
-}
-
-// SheetTrigger wrapper component to work with Sheet's onOpenChange
-function SheetTriggerWrapper({
-  children,
-  setIsMobileOpen,
-}: {
-  children: React.ReactNode;
-  setIsMobileOpen: (open: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => setIsMobileOpen(true)}
-      className="inline-flex items-center justify-center"
-    >
-      {children}
-    </button>
-  );
-}
-
-function SheetTrigger({
-  children,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  children: React.ReactNode;
-}) {
-  return (
-    <button type="button" {...props}>
-      {children}
-    </button>
   );
 }

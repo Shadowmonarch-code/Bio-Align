@@ -210,7 +210,11 @@ const cardVariants = {
   }
 };
 
-export default function ToolsShowcase() {
+interface ToolsShowcaseProps {
+  onLaunchTool?: (toolId: string) => void;
+}
+
+export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -362,7 +366,8 @@ export default function ToolsShowcase() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full gap-2 rounded-lg text-biored hover:bg-biored/10 hover:text-biored-dark group/btn"
+                    onClick={() => onLaunchTool?.(tool.id)}
+                    className="w-full gap-2 rounded-lg text-biored hover:bg-biored/10 hover:text-biored-dark group/btn cursor-pointer"
                   >
                     <Play className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                     Launch Tool
@@ -405,7 +410,8 @@ export default function ToolsShowcase() {
           <Button
             variant="outline"
             size="lg"
-            className="gap-2 rounded-full px-8 border-biored/30 text-biored hover:bg-biored hover:text-white hover:border-biored transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-biored/20"
+            onClick={() => onLaunchTool?.('all')}
+            className="gap-2 rounded-full px-8 border-biored/30 text-biored hover:bg-biored hover:text-white hover:border-biored transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-biored/20 cursor-pointer"
           >
             Explore All 50+ Tools
             <ChevronRight className="w-4 h-4" />

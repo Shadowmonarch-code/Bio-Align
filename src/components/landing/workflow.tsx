@@ -254,7 +254,11 @@ function VerticalConnector({ isLast }: { isLast: boolean }) {
   )
 }
 
-export default function WorkflowSection() {
+interface WorkflowSectionProps {
+  onStartClick?: () => void;
+}
+
+export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
 
   return (
@@ -379,7 +383,8 @@ export default function WorkflowSection() {
                   boxShadow: '0 20px 40px rgba(193, 18, 31, 0.35)'
                 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[#C1121F] to-[#A41623] text-white font-semibold text-lg shadow-lg shadow-[#C1121F]/30 transition-all duration-300 overflow-hidden"
+                onClick={onStartClick}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[#C1121F] to-[#A41623] text-white font-semibold text-lg shadow-lg shadow-[#C1121F]/30 transition-all duration-300 overflow-hidden cursor-pointer"
               >
                 {/* Button shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

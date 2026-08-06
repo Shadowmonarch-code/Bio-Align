@@ -119,7 +119,11 @@ const cardVariants = {
   }
 }
 
-export default function FeaturesSection() {
+interface FeaturesSectionProps {
+  onExploreClick?: () => void;
+}
+
+export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps) {
   return (
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background gradient decoration */}
