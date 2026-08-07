@@ -322,7 +322,7 @@ function SidebarContent({
         collapsed ? "justify-center" : "gap-3"
       )}>
         <Avatar className="size-9 ring-2 ring-biored/20">
-          <AvatarImage src="/avatars/user.png" alt="User" />
+          <AvatarImage src="/avatars/user.svg" alt="User" />
           <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
             BA
           </AvatarFallback>

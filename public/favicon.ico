@@ -1,0 +1,6 @@
+echo ""
+# Test API routes
+echo "=== API Routes ==="
+curl -s --max-time 5 -o /dev/null -w "Auth: %{http_code}\n" http://localhost:3000/api/auth/session 2>/dev/null || echo "Auth: N/A"
+__workspace_agent_exit_code=$?
+printf "\n<<workspace_agent_exit_code:1786081647269:%s>>\n" "$__workspace_agent_exit_code"
