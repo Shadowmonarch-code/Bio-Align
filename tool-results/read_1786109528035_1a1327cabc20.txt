@@ -1,0 +1,965 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { motion, AnimatePresence } from "framer-motion";
+     5→import { useTheme } from "next-themes";
+     6→import { useSession, signIn, signOut } from "next-auth/react";
+     7→import {
+     8→  Dna,
+     9→  Menu,
+    10→  X,
+    11→  Sun,
+    12→  Moon,
+    13→  LayoutDashboard,
+    14→  Wrench,
+    15→  Database,
+    16→  BookOpen,
+    17→  GraduationCap,
+    18→  Coffee,
+    19→  ArrowRight,
+    20→  LogIn,
+    21→  LogOut,
+    22→  UserPlus,
+    23→  User,
+    24→  Loader2,
+    25→  Search,
+    26→  Settings,
+    27→  HelpCircle,
+    28→  Phone,
+    29→  Mail,
+    30→  ExternalLink,
+    31→} from "lucide-react";
+    32→
+    33→import { cn } from "@/lib/utils";
+    34→import { Button } from "@/components/ui/button";
+    35→import {
+    36→  Sheet,
+    37→  SheetContent,
+    38→  SheetHeader,
+    39→  SheetTitle,
+    40→  SheetDescription,
+    41→  SheetClose,
+    42→} from "@/components/ui/sheet";
+    43→import { Separator } from "@/components/ui/separator";
+    44→import {
+    45→  Dialog,
+    46→  DialogContent,
+    47→  DialogHeader,
+    48→  DialogTitle,
+    49→  DialogDescription,
+    50→} from "@/components/ui/dialog";
+    51→import { Input } from "@/components/ui/input";
+    52→import { Label } from "@/components/ui/label";
+    53→
+    54→// Navigation links configuration - all now functional
+    55→const navLinks = [
+    56→  {
+    57→    name: "Dashboard",
+    58→    href: "#dashboard",
+    59→    icon: LayoutDashboard,
+    60→    description: "Your analytics hub",
+    61→    action: "dashboard" as const,
+    62→  },
+    63→  {
+    64→    name: "Tools",
+    65→    href: "#tools",
+    66→    icon: Wrench,
+    67→    description: "Bioinformatics toolkit",
+    68→    action: "tools" as const,
+    69→  },
+    70→  {
+    71→    name: "Databases",
+    72→    href: "#databases",
+    73→    icon: Database,
+    74→    description: "Search NCBI & more",
+    75→    action: "databases" as const,
+    76→  },
+    77→  {
+    78→    name: "Documentation",
+    79→    href: "#documentation",
+    80→    icon: BookOpen,
+    81→    description: "API & guides",
+    82→    action: "documentation" as const,
+    83→  },
+    84→  {
+    85→    name: "Tutorials",
+    86→    href: "#tutorials",
+    87→    icon: GraduationCap,
+    88→    description: "Learn BioAlign",
+    89→    action: "tutorials" as const,
+    90→  },
+    91→  {
+    92→    name: "Support Me",
+    93→    href: "#coffee",
+    94→    icon: Coffee,
+    95→    description: "Buy me a coffee ☕",
+    96→    action: "coffee" as const,
+    97→  },
+    98→];
+    99→
+   100→// Database search options
+   101→const databaseOptions = [
+   102→  { id: "ncbi", name: "NCBI GenBank", url: "https://www.ncbi.nlm.nih.gov/", description: "Nucleotide sequences", color: "bg-blue-500" },
+   103→  { id: "uniprot", name: "UniProt", url: "https://www.uniprot.org/", description: "Protein database", color: "bg-green-500" },
+   104→  { id: "pdb", name: "PDB", url: "https://www.rcsb.org/", description: "Protein structures", color: "bg-purple-500" },
+   105→  { id: "ensembl", name: "Ensembl", url: "https://ensembl.org/", description: "Genome browser", color: "bg-orange-500" },
+   106→  { id: "kegg", name: "KEGG", url: "https://www.genome.jp/kegg/", description: "Pathway database", color: "bg-teal-500" },
+   107→  { id: "pubmed", name: "PubMed", url: "https://pubmed.ncbi.nlm.nih.gov/", description: "Literature search", color: "bg-red-500" },
+   108→];
+   109→
+   110→// Animation variants (using tuple types for framer-motion compatibility)
+   111→const linkVariants = {
+   112→  hidden: { opacity: 0, y: -10 },
+   113→  visible: {
+   114→    opacity: 1,
+   115→    y: 0,
+   116→    transition: {
+   117→      duration: 0.3,
+   118→      ease: [0.22, 1, 0.36, 1] as const,
+   119→    },
+   120→  },
+   121→};
+   122→
+   123→interface NavbarProps {
+   124→  onNavigate?: (view: string) => void;
+   125→}
+   126→
+   127→export default function Navbar({ onNavigate }: NavbarProps) {
+   128→  const [isScrolled, setIsScrolled] = React.useState(false);
+   129→  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+   130→  const [activeSection, setActiveSection] = React.useState("");
+   131→  const [mounted, setMounted] = React.useState(false);
+   132→  const [showAuthModal, setShowAuthModal] = React.useState(false);
+   133→  const [authMode, setAuthMode] = React.useState<"signin" | "signup">("signin");
+   134→  
+   135→  // Search state
+   136→  const [showSearch, setShowSearch] = React.useState(false);
+   137→  const [searchQuery, setSearchQuery] = React.useState("");
+   138→  const [searchResults, setSearchResults] = React.useState<typeof databaseOptions>([]);
+   139→  
+   140→  // Form state
+   141→  const [authEmail, setAuthEmail] = React.useState("");
+   142→  const [authPassword, setAuthPassword] = React.useState("");
+   143→  const [authName, setAuthName] = React.useState("");
+   144→  const [isLoading, setIsLoading] = React.useState(false);
+   145→  const [authError, setAuthError] = React.useState("");
+   146→  
+   147→  // Contact modal
+   148→  const [showContactModal, setShowContactModal] = React.useState(false);
+   149→  
+   150→  const { theme, setTheme } = useTheme();
+   151→  const { data: session, status } = useSession();
+   152→
+   153→  // Handle mount state for theme
+   154→  React.useEffect(() => {
+   155→    setMounted(true);
+   156→  }, []);
+   157→
+   158→  // Scroll detection for glassmorphism effect
+   159→  React.useEffect(() => {
+   160→    const handleScroll = () => {
+   161→      setIsScrolled(window.scrollY > 20);
+   162→      
+   163→      // Detect active section
+   164→      const sections = navLinks.map((link) => link.href.substring(1));
+   165→      for (const section of sections.reverse()) {
+   166→        const element = document.getElementById(section);
+   167→        if (element) {
+   168→          const rect = element.getBoundingClientRect();
+   169→          if (rect.top <= 150) {
+   170→            setActiveSection(section);
+   171→            break;
+   172→          }
+   173→        }
+   174→      }
+   175→    };
+   176→
+   177→    window.addEventListener("scroll", handleScroll, { passive: true });
+   178→    return () => window.removeEventListener("scroll", handleScroll);
+   179→  }, []);
+   180→
+   181→  // Toggle theme
+   182→  const toggleTheme = () => {
+   183→    setTheme(theme === "dark" ? "light" : "dark");
+   184→  };
+   185→
+   186→  // Handle navigation click - ALL links are now functional
+   187→  const handleNavClick = (href: string, action?: string) => {
+   188→    setIsMobileOpen(false);
+   189→    
+   190→    if (action && onNavigate) {
+   191→      onNavigate(action);
+   192→      window.scrollTo({ top: 0 });
+   193→      return;
+   194→    }
+   195→    
+   196→    // For landing page sections that exist
+   197→    const elementId = href.substring(1);
+   198→    const element = document.getElementById(elementId);
+   199→    if (element) {
+   200→      element.scrollIntoView({ behavior: "smooth" });
+   201→    } else if (onNavigate) {
+   202→      // Navigate to view if section doesn't exist on current page
+   203→      onNavigate(elementId);
+   204→      window.scrollTo({ top: 0 });
+   205→    }
+   206→  };
+   207→
+   208→  // Handle Get Started button click
+   209→  const handleGetStarted = () => {
+   210→    if (onNavigate) {
+   211→      onNavigate('dashboard');
+   212→      window.scrollTo({ top: 0 });
+   213→    }
+   214→  };
+   215→
+   216→  // Handle Sign In button click
+   217→  const handleSignIn = () => {
+   218→    setShowAuthModal(true);
+   219→    setAuthMode('signin');
+   220→    setAuthError("");
+   221→  };
+   222→
+   223→  // Handle Sign Up button click  
+   224→  const handleSignUp = () => {
+   225→    setShowAuthModal(true);
+   226→    setAuthMode('signup');
+   227→    setAuthError("");
+   228→  };
+   229→
+   230→  // Handle sign out
+   231→  const handleSignOut = async () => {
+   232→    await signOut({ callbackUrl: '/' });
+   233→  };
+   234→
+   235→  // Reset form when modal opens
+   236→  React.useEffect(() => {
+   237→    if (showAuthModal) {
+   238→      setAuthEmail("");
+   239→      setAuthPassword("");
+   240→      setAuthName("");
+   241→      setAuthError("");
+   242→    }
+   243→  }, [showAuthModal, authMode]);
+   244→
+   245→  // Handle form submission with real authentication
+   246→  const handleAuthSubmit = async (e: React.FormEvent) => {
+   247→    e.preventDefault();
+   248→    setAuthError("");
+   249→    setIsLoading(true);
+   250→
+   251→    try {
+   252→      if (authMode === 'signup') {
+   253→        // Registration
+   254→        const response = await fetch('/api/auth/register', {
+   255→          method: 'POST',
+   256→          headers: { 'Content-Type': 'application/json' },
+   257→          body: JSON.stringify({
+   258→            name: authName,
+   259→            email: authEmail,
+   260→            password: authPassword,
+   261→          }),
+   262→        });
+   263→
+   264→        const data = await response.json();
+   265→
+   266→        if (!response.ok) {
+   267→          throw new Error(data.error || 'Registration failed');
+   268→        }
+   269→
+   270→        // After successful registration, sign in
+   271→        const result = await signIn('credentials', {
+   272→          email: authEmail,
+   273→          password: authPassword,
+   274→          redirect: false,
+   275→        });
+   276→
+   277→        if (result?.error) {
+   278→          throw new Error(result.error);
+   279→        }
+   280→      } else {
+   281→        // Sign in
+   282→        const result = await signIn('credentials', {
+   283→          email: authEmail,
+   284→          password: authPassword,
+   285→          redirect: false,
+   286→        });
+   287→
+   288→        if (result?.error) {
+   289→          throw new Error('Invalid email or password');
+   290→        }
+   291→      }
+   292→
+   293→      // Success - close modal and navigate to dashboard
+   294→      setShowAuthModal(false);
+   295→      if (onNavigate) {
+   296→        onNavigate('dashboard');
+   297→        window.scrollTo({ top: 0 });
+   298→      }
+   299→    } catch (error: any) {
+   300→      setAuthError(error.message || 'An error occurred');
+   301→    } finally {
+   302→      setIsLoading(false);
+   303→    }
+   304→  };
+   305→
+   306→  // Handle database search
+   307→  const handleDatabaseSearch = (query: string) => {
+   308→    setSearchQuery(query);
+   309→    if (query.trim().length > 0) {
+   310→      const filtered = databaseOptions.filter(db => 
+   311→        db.name.toLowerCase().includes(query.toLowerCase()) ||
+   312→        db.description.toLowerCase().includes(query.toLowerCase())
+   313→      );
+   314→      setSearchResults(filtered);
+   315→    } else {
+   316→      setSearchResults([]);
+   317→    }
+   318→  };
+   319→
+   320→  // Open external database link
+   321→  const openDatabaseLink = (url: string, dbName: string) => {
+   322→    window.open(url, '_blank', 'noopener,noreferrer');
+   323→  };
+   324→
+   325→  // User initials for avatar
+   326→  const getUserInitials = () => {
+   327→    if (session?.user?.name) {
+   328→      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+   329→    }
+   330→    if (session?.user?.email) {
+   331→      return session.user.email[0].toUpperCase();
+   332→    }
+   333→    return 'U';
+   334→  };
+   335→
+   336→  return (
+   337→    <>
+   338→      <motion.header
+   339→        initial={{ y: -100, opacity: 0 }}
+   340→        animate={{ y: 0, opacity: 1 }}
+   341→        transition={{ duration: 0.5 }}
+   342→        className={cn(
+   343→          "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300",
+   344→          isScrolled
+   345→            ? "glass shadow-sm border-b border-border/50"
+   346→            : "bg-transparent"
+   347→        )}
+   348→      >
+   349→        <nav
+   350→          className={cn(
+   351→            "mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8",
+   352→            "transition-all duration-300"
+   353→          )}
+   354→        >
+   355→          {/* Logo */}
+   356→          <motion.div className="flex items-center gap-2">
+   357→            <a
+   358→              href="#"
+   359→              className="group flex items-center gap-2.5 no-underline"
+   360→              onClick={(e) => {
+   361→                e.preventDefault();
+   362→                if (onNavigate) {
+   363→                  onNavigate('landing');
+   364→                  window.scrollTo({ top: 0 });
+   365→                } else {
+   366→                  window.scrollTo({ top: 0, behavior: "smooth" });
+   367→                }
+   368→              }}
+   369→            >
+   370→              <div className="relative flex items-center justify-center">
+   371→                <div className="absolute inset-0 rounded-lg bg-biored/20 blur-lg group-hover:bg-biored/30 transition-colors duration-300" />
+   372→                <Dna className="relative size-8 text-biored transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+   373→              </div>
+   374→              <span className="text-xl font-bold tracking-tight">
+   375→                <span className="text-foreground">Bio</span>
+   376→                <span className="text-biored">Align</span>
+   377→              </span>
+   378→            </a>
+   379→          </motion.div>
+   380→
+   381→          {/* Desktop Navigation Links */}
+   382→          <div className="hidden lg:flex items-center gap-1">
+   383→            {navLinks.map((link) => (
+   384→              <a
+   385→                key={link.name}
+   386→                href={link.href}
+   387→                onClick={(e) => {
+   388→                  e.preventDefault();
+   389→                  handleNavClick(link.href, link.action);
+   390→                }}
+   391→                className={cn(
+   392→                  "relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer",
+   393→                  "hover:text-foreground hover:bg-accent/10",
+   394→                  activeSection === link.href.substring(1) || 
+   395→                  (link.href.substring(1) === 'coffee' && activeSection === 'pricing')
+   396→                    ? "text-biored font-semibold"
+   397→                    : "text-muted-foreground"
+   398→                )}
+   399→              >
+   400→                <span className="relative z-10">{link.name}</span>
+   401→                {/* Active indicator */}
+   402→                {(activeSection === link.href.substring(1) || 
+   403→                  (link.href.substring(1) === 'coffee' && activeSection === 'pricing')) && (
+   404→                  <motion.div
+   405→                    layoutId="activeNav"
+   406→                    className="absolute inset-0 rounded-md bg-biored/10 border border-biored/20"
+   407→                    transition={{
+   408→                      type: "spring",
+   409→                      stiffness: 380,
+   410→                      damping: 30,
+   411→                    }}
+   412→                  />
+   413→                )}
+   414→              </a>
+   415→            ))}
+   416→          </div>
+   417→
+   418→          {/* Right Side Actions */}
+   419→          <div className="flex items-center gap-2 sm:gap-3">
+   420→            {/* Global Search Button */}
+   421→            <Button
+   422→              variant="ghost"
+   423→              size="icon"
+   424→              onClick={() => setShowSearch(!showSearch)}
+   425→              className="relative size-9 rounded-full hover:bg-accent/10 cursor-pointer"
+   426→              aria-label="Search databases"
+   427→            >
+   428→              <Search className="size-4" />
+   429→            </Button>
+   430→
+   431→            {/* Theme Toggle */}
+   432→            {mounted && (
+   433→              <Button
+   434→                variant="ghost"
+   435→                size="icon"
+   436→                onClick={toggleTheme}
+   437→                className="relative size-9 rounded-full overflow-hidden hover:bg-accent/10 cursor-pointer"
+   438→                aria-label="Toggle theme"
+   439→              >
+   440→                <AnimatePresence mode="wait" initial={false}>
+   441→                  {theme === "dark" ? (
+   442→                    <motion.div
+   443→                      key="sun"
+   444→                      initial={{ rotate: -90, scale: 0, opacity: 0 }}
+   445→                      animate={{ rotate: 0, scale: 1, opacity: 1 }}
+   446→                      exit={{ rotate: 90, scale: 0, opacity: 0 }}
+   447→                      transition={{ duration: 0.2 }}
+   448→                      className="absolute"
+   449→                    >
+   450→                      <Sun className="size-4 text-yellow-400" />
+   451→                    </motion.div>
+   452→                  ) : (
+   453→                    <motion.div
+   454→                      key="moon"
+   455→                      initial={{ rotate: 90, scale: 0, opacity: 0 }}
+   456→                      animate={{ rotate: 0, scale: 1, opacity: 1 }}
+   457→                      exit={{ rotate: -90, scale: 0, opacity: 0 }}
+   458→                      transition={{ duration: 0.2 }}
+   459→                      className="absolute"
+   460→                    >
+   461→                      <Moon className="size-4 text-slate-700" />
+   462→                    </motion.div>
+   463→                  )}
+   464→                </AnimatePresence>
+   465→              </Button>
+   466→            )}
+   467→
+   468→            {/* Contact Button */}
+   469→            <Button
+   470→              variant="ghost"
+   471→              size="icon"
+   472→              onClick={() => setShowContactModal(true)}
+   473→              className="hidden md:flex size-9 rounded-full hover:bg-accent/10 cursor-pointer"
+   474→              aria-label="Contact us"
+   475→            >
+   476→              <Phone className="size-4" />
+   477→            </Button>
+   478→
+   479→            {/* Auth Section */}
+   480→            {status === "loading" ? (
+   481→              <div className="flex items-center gap-2">
+   482→                <Loader2 className="size-4 animate-spin text-muted-foreground" />
+   483→              </div>
+   484→            ) : session?.user ? (
+   485→              /* Logged In State */
+   486→              <div className="flex items-center gap-2">
+   487→                {/* User Menu Button */}
+   488→                <Button
+   489→                  variant="ghost"
+   490→                  size="sm"
+   491→                  onClick={() => onNavigate?.("dashboard")}
+   492→                  className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-accent/10 cursor-pointer"
+   493→                >
+   494→                  <div className="size-7 rounded-full bg-biored/10 flex items-center justify-center">
+   495→                    <span className="text-xs font-medium text-biored">{getUserInitials()}</span>
+   496→                  </div>
+   497→                  <span className="text-sm font-medium">{session.user.name || 'User'}</span>
+   498→                </Button>
+   499→                
+   500→                {/* Sign Out Button */}
+   501→                <Button
+   502→                  variant="ghost"
+   503→                  size="sm"
+   504→                  onClick={handleSignOut}
+   505→                  className="hidden sm:inline-flex text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer gap-2"
+   506→                >
+   507→                  <LogOut className="size-4" />
+   508→                  <span className="hidden md:inline">Sign Out</span>
+   509→                </Button>
+   510→
+   511→                {/* Mobile Sign Out */}
+   512→                <Button
+   513→                  variant="ghost"
+   514→                  size="icon"
+   515→                  onClick={handleSignOut}
+   516→                  className="sm:hidden size-9 hover:bg-accent/10 cursor-pointer"
+   517→                >
+   518→                  <LogOut className="size-4" />
+   519→                </Button>
+   520→              </div>
+   521→            ) : (
+   522→              /* Logged Out State */
+   523→              <>
+   524→                {/* Sign In Button - Desktop */}
+   525→                <Button
+   526→                  variant="ghost"
+   527→                  size="sm"
+   528→                  onClick={handleSignIn}
+   529→                  className="hidden sm:inline-flex text-muted-foreground hover:text-foreground hover:bg-accent/10 cursor-pointer gap-2"
+   530→                >
+   531→                  <LogIn className="size-4" />
+   532→                  Sign In
+   533→                </Button>
+   534→
+   535→                {/* Get Started CTA Button */}
+   536→                <Button
+   537→                  size="sm"
+   538→                  onClick={handleGetStarted}
+   539→                  className="hidden sm:inline-flex bg-biored hover:bg-biored-dark text-white shadow-lg shadow-biored/25 hover:shadow-biored/40 transition-all duration-300 group cursor-pointer"
+   540→                >
+   541→                  Get Started
+   542→                  <ArrowRight className="size-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
+   543→                </Button>
+   544→              </>
+   545→            )}
+   546→
+   547→            {/* Mobile Menu Button */}
+   548→            <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+   549→              <Button
+   550→                variant="ghost"
+   551→                size="icon"
+   552→                className="lg:hidden size-9 hover:bg-accent/10 cursor-pointer"
+   553→                onClick={() => setIsMobileOpen(true)}
+   554→              >
+   555→                <Menu className="size-5" />
+   556→              </Button>
+   557→              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 bg-background/95 backdrop-blur-xl">
+   558→                <div className="flex flex-col h-full">
+   559→                  {/* Mobile Header */}
+   560→                  <SheetHeader className="p-6 pb-4">
+   561→                    <div className="flex items-center justify-between">
+   562→                      <SheetTitle className="flex items-center gap-2.5">
+   563→                        <Dna className="size-6 text-biored" />
+   564→                        <span className="text-xl font-bold">
+   565→                          <span className="text-foreground">Bio</span>
+   566→                          <span className="text-biored">Align</span>
+   567→                        </span>
+   568→                      </SheetTitle>
+   569→                    </div>
+   570→                    <SheetDescription className="sr-only">
+   571→                      Navigation menu for BioAlign platform
+   572→                    </SheetDescription>
+   573→                  </SheetHeader>
+   574→
+   575→                  <Separator className="bg-border/50" />
+   576→
+   577→                  {/* Auth Status in Mobile Menu */}
+   578→                  <div className="px-4 py-3 border-b border-border/50">
+   579→                    {session?.user ? (
+   580→                      <div className="flex items-center justify-between">
+   581→                        <div className="flex items-center gap-3">
+   582→                          <div className="size-9 rounded-full bg-biored/10 flex items-center justify-center">
+   583→                            <User className="size-4 text-biored" />
+   584→                          </div>
+   585→                          <div>
+   586→                            <p className="text-sm font-medium">{session.user.name || 'User'}</p>
+   587→                            <p className="text-xs text-muted-foreground truncate max-w-[150px]">
+   588→                              {session.user.email}
+   589→                            </p>
+   590→                          </div>
+   591→                        </div>
+   592→                        <Button
+   593→                          variant="ghost"
+   594→                          size="sm"
+   595→                          onClick={handleSignOut}
+   596→                          className="text-destructive hover:text-destructive cursor-pointer"
+   597→                        >
+   598→                          <LogOut className="size-4 mr-1" />
+   599→                          Out
+   600→                        </Button>
+   601→                      </div>
+   602→                    ) : (
+   603→                      <div className="flex gap-2">
+   604→                        <Button
+   605→                          variant="outline"
+   606→                          size="sm"
+   607→                          className="flex-1 cursor-pointer"
+   608→                          onClick={() => {
+   609→                            setIsMobileOpen(false);
+   610→                            handleSignIn();
+   611→                          }}
+   612→                        >
+   613→                          <LogIn className="size-4 mr-1" />
+   614→                          Sign In
+   615→                        </Button>
+   616→                        <Button
+   617→                          size="sm"
+   618→                          className="flex-1 bg-biored hover:bg-biored-dark text-white cursor-pointer"
+   619→                          onClick={() => {
+   620→                            setIsMobileOpen(false);
+   621→                            handleGetStarted();
+   622→                          }}
+   623→                        >
+   624→                          Get Started
+   625→                        </Button>
+   626→                      </div>
+   627→                    )}
+   628→                  </div>
+   629→
+   630→                  {/* Mobile Navigation Links */}
+   631→                  <div className="flex-1 overflow-y-auto py-4 px-2 scrollbar-hide">
+   632→                    <nav className="flex flex-col gap-1">
+   633→                      {navLinks.map((link) => {
+   634→                        const Icon = link.icon;
+   635→                        return (
+   636→                          <a
+   637→                            key={link.name}
+   638→                            href={link.href}
+   639→                            onClick={(e) => {
+   640→                              e.preventDefault();
+   641→                              setIsMobileOpen(false);
+   642→                              handleNavClick(link.href, link.action);
+   643→                            }}
+   644→                            className={cn(
+   645→                              "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 no-underline cursor-pointer",
+   646→                              "hover:bg-accent/10",
+   647→                              activeSection === link.href.substring(1)
+   648→                                ? "bg-biored/10 text-biored font-medium"
+   649→                                : "text-muted-foreground hover:text-foreground"
+   650→                            )}
+   651→                          >
+   652→                            <Icon className="size-5 shrink-0" />
+   653→                            <div className="flex flex-col">
+   654→                              <span>{link.name}</span>
+   655→                              <span className="text-xs text-muted-foreground/70">
+   656→                                {link.description}
+   657→                              </span>
+   658→                            </div>
+   659→                          </a>
+   660→                        );
+   661→                      })}
+   662→                      
+   663→                      {/* Contact option in mobile */}
+   664→                      <button
+   665→                        onClick={() => {
+   666→                          setIsMobileOpen(false);
+   667→                          setShowContactModal(true);
+   668→                        }}
+   669→                        className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-left cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent/10"
+   670→                      >
+   671→                        <Phone className="size-5 shrink-0" />
+   672→                        <span>Contact Us</span>
+   673→                      </button>
+   674→                    </nav>
+   675→                  </div>
+   676→
+   677→                  <Separator className="bg-border/50" />
+   678→                </div>
+   679→              </SheetContent>
+   680→            </Sheet>
+   681→          </div>
+   682→        </nav>
+   683→      </motion.header>
+   684→
+   685→      {/* Spacer to prevent content from hiding behind fixed navbar */}
+   686→      <div className="h-16" />
+   687→
+   688→      {/* Global Database Search Dropdown */}
+   689→      <AnimatePresence>
+   690→        {showSearch && (
+   691→          <motion.div
+   692→            initial={{ opacity: 0, y: -10 }}
+   693→            animate={{ opacity: 1, y: 0 }}
+   694→            exit={{ opacity: 0, y: -10 }}
+   695→            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b shadow-lg"
+   696→          >
+   697→            <div className="max-w-4xl mx-auto p-4">
+   698→              <div className="relative">
+   699→                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 size-5 text-muted-foreground" />
+   700→                <Input
+   701→                  type="text"
+   702→                  placeholder="Search databases (NCBI, UniProt, PDB, PubMed...)"
+   703→                  value={searchQuery}
+   704→                  onChange={(e) => handleDatabaseSearch(e.target.value)}
+   705→                  className="pl-12 pr-4 py-3 text-base h-12"
+   706→                  autoFocus
+   707→                />
+   708→                <Button
+   709→                  variant="ghost"
+   710→                  size="icon"
+   711→                  onClick={() => setShowSearch(false)}
+   712→                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
+   713→                >
+   714→                  <X className="size-4" />
+   715→                </Button>
+   716→              </div>
+   717→              
+   718→              {/* Search Results / Quick Access */}
+   719→              <div className="mt-4">
+   720→                {searchQuery.length > 0 ? (
+   721→                  <div>
+   722→                    <p className="text-sm text-muted-foreground mb-2">Matching Databases:</p>
+   723→                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+   724→                      {searchResults.map((db) => (
+   725→                        <button
+   726→                          key={db.id}
+   727→                          onClick={() => openDatabaseLink(db.url, db.name)}
+   728→                          className="flex items-center gap-3 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer text-left"
+   729→                        >
+   730→                          <div className={`w-3 h-3 rounded-full ${db.color}`} />
+   731→                          <div>
+   732→                            <p className="font-medium text-sm">{db.name}</p>
+   733→                            <p className="text-xs text-muted-foreground">{db.description}</p>
+   734→                          </div>
+   735→                          <ExternalLink className="size-3 ml-auto text-muted-foreground" />
+   736→                        </button>
+   737→                      ))}
+   738→                    </div>
+   739→                  </div>
+   740→                ) : (
+   741→                  <div>
+   742→                    <p className="text-sm text-muted-foreground mb-2">Quick Access to Biological Databases:</p>
+   743→                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+   744→                      {databaseOptions.map((db) => (
+   745→                        <button
+   746→                          key={db.id}
+   747→                          onClick={() => openDatabaseLink(db.url, db.name)}
+   748→                          className="flex flex-col items-center gap-1 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer"
+   749→                        >
+   750→                          <div className={`w-4 h-4 rounded-full ${db.color}`} />
+   751→                          <span className="text-xs font-medium">{db.name}</span>
+   752→                        </button>
+   753→                      ))}
+   754→                    </div>
+   755→                  </div>
+   756→                )}
+   757→              </div>
+   758→            </div>
+   759→          </motion.div>
+   760→        )}
+   761→      </AnimatePresence>
+   762→
+   763→      {/* Authentication Modal */}
+   764→      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+   765→        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+   766→          <div className="relative">
+   767→            {/* Header gradient */}
+   768→            <div className="bg-gradient-to-br from-biored to-biored-dark p-6 text-white">
+   769→              <DialogTitle className="text-xl font-bold text-center">
+   770→                {authMode === 'signin' ? 'Welcome Back' : 'Join BioAlign'}
+   771→              </DialogTitle>
+   772→              <DialogDescription className="text-white/80 text-center mt-1">
+   773→                {authMode === 'signin' 
+   774→                  ? 'Sign in to access your bioinformatics workspace' 
+   775→                  : 'Create your free account to start analyzing'}
+   776→              </DialogDescription>
+   777→            </div>
+   778→
+   779→            {/* Error Message */}
+   780→            {authError && (
+   781→              <div className="mx-6 mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+   782→                <p className="text-sm text-red-600 dark:text-red-400">{authError}</p>
+   783→              </div>
+   784→            )}
+   785→
+   786→            {/* Form */}
+   787→            <form onSubmit={handleAuthSubmit} className="p-6 space-y-4">
+   788→              {authMode === 'signup' && (
+   789→                <div className="space-y-2">
+   790→                  <Label htmlFor="name">Full Name</Label>
+   791→                  <Input 
+   792→                    id="name" 
+   793→                    placeholder="Dr. Jane Smith" 
+   794→                    value={authName}
+   795→                    onChange={(e) => setAuthName(e.target.value)}
+   796→                    required 
+   797→                    disabled={isLoading}
+   798→                  />
+   799→                </div>
+   800→              )}
+   801→              
+   802→              <div className="space-y-2">
+   803→                <Label htmlFor="email">Email Address</Label>
+   804→                <Input 
+   805→                  id="email" 
+   806→                  type="email" 
+   807→                  placeholder="jane@university.edu" 
+   808→                  value={authEmail}
+   809→                  onChange={(e) => setAuthEmail(e.target.value)}
+   810→                  required 
+   811→                  disabled={isLoading}
+   812→                />
+   813→              </div>
+   814→              
+   815→              <div className="space-y-2">
+   816→                <Label htmlFor="password">Password</Label>
+   817→                <Input 
+   818→                  id="password" 
+   819→                  type="password" 
+   820→                  placeholder="••••••••" 
+   821→                  value={authPassword}
+   822→                  onChange={(e) => setAuthPassword(e.target.value)}
+   823→                  required 
+   824→                  minLength={8}
+   825→                  disabled={isLoading}
+   826→                />
+   827→                <p className="text-xs text-muted-foreground">
+   828→                  Must be at least 8 characters
+   829→                </p>
+   830→              </div>
+   831→
+   832→              {authMode === 'signin' && (
+   833→                <div className="flex justify-end">
+   834→                  <button type="button" className="text-xs text-biored hover:underline">
+   835→                    Forgot password?
+   836→                  </button>
+   837→                </div>
+   838→              )}
+   839→
+   840→              <Button 
+   841→                type="submit" 
+   842→                className="w-full bg-biored hover:bg-biored-dark text-white cursor-pointer"
+   843→                disabled={isLoading}
+   844→              >
+   845→                {isLoading ? (
+   846→                  <>
+   847→                    <Loader2 className="size-4 mr-2 animate-spin" />
+   848→                    {authMode === 'signin' ? 'Signing In...' : 'Creating Account...'}
+   849→                  </>
+   850→                ) : (
+   851→                  authMode === 'signin' ? 'Sign In' : 'Create Account'
+   852→                )}
+   853→              </Button>
+   854→
+   855→              {/* Demo Credentials Notice */}
+   856→              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+   857→                <p className="text-xs text-muted-foreground text-center mb-2 font-medium">
+   858→                  🧪 Demo Mode - Create a new account to test
+   859→                </p>
+   860→                <p className="text-xs text-muted-foreground text-center">
+   861→                  Or use existing credentials after registration
+   862→                </p>
+   863→              </div>
+   864→
+   865→              {/* Toggle between signin/signup */}
+   866→              <p className="text-center text-sm text-muted-foreground">
+   867→                {authMode === 'signin' ? (
+   868→                  <>
+   869→                    Don't have an account?{' '}
+   870→                    <button 
+   871→                      type="button" 
+   872→                      onClick={() => setAuthMode('signup')}
+   873→                      className="text-biored hover:underline font-medium cursor-pointer"
+   874→                    >
+   875→                      Sign up
+   876→                    </button>
+   877→                  </>
+   878→                ) : (
+   879→                  <>
+   880→                    Already have an account?{' '}
+   881→                    <button 
+   882→                      type="button" 
+   883→                      onClick={() => setAuthMode('signin')}
+   884→                      className="text-biored hover:underline font-medium cursor-pointer"
+   885→                    >
+   886→                      Sign in
+   887→                    </button>
+   888→                  </>
+   889→                )}
+   890→              </p>
+   891→            </form>
+   892→          </div>
+   893→        </DialogContent>
+   894→      </Dialog>
+   895→
+   896→      {/* Contact Us Modal */}
+   897→      <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
+   898→        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+   899→          <div className="relative">
+   900→            <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white">
+   901→              <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+   902→                <Phone className="size-5" />
+   903→                Contact Us
+   904→              </DialogTitle>
+   905→              <DialogDescription className="text-white/80 text-center mt-1">
+   906→                Get in touch with the BioAlign team
+   907→              </DialogDescription>
+   908→            </div>
+   909→
+   910→            <div className="p-6 space-y-6">
+   911→              {/* Email Contact */}
+   912→              <a
+   913→                href="mailto:toufikmahata20@gmail.com"
+   914→                className="flex items-center gap-4 p-4 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all no-underline group"
+   915→              >
+   916→                <div className="size-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+   917→                  <Mail className="size-5 text-blue-600 dark:text-blue-400" />
+   918→                </div>
+   919→                <div>
+   920→                  <p className="font-medium text-foreground">Email</p>
+   921→                  <p className="text-sm text-muted-foreground group-hover:text-biored transition-colors">
+   922→                    toufikmahata20@gmail.com
+   923→                  </p>
+   924→                </div>
+   925→              </a>
+   926→
+   927→              {/* Phone Contact */}
+   928→              <a
+   929→                href="tel:+916296159691"
+   930→                className="flex items-center gap-4 p-4 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all no-underline group"
+   931→              >
+   932→                <div className="size-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+   933→                  <Phone className="size-5 text-green-600 dark:text-green-400" />
+   934→                </div>
+   935→                <div>
+   936→                  <p className="font-medium text-foreground">Phone</p>
+   937→                  <p className="text-sm text-muted-foreground group-hover:text-biored transition-colors">
+   938→                    +91 62961 56961
+   939→                  </p>
+   940→                </div>
+   941→              </a>
+   942→
+   943→              {/* Availability Notice */}
+   944→              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+   945→                <p className="text-sm text-muted-foreground text-center">
+   946→                  🕐 Available Monday-Friday, 9 AM - 6 PM IST<br/>
+   947→                  📍 CBSH, RPCAU, Pusa, New Delhi
+   948→                </p>
+   949→              </div>
+   950→
+   951→              <Button 
+   952→                onClick={() => setShowContactModal(false)}
+   953→                className="w-full cursor-pointer"
+   954→                variant="outline"
+   955→              >
+   956→                Close
+   957→              </Button>
+   958→            </div>
+   959→          </div>
+   960→        </DialogContent>
+   961→      </Dialog>
+   962→    </>
+   963→  );
+   964→}
+   965→
