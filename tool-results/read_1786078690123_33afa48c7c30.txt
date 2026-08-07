@@ -1,0 +1,1087 @@
+     1→"use client"
+     2→
+     3→import * as React from "react"
+     4→import { motion, AnimatePresence } from "framer-motion"
+     5→import {
+     6→  Search,
+     7→  Star,
+     8→  Grid3X3,
+     9→  List,
+    10→  Clock,
+    11→  ChevronDown,
+    12→  ChevronUp,
+    13→  Rocket,
+    14→  Sparkles,
+    15→  Filter,
+    16→  X,
+    17→  Heart,
+    18→  ExternalLink,
+    19→  CheckCircle2,
+    20→  Circle,
+    21→  Loader2,
+    22→} from "lucide-react"
+    23→import { cn } from "@/lib/utils"
+    24→import { Button } from "@/components/ui/button"
+    25→import { Input } from "@/components/ui/input"
+    26→import { Badge } from "@/components/ui/badge"
+    27→import {
+    28→  Card,
+    29→  CardContent,
+    30→  CardDescription,
+    31→  CardHeader,
+    32→  CardTitle,
+    33→} from "@/components/ui/card"
+    34→import { Skeleton } from "@/components/ui/skeleton"
+    35→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+    36→import {
+    37→  Tooltip,
+    38→  TooltipContent,
+    39→  TooltipProvider,
+    40→  TooltipTrigger,
+    41→} from "@/components/ui/tooltip"
+    42→import {
+    43→  toolCategories,
+    44→  getAllTools,
+    45→  searchTools,
+    46→  recentlyUsedTools,
+    47→  popularTools,
+    48→  type BioTool,
+    49→  type ToolCategory,
+    50→  type ToolStatus,
+    51→} from "@/lib/tools-data"
+    52→
+    53→// ==================== TYPES ====================
+    54→type ViewMode = "grid" | "list"
+    55→type SortOption = "name" | "category" | "recent" | "popular"
+    56→
+    57→// ==================== ICON COMPONENTS ====================
+    58→function StatusIcon({ status }: { status: ToolStatus }) {
+    59→  switch (status) {
+    60→    case "available":
+    61→      return (
+    62→        <Tooltip>
+    63→          <TooltipTrigger asChild>
+    64→            <CheckCircle2 className="size-4 text-emerald-500" />
+    65→          </TooltipTrigger>
+    66→          <TooltipContent>Available</TooltipContent>
+    67→        </Tooltip>
+    68→      )
+    69→    case "coming-soon":
+    70→      return (
+    71→        <Tooltip>
+    72→          <TooltipTrigger asChild>
+    73→            <Clock className="size-4 text-amber-500" />
+    74→          </TooltipTrigger>
+    75→          <TooltipContent>Coming Soon</TooltipContent>
+    76→        </Tooltip>
+    77→      )
+    78→    case "beta":
+    79→      return (
+    80→        <Tooltip>
+    81→          <TooltipTrigger asChild>
+    82→            <Sparkles className="size-4 text-blue-500" />
+    83→          </TooltipTrigger>
+    84→          <TooltipContent>Beta</TooltipContent>
+    85→        </Tooltip>
+    86→      )
+    87→    case "deprecated":
+    88→      return (
+    89→        <Tooltip>
+    90→          <TooltipTrigger asChild>
+    91→            <Circle className="size-4 text-muted-foreground" />
+    92→          </TooltipTrigger>
+    93→          <TooltipContent>Deprecated</TooltipContent>
+    94→        </Tooltip>
+    95→      )
+    96→  }
+    97→}
+    98→
+    99→// ==================== SKELETON LOADING STATES ====================
+   100→function CategoryCardSkeleton() {
+   101→  return (
+   102→    <Card className="glass-card overflow-hidden">
+   103→      <CardContent className="p-6">
+   104→        <div className="flex items-start gap-4">
+   105→          <Skeleton className="size-12 rounded-xl" />
+   106→          <div className="flex-1 space-y-2">
+   107→            <Skeleton className="h-5 w-32" />
+   108→            <Skeleton className="h-4 w-full" />
+   109→            <Skeleton className="h-4 w-2/3" />
+   110→          </div>
+   111→          <Skeleton className="h-8 w-16 rounded-full" />
+   112→        </div>
+   113→      </CardContent>
+   114→    </Card>
+   115→  )
+   116→}
+   117→
+   118→function ToolCardSkeleton({ viewMode }: { viewMode: ViewMode }) {
+   119→  if (viewMode === "list") {
+   120→    return (
+   121→      <div className="flex items-center gap-4 p-4 rounded-lg border bg-card/50">
+   122→        <Skeleton className="size-10 rounded-lg" />
+   123→        <div className="flex-1 space-y-2">
+   124→          <Skeleton className="h-4 w-40" />
+   125→          <Skeleton className="h-3 w-64" />
+   126→        </div>
+   127→        <Skeleton className="h-9 w-20 rounded-md" />
+   128→      </div>
+   129→    )
+   130→  }
+   131→  return (
+   132→    <Card className="glass-card overflow-hidden">
+   133→      <CardContent className="p-4">
+   134→        <div className="space-y-3">
+   135→          <div className="flex items-center justify-between">
+   136→            <Skeleton className="size-10 rounded-lg" />
+   137→            <Skeleton className="size-5 rounded-full" />
+   138→          </div>
+   139→          <Skeleton className="h-5 w-28" />
+   140→          <Skeleton className="h-3 w-full" />
+   141→          <Skeleton className="h-3 w-3/4" />
+   142→          <div className="flex items-center justify-between pt-2">
+   143→            <Skeleton className="h-5 w-20 rounded-full" />
+   144→            <Skeleton className="h-8 w-16 rounded-md" />
+   145→          </div>
+   146→        </div>
+   147→      </CardContent>
+   148→    </Card>
+   149→  )
+   150→}
+   151→
+   152→// ==================== CATEGORY CARD COMPONENT ====================
+   153→function CategoryCard({
+   154→  category,
+   155→  isExpanded,
+   156→  onToggle,
+   157→  onClick,
+   158→}: {
+   159→  category: ToolCategory
+   160→  isExpanded: boolean
+   161→  onToggle: () => void
+   162→  onClick: () => void
+   163→}) {
+   164→  const Icon = category.icon
+   165→  const availableTools = category.tools.filter(
+   166→    (t) => t.status === "available"
+   167→  ).length
+   168→
+   169→  return (
+   170→    <motion.div
+   171→      layout
+   172→      initial={{ opacity: 0, y: 20 }}
+   173→      animate={{ opacity: 1, y: 0 }}
+   174→      exit={{ opacity: 0, y: -20 }}
+   175→      transition={{ duration: 0.3 }}
+   176→    >
+   177→      <Card
+   178→        className={cn(
+   179→          "group glass-card cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1",
+   180→          isExpanded && "ring-2 ring-primary/20 border-primary/30"
+   181→        )}
+   182→        onClick={() => {
+   183→          onToggle()
+   184→          if (!isExpanded) onClick()
+   185→        }}
+   186→      >
+   187→        <CardContent className="p-6">
+   188→          <div className="flex items-start gap-4">
+   189→            {/* Icon */}
+   190→            <motion.div
+   191→              whileHover={{ scale: 1.05, rotate: 5 }}
+   192→              className={cn(
+   193→                "size-12 rounded-xl flex items-center justify-center shrink-0",
+   194→                "bg-gradient-to-br shadow-lg"
+   195→              )}
+   196→              style={{
+   197→                background: `linear-gradient(135deg, ${category.color}20, ${category.color}40)`,
+   198→                color: category.color,
+   199→              }}
+   200→            >
+   201→              <Icon className="size-6" />
+   202→            </motion.div>
+   203→
+   204→            {/* Content */}
+   205→            <div className="flex-1 min-w-0">
+   206→              <div className="flex items-center gap-2 mb-1">
+   207→                <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
+   208→                  {category.name}
+   209→                </CardTitle>
+   210→                <motion.div
+   211→                  animate={{ rotate: isExpanded ? 180 : 0 }}
+   212→                  transition={{ duration: 0.2 }}
+   213→                >
+   214→                  <ChevronDown className="size-4 text-muted-foreground" />
+   215→                </motion.div>
+   216→              </div>
+   217→              <CardDescription className="text-sm line-clamp-2 mb-3">
+   218→                {category.description}
+   219→              </CardDescription>
+   220→              <div className="flex items-center gap-2 flex-wrap">
+   221→                <Badge
+   222→                  variant="secondary"
+   223→                  className="text-xs font-medium"
+   224→                  style={{
+   225→                    backgroundColor: `${category.color}15`,
+   226→                    color: category.color,
+   227→                    borderColor: `${category.color}30`,
+   228→                  }}
+   229→                >
+   230→                  {category.tools.length} tools
+   231→                </Badge>
+   232→                <Badge
+   233→                  variant="outline"
+   234→                  className="text-xs text-emerald-600 border-emerald-300 dark:border-emerald-700"
+   235→                >
+   236→                  {availableTools} available
+   237→                </Badge>
+   238→              </div>
+   239→            </div>
+   240→
+   241→            {/* Action Button */}
+   242→            <Button
+   243→              variant="ghost"
+   244→              size="icon"
+   245→              className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+   246→              onClick={(e) => {
+   247→                e.stopPropagation()
+   248→                onToggle()
+   249→              }}
+   250→            >
+   251→              <ExternalLink className="size-4" />
+   252→            </Button>
+   253→          </div>
+   254→        </CardContent>
+   255→      </Card>
+   256→    </motion.div>
+   257→  )
+   258→}
+   259→
+   260→// ==================== TOOL CARD COMPONENT ====================
+   261→function ToolCard({
+   262→  tool,
+   263→  viewMode,
+   264→  isFavorite,
+   265→  onToggleFavorite,
+   266→  onLaunch,
+   267→}: {
+   268→  tool: BioTool
+   269→  viewMode: ViewMode
+   270→  isFavorite: boolean
+   271→  onToggleFavorite: () => void
+   272→  onLaunch: () => void
+   273→}) {
+   274→  const Icon = tool.icon
+   275→  const category = toolCategories.find((c) => c.id === tool.category)
+   276→
+   277→  if (viewMode === "list") {
+   278→    return (
+   279→      <motion.div
+   280→        layout
+   281→        initial={{ opacity: 0, x: -20 }}
+   282→        animate={{ opacity: 1, x: 0 }}
+   283→        exit={{ opacity: 0, x: 20 }}
+   284→        transition={{ duration: 0.2 }}
+   285→        className={cn(
+   286→          "group flex items-center gap-4 p-4 rounded-lg border bg-card/50 backdrop-blur-sm",
+   287→          "hover:bg-accent/50 hover:border-primary/20 transition-all duration-200"
+   288→        )}
+   289→      >
+   290→        {/* Icon */}
+   291→        <div
+   292→          className="size-10 rounded-lg flex items-center justify-center shrink-0"
+   293→          style={{
+   294→            backgroundColor: `${category?.color || "#64748B"}15`,
+   295→            color: category?.color || "#64748B",
+   296→          }}
+   297→        >
+   298→          <Icon className="size-5" />
+   299→        </div>
+   300→
+   301→        {/* Content */}
+   302→        <div className="flex-1 min-w-0">
+   303→          <div className="flex items-center gap-2">
+   304→            <span className="font-medium truncate">{tool.name}</span>
+   305→            <StatusIcon status={tool.status} />
+   306→          </div>
+   307→          <p className="text-sm text-muted-foreground truncate mt-0.5">
+   308→            {tool.description}
+   309→          </p>
+   310→        </div>
+   311→
+   312→        {/* Badge & Actions */}
+   313→        <div className="flex items-center gap-2 shrink-0">
+   314→          <Badge
+   315→            variant="outline"
+   316→            className="hidden sm:inline-flex text-xs"
+   317→            style={{
+   318→              borderColor: `${category?.color}40`,
+   319→              color: category?.color,
+   320→            }}
+   321→          >
+   322→            {category?.name}
+   323→          </Badge>
+   324→          <TooltipProvider>
+   325→            <Tooltip>
+   326→              <TooltipTrigger asChild>
+   327→                <Button
+   328→                  variant="ghost"
+   329→                  size="icon"
+   330→                  className={cn(
+   331→                    "size-8",
+   332→                    isFavorite && "text-yellow-500 hover:text-yellow-600"
+   333→                  )}
+   334→                  onClick={(e) => {
+   335→                    e.stopPropagation()
+   336→                    onToggleFavorite()
+   337→                  }}
+   338→                >
+   339→                  <Heart
+   340→                    className={cn("size-4", isFavorite && "fill-current")}
+   341→                  />
+   342→                </Button>
+   343→              </TooltipTrigger>
+   344→              <TooltipContent>
+   345→                {isFavorite ? "Remove from favorites" : "Add to favorites"}
+   346→              </TooltipContent>
+   347→            </Tooltip>
+   348→          </TooltipProvider>
+   349→          <Button
+   350→            size="sm"
+   351→            disabled={tool.status !== "available"}
+   352→            onClick={onLaunch}
+   353→            className="gap-1.5"
+   354→          >
+   355→            {tool.status === "available" ? (
+   356→              <>
+   357→                <Rocket className="size-3.5" />
+   358→                Launch
+   359→              </>
+   360→            ) : (
+   361→              "Coming Soon"
+   362→            )}
+   363→          </Button>
+   364→        </div>
+   365→      </motion.div>
+   366→    )
+   367→  }
+   368→
+   369→  // Grid View
+   370→  return (
+   371→    <motion.div
+   372→      layout
+   373→      initial={{ opacity: 0, scale: 0.95 }}
+   374→      animate={{ opacity: 1, scale: 1 }}
+   375→      exit={{ opacity: 0, scale: 0.95 }}
+   376→      transition={{ duration: 0.2 }}
+   377→      className="group"
+   378→    >
+   379→      <Card className="glass-card h-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+   380→        <CardContent className="p-4 h-full flex flex-col">
+   381→          {/* Header */}
+   382→          <div className="flex items-start justify-between mb-3">
+   383→            <motion.div
+   384→              whileHover={{ scale: 1.1, rotate: 5 }}
+   385→              className={cn(
+   386→                "size-10 rounded-lg flex items-center justify-center shrink-0",
+   387→                "bg-gradient-to-br shadow-sm"
+   388→              )}
+   389→              style={{
+   390→                background: `linear-gradient(135deg, ${category?.color || "#64748B"}15, ${category?.color || "#64748B"}30)`,
+   391→                color: category?.color || "#64748B",
+   392→              }}
+   393→            >
+   394→              <Icon className="size-5" />
+   395→            </motion.div>
+   396→            <div className="flex items-center gap-1">
+   397→              <StatusIcon status={tool.status} />
+   398→              <TooltipProvider>
+   399→                <Tooltip>
+   400→                  <TooltipTrigger asChild>
+   401→                    <Button
+   402→                      variant="ghost"
+   403→                      size="icon"
+   404→                      className={cn(
+   405→                        "size-7 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity",
+   406→                        isFavorite && "opacity-100 text-yellow-500 hover:text-yellow-600"
+   407→                      )}
+   408→                      onClick={(e) => {
+   409→                        e.stopPropagation()
+   410→                        onToggleFavorite()
+   411→                      }}
+   412→                    >
+   413→                      <Heart
+   414→                        className={cn("size-3.5", isFavorite && "fill-current")}
+   415→                      />
+   416→                    </Button>
+   417→                  </TooltipTrigger>
+   418→                  <TooltipContent>
+   419→                    {isFavorite ? "Remove from favorites" : "Add to favorites"}
+   420→                  </TooltipContent>
+   421→                </Tooltip>
+   422→              </TooltipProvider>
+   423→            </div>
+   424→          </div>
+   425→
+   426→          {/* Title & Description */}
+   427→          <div className="flex-1 min-w-0">
+   428→            <h3 className="font-semibold text-sm mb-1.5 group-hover:text-primary transition-colors truncate">
+   429→              {tool.name}
+   430→            </h3>
+   431→            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+   432→              {tool.description}
+   433→            </p>
+   434→          </div>
+   435→
+   436→          {/* Footer */}
+   437→          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+   438→            <Badge
+   439→              variant="secondary"
+   440→              className="text-[10px] font-medium px-1.5 py-0"
+   441→              style={{
+   442→                backgroundColor: `${category?.color || "#64748B"}10`,
+   443→                color: category?.color || "#64748B",
+   444→              }}
+   445→            >
+   446→              {category?.name}
+   447→            </Badge>
+   448→            <Button
+   449→              size="sm"
+   450→              variant="ghost"
+   451→              className="h-7 px-2.5 text-xs gap-1.5"
+   452→              disabled={tool.status !== "available"}
+   453→              onClick={onLaunch}
+   454→            >
+   455→              {tool.status === "available" ? (
+   456→                <>
+   457→                  <Rocket className="size-3" />
+   458→                  Launch
+   459→                </>
+   460→              ) : (
+   461→                "Soon"
+   462→              )}
+   463→            </Button>
+   464→          </div>
+   465→        </CardContent>
+   466→      </Card>
+   467→    </motion.div>
+   468→  )
+   469→}
+   470→
+   471→// ==================== EMPTY STATE COMPONENT ====================
+   472→function EmptyState({
+   473→  type,
+   474→  query,
+   475→}: {
+   476→  type: "no-results" | "no-favorites" | "empty"
+   477→  query?: string
+   478→}) {
+   479→  const configs = {
+   480→    "no-results": {
+   481→      icon: Search,
+   482→      title: "No tools found",
+   483→      description:
+   484→        query && query.length > 0
+   485→          ? `No results for "${query}". Try a different search term or browse categories.`
+   486→          : "No tools match your current filters.",
+   487→    },
+   488→    "no-favorites": {
+   489→      icon: Star,
+   490→      title: "No favorite tools yet",
+   491→      description:
+   492→        "Click the heart icon on any tool to add it to your favorites for quick access.",
+   493→    },
+   494→    empty: {
+   495→      icon: Filter,
+   496→      title: "No tools available",
+   497→      description: "Check back later for new tools and updates.",
+   498→    },
+   499→  }
+   500→
+   501→  const config = configs[type]
+   502→  const Icon = config.icon
+   503→
+   504→  return (
+   505→    <motion.div
+   506→      initial={{ opacity: 0, y: 20 }}
+   507→      animate={{ opacity: 1, y: 0 }}
+   508→      className="flex flex-col items-center justify-center py-16 px-4 text-center"
+   509→    >
+   510→      <div className="size-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+   511→        <Icon className="size-8 text-muted-foreground" />
+   512→      </div>
+   513→      <h3 className="text-lg font-semibold mb-2">{config.title}</h3>
+   514→      <p className="text-sm text-muted-foreground max-w-md">{config.description}</p>
+   515→    </motion.div>
+   516→  )
+   517→}
+   518→
+   519→// ==================== MAIN TOOLS CATALOG COMPONENT ====================
+   520→interface ToolsCatalogProps {
+   521→  onToolSelect?: (toolId: string) => void
+   522→}
+   523→
+   524→export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
+   525→  // State
+   526→  const [isLoading, setIsLoading] = React.useState(true)
+   527→  const [searchQuery, setSearchQuery] = React.useState("")
+   528→  const [viewMode, setViewMode] = React.useState<ViewMode>("grid")
+   529→  const [expandedCategories, setExpandedCategories] = React.useState<
+   530→    Set<string>
+   531→  >(new Set())
+   532→  const [favorites, setFavorites] = React.useState<Set<string>>(new Set())
+   533→  const [activeTab, setActiveTab] = React.useState("all")
+   534→  const [statusFilter, setStatusFilter] = React.useState<ToolStatus | "all">(
+   535→    "all"
+   536→  )
+   537→
+   538→  // Simulate loading
+   539→  React.useEffect(() => {
+   540→    const timer = setTimeout(() => setIsLoading(false), 800)
+   541→    return () => clearTimeout(timer)
+   542→  }, [])
+   543→
+   544→  // Load favorites from localStorage
+   545→  React.useEffect(() => {
+   546→    try {
+   547→      const saved = localStorage.getItem("bioalign-favorites")
+   548→      if (saved) {
+   549→        setFavorites(new Set(JSON.parse(saved)))
+   550→      }
+   551→    } catch (error) {
+   552→      console.error("Failed to load favorites:", error)
+   553→    }
+   554→  }, [])
+   555→
+   556→  // Save favorites to localStorage
+   557→  const saveFavorites = React.useCallback((newFavs: Set<string>) => {
+   558→    setFavorites(newFavs)
+   559→    try {
+   560→      localStorage.setItem(
+   561→        "bioalign-favorites",
+   562→        JSON.stringify(Array.from(newFavs))
+   563→      )
+   564→    } catch (error) {
+   565→      console.error("Failed to save favorites:", error)
+   566→    }
+   567→  }, [])
+   568→
+   569→  // Toggle favorite
+   570→  const toggleFavorite = React.useCallback(
+   571→    (toolId: string) => {
+   572→      const newFavs = new Set(favorites)
+   573→      if (newFavs.has(toolId)) {
+   574→        newFavs.delete(toolId)
+   575→      } else {
+   576→        newFavs.add(toolId)
+   577→      }
+   578→      saveFavorites(newFavs)
+   579→    },
+   580→    [favorites, saveFavorites]
+   581→  )
+   582→
+   583→  // Toggle category expansion
+   584→  const toggleCategory = React.useCallback((categoryId: string) => {
+   585→    setExpandedCategories((prev) => {
+   586→      const next = new Set(prev)
+   587→      if (next.has(categoryId)) {
+   588→        next.delete(categoryId)
+   589→      } else {
+   590→        next.add(categoryId)
+   591→      }
+   592→      return next
+   593→    })
+   594→  }, [])
+   595→
+   596→  // Get filtered tools
+   597→  const getFilteredTools = React.useCallback((): BioTool[] => {
+   598→    let tools: BioTool[]
+   599→
+   600→    switch (activeTab) {
+   601→      case "recent":
+   602→        tools = recentlyUsedTools
+   603→        break
+   604→      case "favorites":
+   605→        tools = getAllTools().filter((t) => favorites.has(t.id))
+   606→        break
+   607→      case "popular":
+   608→        tools = popularTools
+   609→        break
+   610→      default:
+   611→        tools = getAllTools()
+   612→    }
+   613→
+   614→    // Apply search filter
+   615→    if (searchQuery.trim()) {
+   616→      tools = searchTools(searchQuery.trim())
+   617→    }
+   618→
+   619→    // Apply status filter
+   620→    if (statusFilter !== "all") {
+   621→      tools = tools.filter((t) => t.status === statusFilter)
+   622→    }
+   623→
+   624→    // Apply tab-specific filtering
+   625→    if (activeTab === "favorites") {
+   626→      tools = tools.filter((t) => favorites.has(t.id))
+   627→    }
+   628→
+   629→    return tools
+   630→  }, [searchQuery, activeTab, statusFilter, favorites])
+   631→
+   632→  // Get filtered categories
+   633→  const getFilteredCategories = React.useCallback((): ToolCategory[] => {
+   634→    if (!searchQuery.trim() && statusFilter === "all") {
+   635→      return toolCategories
+   636→    }
+   637→
+   638→    return toolCategories
+   639→      .map((cat) => ({
+   640→        ...cat,
+   641→        tools: cat.tools.filter((tool) => {
+   642→          const matchesSearch =
+   643→            !searchQuery.trim() ||
+   644→            tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+   645→            tool.description
+   646→              .toLowerCase()
+   647→              .includes(searchQuery.toLowerCase())
+   648→          const matchesStatus =
+   649→            statusFilter === "all" || tool.status === statusFilter
+   650→          return matchesSearch && matchesStatus
+   651→        }),
+   652→      }))
+   653→      .filter((cat) => cat.tools.length > 0)
+   654→  }, [searchQuery, statusFilter])
+   655→
+   656→  // Handle tool launch
+   657→  const handleLaunch = React.useCallback((tool: BioTool) => {
+   658→    console.log(`Launching tool: ${tool.name} (${tool.id})`)
+   659→    // Call the parent's onToolSelect callback if provided
+   660→    if (onToolSelect) {
+   661→      onToolSelect(tool.id)
+   662→    }
+   663→  }, [onToolSelect])
+   664→
+   665→  // Clear search
+   666→  const clearSearch = React.useCallback(() => {
+   667→    setSearchQuery("")
+   668→  }, [])
+   669→
+   670→  // Render loading state
+   671→  if (isLoading) {
+   672→    return (
+   673→      <div className="space-y-6 p-6">
+   674→        {/* Header skeleton */}
+   675→        <div className="space-y-4">
+   676→          <Skeleton className="h-10 w-72" />
+   677→          <Skeleton className="h-14 w-full max-w-2xl" />
+   678→        </div>
+   679→        {/* Categories grid skeleton */}
+   680→        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+   681→          {Array.from({ length: 6 }).map((_, i) => (
+   682→            <CategoryCardSkeleton key={i} />
+   683→          ))}
+   684→        </div>
+   685→      </div>
+   686→    )
+   687→  }
+   688→
+   689→  const filteredCategories = getFilteredCategories()
+   690→  const filteredTools = getFilteredTools()
+   691→
+   692→  return (
+   693→    <TooltipProvider delayDuration={200}>
+   694→      <div className="space-y-6">
+   695→        {/* ==================== HEADER SECTION ==================== */}
+   696→        <div className="space-y-4">
+   697→          {/* Title */}
+   698→          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+   699→            <div>
+   700→              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+   701→                Tools Catalog
+   702→              </h1>
+   703→              <p className="text-muted-foreground mt-1">
+   704→                {getAllTools().length} bioinformatics tools across{" "}
+   705→                {toolCategories.length} categories
+   706→              </p>
+   707→            </div>
+   708→            <div className="flex items-center gap-2">
+   709→              {/* View Mode Toggle */}
+   710→              <div className="flex items-center bg-muted rounded-lg p-1">
+   711→                <Button
+   712→                  variant={viewMode === "grid" ? "default" : "ghost"}
+   713→                  size="sm"
+   714→                  className="size-8 p-0"
+   715→                  onClick={() => setViewMode("grid")}
+   716→                >
+   717→                  <Grid3X3 className="size-4" />
+   718→                </Button>
+   719→                <Button
+   720→                  variant={viewMode === "list" ? "default" : "ghost"}
+   721→                  size="sm"
+   722→                  className="size-8 p-0"
+   723→                  onClick={() => setViewMode("list")}
+   724→                >
+   725→                  <List className="size-4" />
+   726→                </Button>
+   727→              </div>
+   728→            </div>
+   729→          </div>
+   730→
+   731→          {/* Search Bar */}
+   732→          <div className="relative max-w-2xl">
+   733→            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+   734→            <Input
+   735→              placeholder="Search tools by name, description, or tags..."
+   736→              value={searchQuery}
+   737→              onChange={(e) => setSearchQuery(e.target.value)}
+   738→              className="pl-10 pr-10 h-11 bg-background/50 backdrop-blur-sm"
+   739→            />
+   740→            {searchQuery && (
+   741→              <Button
+   742→                variant="ghost"
+   743→                size="icon"
+   744→                className="absolute right-1 top-1/2 -translate-y-1/2 size-8"
+   745→                onClick={clearSearch}
+   746→              >
+   747→                <X className="size-4" />
+   748→              </Button>
+   749→            )}
+   750→          </div>
+   751→
+   752→          {/* Filters Row */}
+   753→          <div className="flex flex-wrap items-center gap-3">
+   754→            {/* Status Filter */}
+   755→            <div className="flex items-center gap-2">
+   756→              <Filter className="size-4 text-muted-foreground" />
+   757→              <select
+   758→                value={statusFilter}
+   759→                onChange={(e) =>
+   760→                  setStatusFilter(e.target.value as ToolStatus | "all")
+   761→                }
+   762→                className="bg-background border border-input rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+   763→              >
+   764→                <option value="all">All Status</option>
+   765→                <option value="available">Available</option>
+   766→                <option value="beta">Beta</option>
+   767→                <option value="coming-soon">Coming Soon</option>
+   768→              </select>
+   769→            </div>
+   770→
+   771→            {/* Active Filters Display */}
+   772→            {(statusFilter !== "all" || searchQuery) && (
+   773→              <div className="flex items-center gap-2">
+   774→                {statusFilter !== "all" && (
+   775→                  <Badge
+   776→                    variant="secondary"
+   777→                    className="gap-1 cursor-pointer"
+   778→                    onClick={() => setStatusFilter("all")}
+   779→                  >
+   780→                    Status: {statusFilter}
+   781→                    <X className="size-3" />
+   782→                  </Badge>
+   783→                )}
+   784→                {searchQuery && (
+   785→                  <Badge
+   786→                    variant="secondary"
+   787→                    className="gap-1 cursor-pointer"
+   788→                    onClick={clearSearch}
+   789→                  >
+   790→                    Search: {searchQuery}
+   791→                    <X className="size-3" />
+   792→                  </Badge>
+   793→                )}
+   794→              </div>
+   795→            )}
+   796→
+   797→            {/* Results Count */}
+   798→            <span className="ml-auto text-sm text-muted-foreground">
+   799→              {filteredTools.length} tool{filteredTools.length !== 1 ? "s" : ""}{" "}
+   800→              found
+   801→            </span>
+   802→          </div>
+   803→        </div>
+   804→
+   805→        {/* ==================== TABS SECTION ==================== */}
+   806→        <Tabs value={activeTab} onValueChange={setActiveTab}>
+   807→          <TabsList className="bg-muted/50">
+   808→            <TabsTrigger value="all" className="gap-1.5">
+   809→              <Grid3X3 className="size-4" />
+   810→              All Tools
+   811→            </TabsTrigger>
+   812→            <TabsTrigger value="recent" className="gap-1.5">
+   813→              <Clock className="size-4" />
+   814→              Recent
+   815→            </TabsTrigger>
+   816→            <TabsTrigger value="favorites" className="gap-1.5">
+   817→              <Star className="size-4" />
+   818→              Favorites
+   819→              {favorites.size > 0 && (
+   820→                <span className="size-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">
+   821→                  {favorites.size}
+   822→                </span>
+   823→              )}
+   824→            </TabsTrigger>
+   825→            <TabsTrigger value="popular" className="gap-1.5">
+   826→              <Sparkles className="size-4" />
+   827→              Popular
+   828→            </TabsTrigger>
+   829→          </TabsList>
+   830→
+   831→          {/* ==================== CONTENT SECTIONS ==================== */}
+   832→          <TabsContent value="all" className="mt-6 space-y-6">
+   833→            {/* Categories Grid */}
+   834→            {!searchQuery.trim() && statusFilter === "all" ? (
+   835→              <>
+   836→                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+   837→                  <AnimatePresence mode="popLayout">
+   838→                    {filteredCategories.map((category) => (
+   839→                      <CategoryCard
+   840→                        key={category.id}
+   841→                        category={category}
+   842→                        isExpanded={expandedCategories.has(category.id)}
+   843→                        onToggle={() => toggleCategory(category.id)}
+   844→                        onClick={() =>
+   845→                          setActiveTab(`category-${category.id}`)
+   846→                        }
+   847→                      />
+   848→                    ))}
+   849→                  </AnimatePresence>
+   850→                </div>
+   851→
+   852→                {/* Expanded Category Tools */}
+   853→                <AnimatePresence>
+   854→                  {Array.from(expandedCategories).map((categoryId) => {
+   855→                    const category = toolCategories.find(
+   856→                      (c) => c.id === categoryId
+   857→                    )
+   858→                    if (!category) return null
+   859→
+   860→                    return (
+   861→                      <motion.div
+   862→                        key={`expanded-${categoryId}`}
+   863→                        initial={{ opacity: 0, height: 0 }}
+   864→                        animate={{ opacity: 1, height: "auto" }}
+   865→                        exit={{ opacity: 0, height: 0 }}
+   866→                        transition={{ duration: 0.3 }}
+   867→                        className="overflow-hidden"
+   868→                      >
+   869→                        <div className="flex items-center gap-3 mb-4">
+   870→                          <div
+   871→                            className="w-1 h-6 rounded-full"
+   872→                            style={{ backgroundColor: category.color }}
+   873→                          />
+   874→                          <h2 className="text-lg font-semibold">
+   875→                            {category.name} Tools
+   876→                          </h2>
+   877→                          <Badge variant="secondary">{category.tools.length}</Badge>
+   878→                          <Button
+   879→                            variant="ghost"
+   880→                            size="sm"
+   881→                            className="ml-auto"
+   882→                            onClick={() => toggleCategory(categoryId)}
+   883→                          >
+   884→                            Collapse
+   885→                          </Button>
+   886→                        </div>
+   887→                        <div
+   888→                          className={
+   889→                            viewMode === "grid"
+   890→                              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+   891→                              : "space-y-2"
+   892→                          }
+   893→                        >
+   894→                          <AnimatePresence mode="popLayout">
+   895→                            {category.tools.map((tool) => (
+   896→                              <ToolCard
+   897→                                key={tool.id}
+   898→                                tool={tool}
+   899→                                viewMode={viewMode}
+   900→                                isFavorite={favorites.has(tool.id)}
+   901→                                onToggleFavorite={() => toggleFavorite(tool.id)}
+   902→                                onLaunch={() => handleLaunch(tool)}
+   903→                              />
+   904→                            ))}
+   905→                          </AnimatePresence>
+   906→                        </div>
+   907→                      </motion.div>
+   908→                    )
+   909→                  })}
+   910→                </AnimatePresence>
+   911→              </>
+   912→            ) : (
+   913→              /* Filtered Results */
+   914→              <div
+   915→                className={
+   916→                  viewMode === "grid"
+   917→                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+   918→                    : "space-y-2"
+   919→                }
+   920→              >
+   921→                <AnimatePresence mode="popLayout">
+   922→                  {filteredTools.length > 0 ? (
+   923→                    filteredTools.map((tool) => (
+   924→                      <ToolCard
+   925→                        key={tool.id}
+   926→                        tool={tool}
+   927→                        viewMode={viewMode}
+   928→                        isFavorite={favorites.has(tool.id)}
+   929→                        onToggleFavorite={() => toggleFavorite(tool.id)}
+   930→                        onLaunch={() => handleLaunch(tool)}
+   931→                      />
+   932→                    ))
+   933→                  ) : (
+   934→                    <div className="col-span-full">
+   935→                      <EmptyState type="no-results" query={searchQuery} />
+   936→                    </div>
+   937→                  )}
+   938→                </AnimatePresence>
+   939→              </div>
+   940→            )}
+   941→          </TabsContent>
+   942→
+   943→          {/* Recent Tab */}
+   944→          <TabsContent value="recent" className="mt-6">
+   945→            <div
+   946→              className={
+   947→                viewMode === "grid"
+   948→                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+   949→                  : "space-y-2"
+   950→              }
+   951→            >
+   952→              <AnimatePresence mode="popLayout">
+   953→                {recentlyUsedTools.length > 0 ? (
+   954→                  recentlyUsedTools.map((tool) => (
+   955→                    <ToolCard
+   956→                      key={tool.id}
+   957→                      tool={tool}
+   958→                      viewMode={viewMode}
+   959→                      isFavorite={favorites.has(tool.id)}
+   960→                      onToggleFavorite={() => toggleFavorite(tool.id)}
+   961→                      onLaunch={() => handleLaunch(tool)}
+   962→                    />
+   963→                  ))
+   964→                ) : (
+   965→                  <EmptyState type="empty" />
+   966→                )}
+   967→              </AnimatePresence>
+   968→            </div>
+   969→          </TabsContent>
+   970→
+   971→          {/* Favorites Tab */}
+   972→          <TabsContent value="favorites" className="mt-6">
+   973→            <div
+   974→              className={
+   975→                viewMode === "grid"
+   976→                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+   977→                  : "space-y-2"
+   978→              }
+   979→            >
+   980→              <AnimatePresence mode="popLayout">
+   981→                {filteredTools.length > 0 ? (
+   982→                  filteredTools.map((tool) => (
+   983→                    <ToolCard
+   984→                      key={tool.id}
+   985→                      tool={tool}
+   986→                      viewMode={viewMode}
+   987→                      isFavorite={true}
+   988→                      onToggleFavorite={() => toggleFavorite(tool.id)}
+   989→                      onLaunch={() => handleLaunch(tool)}
+   990→                    />
+   991→                  ))
+   992→                ) : (
+   993→                  <EmptyState type="no-favorites" />
+   994→                )}
+   995→              </AnimatePresence>
+   996→            </div>
+   997→          </TabsContent>
+   998→
+   999→          {/* Popular Tab */}
+  1000→          <TabsContent value="popular" className="mt-6">
+  1001→            <div
+  1002→              className={
+  1003→                viewMode === "grid"
+  1004→                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+  1005→                  : "space-y-2"
+  1006→              }
+  1007→            >
+  1008→              <AnimatePresence mode="popLayout">
+  1009→                {popularTools.map((tool) => (
+  1010→                  <ToolCard
+  1011→                    key={tool.id}
+  1012→                    tool={tool}
+  1013→                    viewMode={viewMode}
+  1014→                    isFavorite={favorites.has(tool.id)}
+  1015→                    onToggleFavorite={() => toggleFavorite(tool.id)}
+  1016→                    onLaunch={() => handleLaunch(tool)}
+  1017→                  />
+  1018→                ))}
+  1019→              </AnimatePresence>
+  1020→            </div>
+  1021→          </TabsContent>
+  1022→
+  1023→          {/* Individual Category Tabs (generated dynamically) */}
+  1024→          {toolCategories.map((category) => (
+  1025→            <TabsContent
+  1026→              key={category.id}
+  1027→              value={`category-${category.id}`}
+  1028→              className="mt-6"
+  1029→            >
+  1030→              {/* Category Header */}
+  1031→              <div className="flex items-center gap-4 mb-6 pb-4 border-b">
+  1032→                <div
+  1033→                  className="size-12 rounded-xl flex items-center justify-center"
+  1034→                  style={{
+  1035→                    background: `linear-gradient(135deg, ${category.color}20, ${category.color}40)`,
+  1036→                    color: category.color,
+  1037→                  }}
+  1038→                >
+  1039→                  <category.icon className="size-6" />
+  1040→                </div>
+  1041→                <div className="flex-1">
+  1042→                  <h2 className="text-xl font-bold">{category.name}</h2>
+  1043→                  <p className="text-sm text-muted-foreground">
+  1044→                    {category.description}
+  1045→                  </p>
+  1046→                </div>
+  1047→                <Badge
+  1048→                  variant="secondary"
+  1049→                  className="text-sm"
+  1050→                  style={{
+  1051→                    backgroundColor: `${category.color}15`,
+  1052→                    color: category.color,
+  1053→                  }}
+  1054→                >
+  1055→                  {category.tools.length} tools
+  1056→                </Badge>
+  1057→              </div>
+  1058→
+  1059→              {/* Tools Grid/List */}
+  1060→              <div
+  1061→                className={
+  1062→                  viewMode === "grid"
+  1063→                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+  1064→                    : "space-y-2"
+  1065→                }
+  1066→              >
+  1067→                <AnimatePresence mode="popLayout">
+  1068→                  {category.tools.map((tool) => (
+  1069→                    <ToolCard
+  1070→                      key={tool.id}
+  1071→                      tool={tool}
+  1072→                      viewMode={viewMode}
+  1073→                      isFavorite={favorites.has(tool.id)}
+  1074→                      onToggleFavorite={() => toggleFavorite(tool.id)}
+  1075→                      onLaunch={() => handleLaunch(tool)}
+  1076→                    />
+  1077→                  ))}
+  1078→                </AnimatePresence>
+  1079→              </div>
+  1080→            </TabsContent>
+  1081→          ))}
+  1082→        </Tabs>
+  1083→      </div>
+  1084→    </TooltipProvider>
+  1085→  )
+  1086→}
+  1087→
