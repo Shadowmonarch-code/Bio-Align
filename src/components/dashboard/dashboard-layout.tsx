@@ -3,6 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
+import { useSession, signOut } from "next-auth/react"
 import {
   Search,
   Bell,
@@ -428,46 +429,68 @@ function NotificationBell() {
   )
 }
 
-// User Menu Component
-function UserMenu() {
+// User Menu Component with session support
+function UserMenu({ onNavigate }: { onNavigate?: (view: string) => void }) {
+  const { data: session } = useSession()
+  
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (session?.user?.name) {
+      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    }
+    if (session?.user?.email) {
+      return session.user.email[0].toUpperCase()
+    }
+    return 'BA'
+  }
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' })
+  }
+
+  // Get display name
+  const displayName = session?.user?.name || 'BioAlign User'
+  const displayEmail = session?.user?.email || 'user@bioalign.io'
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3">
+        <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3 cursor-pointer">
           <Avatar className="size-7 ring-2 ring-biored/20">
-            <AvatarImage src="/avatars/user.svg" alt="User" />
+            <AvatarImage src={session?.user?.image || "/avatars/user.svg"} alt="User" />
             <AvatarFallback className="bg-biored/10 text-biored text-xs font-medium">
-              BA
+              {getUserInitials()}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline-flex text-sm font-medium">User</span>
+          <span className="hidden md:inline-flex text-sm font-medium">{displayName.split(' ')[0]}</span>
           <ChevronRight className="size-3.5 rotate-90 text-muted-foreground hidden md:block" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">BioAlign User</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@bioalign.io
+              {displayEmail}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onNavigate?.('settings')} className="cursor-pointer">
           <User className="mr-2 size-4" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onNavigate?.('settings')} className="cursor-pointer">
           <Settings className="mr-2 size-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => window.open('https://github.com/toufikmahata/BioAlign/issues', '_blank')} className="cursor-pointer">
           <HelpCircle className="mr-2 size-4" />
           Help & Support
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
+        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 size-4" />
           Log out
         </DropdownMenuItem>
@@ -484,6 +507,7 @@ function Header({
   actions,
   breadcrumbs = [],
   onSearchNavigate,
+  onNavigate,
 }: {
   onMobileMenuClick: () => void
   title?: string
@@ -491,6 +515,7 @@ function Header({
   actions?: React.ReactNode
   breadcrumbs?: Array<{ label: string; href?: string }>
   onSearchNavigate?: (view: string, toolId?: string) => void
+  onNavigate?: (view: string) => void
 }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 sm:px-6 lg:px-8">
@@ -498,7 +523,7 @@ function Header({
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden size-9"
+        className="md:hidden size-9 cursor-pointer"
         onClick={onMobileMenuClick}
       >
         <Menu className="size-5" />
@@ -519,7 +544,7 @@ function Header({
         <ThemeToggle />
         <NotificationBell />
         <Separator orientation="vertical" className="mx-1 h-6 hidden sm:block" />
-        <UserMenu />
+        <UserMenu onNavigate={onNavigate} />
       </div>
     </header>
   )
@@ -575,6 +600,7 @@ export default function DashboardLayout({
             onMobileMenuClick={sidebarState.toggle}
             title={title}
             subtitle={subtitle}
+            onNavigate={onSidebarNavigate}
             actions={actions}
             breadcrumbs={displayBreadcrumbs}
             onSearchNavigate={onSidebarNavigate}

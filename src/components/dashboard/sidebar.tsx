@@ -4,6 +4,7 @@ import * as React from "react"
 import { ChevronRight, ChevronLeft } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -127,6 +128,22 @@ function SidebarContent({
   setToolsOpen: (open: boolean) => void
   onNavigate?: (view: string, toolId?: string) => void
 }) {
+  const { data: session } = useSession()
+  
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (session?.user?.name) {
+      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    }
+    if (session?.user?.email) {
+      return session.user.email[0].toUpperCase()
+    }
+    return 'BA'
+  }
+  
+  // Get display name and email
+  const displayName = session?.user?.name || 'BioAlign User'
+  const displayEmail = session?.user?.email || 'user@bioalign.io'
   // Handle navigation click
   const handleNavClick = React.useCallback(
     (href: string) => {
@@ -318,9 +335,9 @@ function SidebarContent({
         collapsed ? "justify-center" : "gap-3"
       )}>
         <Avatar className="size-9 ring-2 ring-biored/20">
-          <AvatarImage src="/avatars/user.svg" alt="User" />
+          <AvatarImage src={session?.user?.image || "/avatars/user.svg"} alt="User" />
           <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
-            BA
+            {getUserInitials()}
           </AvatarFallback>
         </Avatar>
         <AnimatePresence mode="wait">
@@ -333,8 +350,8 @@ function SidebarContent({
               className="overflow-hidden whitespace-nowrap"
             >
               <div className="flex flex-col">
-                <span className="text-sm font-medium leading-none">BioAlign User</span>
-                <span className="text-xs text-muted-foreground mt-0.5">user@bioalign.io</span>
+                <span className="text-sm font-medium leading-none">{displayName}</span>
+                <span className="text-xs text-muted-foreground mt-0.5">{displayEmail}</span>
               </div>
             </motion.div>
           )}
