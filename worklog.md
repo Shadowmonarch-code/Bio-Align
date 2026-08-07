@@ -269,3 +269,42 @@ Stage Summary:
   - Clickable links to external databases
 - **Server running** on port 3000
 - **Lint passes** with no errors
+
+---
+Task ID: 5
+Agent: Main Developer (Full Stack)
+Task: Fix search, update address, change vision name, remove journey section
+
+Work Log:
+
+1. **Fixed Header Search Functionality** (`src/components/landing/navbar.tsx`):
+   - Added backdrop overlay when search is open (click to close)
+   - Increased z-index to z-[60] for proper visibility
+   - Added spring animation for smoother open/close
+   - Added rounded corners and shadow for better visual design
+   - Added search header with title and close button
+   - Increased search input size (h-14) with better focus styling
+   - Added Escape key to close search
+   - Added "Popular searches" quick buttons (BLAST, Genome, Protein, etc.)
+   - Added "No results found" state with suggestions
+   - Shows count of matching databases
+   - Auto-closes search after clicking a database link
+
+2. **Updated Address** (Pusa is in Bihar, NOT Delhi):
+   - `src/components/landing/about-creator.tsx`: Changed "CBSH, RPCAU (Pusa, New Delhi)" → "CBSH, RPCAU (Pusa, Samastipur, Bihar)"
+   - `src/components/landing/navbar.tsx`: Updated contact modal address
+
+3. **Changed "HelixX Vision" to "BioAlign Vision"**:
+   - `src/components/landing/about-creator.tsx`: Updated section heading
+
+4. **Removed Journey Section**:
+   - Removed entire Timeline/Journey section from About Creator page
+   - Removed unused `achievements` array
+   - Page now flows: Hero → About Me → Interests → Contact CTA
+
+Stage Summary:
+- **Search now fully functional** with improved UI
+- **Address corrected**: Pusa, Samastipur, Bihar
+- **Vision renamed**: BioAlign Vision (not HelixX)
+- **Journey section removed**
+- Server running, lint passes

@@ -688,75 +688,131 @@ export default function Navbar({ onNavigate }: NavbarProps) {
       {/* Global Database Search Dropdown */}
       <AnimatePresence>
         {showSearch && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b shadow-lg"
-          >
-            <div className="max-w-4xl mx-auto p-4">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 size-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search databases (NCBI, UniProt, PDB, PubMed...)"
-                  value={searchQuery}
-                  onChange={(e) => handleDatabaseSearch(e.target.value)}
-                  className="pl-12 pr-4 py-3 text-base h-12"
-                  autoFocus
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowSearch(false)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
-              
-              {/* Search Results / Quick Access */}
-              <div className="mt-4">
-                {searchQuery.length > 0 ? (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Matching Databases:</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {searchResults.map((db) => (
-                        <button
-                          key={db.id}
-                          onClick={() => openDatabaseLink(db.url, db.name)}
-                          className="flex items-center gap-3 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer text-left"
-                        >
-                          <div className={`w-3 h-3 rounded-full ${db.color}`} />
-                          <div>
-                            <p className="font-medium text-sm">{db.name}</p>
-                            <p className="text-xs text-muted-foreground">{db.description}</p>
-                          </div>
-                          <ExternalLink className="size-3 ml-auto text-muted-foreground" />
-                        </button>
-                      ))}
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              onClick={() => setShowSearch(false)}
+            />
+            
+            {/* Search Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="fixed top-16 left-0 right-0 z-[60] bg-background/98 backdrop-blur-xl border-b shadow-2xl rounded-b-2xl mx-4 mt-2 max-w-[calc(100vw-2rem)]"
+            >
+              <div className="max-w-4xl mx-auto p-5">
+                {/* Search Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <Search className="size-5 text-biored" />
+                    Search Biological Databases
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSearch(false)}
+                    className="cursor-pointer hover:bg-muted"
+                  >
+                    <X className="size-5" />
+                  </Button>
+                </div>
+                
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 size-5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Type to search... (NCBI, UniProt, PDB, PubMed, KEGG...)"
+                    value={searchQuery}
+                    onChange={(e) => handleDatabaseSearch(e.target.value)}
+                    className="pl-12 pr-4 py-3 text-base h-14 border-2 focus:border-biored/50"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setShowSearch(false);
+                    }}
+                  />
+                </div>
+                
+                {/* Search Results / Quick Access */}
+                <div className="mt-4 max-h-[400px] overflow-y-auto">
+                  {searchQuery.length > 0 ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3 font-medium">
+                        {searchResults.length} database{searchResults.length !== 1 ? 's' : ''} found:
+                      </p>
+                      {searchResults.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {searchResults.map((db) => (
+                            <button
+                              key={db.id}
+                              onClick={() => {
+                                openDatabaseLink(db.url, db.name);
+                                setShowSearch(false);
+                              }}
+                              className="flex items-center gap-3 p-4 rounded-xl border-2 hover:border-biored/50 hover:bg-biored/5 transition-all cursor-pointer text-left group"
+                            >
+                              <div className={`w-4 h-4 rounded-full ${db.color} group-hover:scale-110 transition-transform`} />
+                              <div className="flex-1">
+                                <p className="font-semibold text-sm group-hover:text-biored transition-colors">{db.name}</p>
+                                <p className="text-xs text-muted-foreground">{db.description}</p>
+                              </div>
+                              <ExternalLink className="size-4 text-muted-foreground group-hover:text-biored transition-colors" />
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">No databases match your search</p>
+                          <p className="text-sm text-muted-foreground mt-1">Try: NCBI, UniProt, PDB, Ensembl, KEGG, PubMed</p>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Quick Access to Biological Databases:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                      {databaseOptions.map((db) => (
-                        <button
-                          key={db.id}
-                          onClick={() => openDatabaseLink(db.url, db.name)}
-                          className="flex flex-col items-center gap-1 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer"
-                        >
-                          <div className={`w-4 h-4 rounded-full ${db.color}`} />
-                          <span className="text-xs font-medium">{db.name}</span>
-                        </button>
-                      ))}
+                  ) : (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3 font-medium">Quick Access to Databases:</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {databaseOptions.map((db) => (
+                          <button
+                            key={db.id}
+                            onClick={() => {
+                              openDatabaseLink(db.url, db.name);
+                              setShowSearch(false);
+                            }}
+                            className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 hover:border-biored/50 hover:bg-biored/5 transition-all cursor-pointer group"
+                          >
+                            <div className={`w-6 h-6 rounded-full ${db.color} group-hover:scale-110 transition-transform`} />
+                            <span className="text-xs font-medium text-center group-hover:text-biored transition-colors">{db.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {/* Popular Searches */}
+                      <div className="mt-4 pt-4 border-t">
+                        <p className="text-xs text-muted-foreground mb-2">Popular searches:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {['BLAST', 'Genome', 'Protein', 'Structure', 'Pathway'].map((term) => (
+                            <button
+                              key={term}
+                              onClick={() => handleDatabaseSearch(term)}
+                              className="px-3 py-1 text-xs bg-muted hover:bg-biored/10 hover:text-biored rounded-full transition-colors cursor-pointer"
+                            >
+                              {term}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -944,7 +1000,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
               <div className="p-4 rounded-lg bg-muted/50 border border-border">
                 <p className="text-sm text-muted-foreground text-center">
                   🕐 Available Monday-Friday, 9 AM - 6 PM IST<br/>
-                  📍 CBSH, RPCAU, Pusa, New Delhi
+                  📍 CBSH, RPCAU, Pusa, Samastipur, Bihar
                 </p>
               </div>
 

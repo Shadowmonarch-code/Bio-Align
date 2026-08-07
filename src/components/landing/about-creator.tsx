@@ -34,13 +34,6 @@ const interests = [
   { icon: BookOpen, label: 'Scientific Communication', color: 'text-yellow-600' },
 ];
 
-// Timeline/Achievements
-const achievements = [
-  { year: '2024', title: 'BioAlign Platform', desc: 'Launched comprehensive bioinformatics platform' },
-  { year: '2024', title: 'CBSH, RPCAU', desc: 'Biotechnology undergraduate research' },
-  { year: '2023', title: 'AI Integration', desc: 'Started building AI-powered bio tools' },
-];
-
 interface AboutProps {
   onBack?: () => void;
 }
@@ -108,7 +101,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
                 Biotechnology Undergraduate • Bioinformatician • AI Enthusiast
               </p>
               <p className="text-white/70 max-w-xl">
-                CBSH, RPCAU (Pusa, New Delhi)
+                CBSH, RPCAU (Pusa, Samastipur, Bihar)
               </p>
               
               {/* Social Links */}
@@ -162,7 +155,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
               <div className="bg-gradient-to-r from-biored/10 to-purple-500/10 border border-biored/20 rounded-xl p-6 my-8">
                 <h3 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
                   <Sparkles className="size-5 text-biored" />
-                  HelixX Vision
+                  BioAlign Vision
                 </h3>
                 <p className="text-foreground/80">
                   <strong>BioAlign</strong> is my vision of a unified platform where biological data analysis, AI-assisted research, and modern computational workflows come together in one intelligent ecosystem. Rather than forcing researchers to navigate dozens of disconnected tools, BioAlign aims to provide a seamless environment for genomic analysis, protein studies, structural biology, drug discovery, systems biology, and many other areas of biotechnology.
@@ -212,47 +205,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           </div>
         </motion.section>
 
-        {/* Timeline */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-2xl font-bold mb-6 text-center">Journey</h2>
-          
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-border md:-translate-x-px" />
-            
-            <div className="space-y-8">
-              {achievements.map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className={`relative flex items-start gap-6 ${
-                    idx % 2 === 0 ? 'md:flex-row-reverse' : ''
-                  }`}
-                >
-                  {/* Dot */}
-                  <div className="absolute left-4 md:left-1/2 w-3 h-3 bg-biored rounded-full mt-2 md:-translate-x-1.5 ring-4 ring-background z-10" />
-                  
-                  {/* Content */}
-                  <div className={`ml-12 md:ml-0 md:w-[calc(50%-2rem)] ${
-                    idx % 2 === 0 ? 'md:text-right' : ''
-                  }`}>
-                    <span className="inline-block px-3 py-1 bg-biored/10 text-biored text-sm font-medium rounded-full mb-2">
-                      {item.year}
-                    </span>
-                    <h3 className="font-bold text-lg">{item.title}</h3>
-                    <p className="text-muted-foreground">{item.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.section>
+
 
         {/* Contact CTA */}
         <motion.section
