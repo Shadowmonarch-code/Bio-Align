@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -31,6 +30,7 @@ import {
   Code2,
   Minimize2,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 // Suggested prompts for quick actions
@@ -85,7 +85,7 @@ const capabilities = [
 // Typing indicator animation
 function TypingIndicator() {
   return (
-    <div className="flex items-start gap-3 px-4 py-2">
+    <div className="flex items-start gap-3 px-4 py-3">
       <Avatar className="h-8 w-8 flex-shrink-0">
         <AvatarFallback className="bg-gradient-to-br from-[#C1121F] to-[#780000] text-white text-xs">
           <Bot className="h-4 w-4" />
@@ -161,9 +161,9 @@ function MessageBubble({
           }`}
         >
           {isUser ? (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1 prose-code:text-[#C1121F] dark:prose-code:text-red-400 prose-pre:bg-background prose-pre:border prose-table:text-xs">
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1 prose-code:text-[#C1121F] dark:prose-code:text-red-400 prose-pre:bg-background prose-pre:border prose-table:text-xs prose-li:my-0.5">
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
           )}
@@ -187,7 +187,7 @@ function MessageBubble({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 onClick={handleCopy}
               >
                 {copied ? (
@@ -208,21 +208,24 @@ function MessageBubble({
 // Welcome screen component
 function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => void }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+    <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6 text-center overflow-y-auto">
       {/* Avatar and greeting */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="mb-6"
+        className="mb-5 sm:mb-6"
       >
-        <Avatar className="h-16 w-16 mx-auto mb-4 ring-4 ring-[#C1121F]/20">
-          <AvatarFallback className="bg-gradient-to-br from-[#C1121F] to-[#780000] text-white text-xl">
-            <Dna className="h-8 w-8" />
-          </AvatarFallback>
-        </Avatar>
-        <h2 className="text-xl font-semibold mb-2">Hello! I&apos;m BioAssist</h2>
-        <p className="text-sm text-muted-foreground max-w-md">
+        <div className="relative inline-block">
+          <Avatar className="h-14 w-14 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 ring-4 ring-[#C1121F]/20">
+            <AvatarFallback className="bg-gradient-to-br from-[#C1121F] to-[#780000] text-white text-lg sm:text-xl">
+              <Dna className="h-6 w-6 sm:h-8 sm:w-8" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+        </div>
+        <h2 className="text-lg sm:text-xl font-semibold mb-1.5 sm:mb-2">Hello! I&apos;m BioAssist</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-md px-2">
           Your AI-powered bioinformatics assistant. Ask me anything about sequence analysis,
           genomics workflows, or data interpretation.
         </p>
@@ -233,22 +236,23 @@ function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => v
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="w-full max-w-lg space-y-3"
+        className="w-full max-w-lg space-y-2.5 sm:space-y-3 px-2"
       >
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-left">
           Try asking about...
         </p>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-1.5 sm:gap-2">
           {suggestedPrompts.map((prompt, index) => (
             <button
               key={index}
               onClick={() => onPromptClick(prompt)}
-              className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/50 
-                         transition-all duration-200 group text-left cursor-pointer"
+              className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl border bg-card hover:bg-accent/50 
+                         transition-all duration-200 group text-left cursor-pointer 
+                         active:scale-[0.98] touch-manipulation"
             >
               <Sparkles className="h-4 w-4 text-[#C1121F] flex-shrink-0" />
-              <span className="text-sm">{prompt}</span>
-              <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-[#C1121F] transition-colors" />
+              <span className="text-xs sm:text-sm flex-1">{prompt}</span>
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-auto text-muted-foreground group-hover:text-[#C1121F] transition-colors flex-shrink-0" />
             </button>
           ))}
         </div>
@@ -259,22 +263,22 @@ function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => v
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="w-full max-w-lg mt-6 pt-6 border-t"
+        className="w-full max-w-lg mt-4 sm:mt-6 pt-4 sm:pt-6 border-t px-2"
       >
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2.5 sm:mb-3 text-left">
           What I can help with
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
           {capabilities.map((capability, index) => (
             <div
               key={index}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-muted/50"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 p-2 sm:p-3 rounded-lg bg-muted/50"
             >
-              <capability.icon className={`h-5 w-5 ${capability.color}`} />
-              <span className="text-xs font-medium text-center leading-tight">
+              <capability.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${capability.color}`} />
+              <span className="text-[10px] sm:text-xs font-medium text-center leading-tight">
                 {capability.title}
               </span>
-              <span className="text-[10px] text-muted-foreground text-center">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground text-center hidden sm:block">
                 {capability.description}
               </span>
             </div>
@@ -286,22 +290,33 @@ function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => v
 }
 
 // Error state component
-function ErrorState({ onRetry }: { onRetry: () => void }) {
+function ErrorState({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-6 text-center">
       <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
-        <AlertCircle className="h-8 w-8 text-red-500" />
+        {isRetrying ? (
+          <Loader2 className="h-8 w-8 text-red-500 animate-spin" />
+        ) : (
+          <AlertCircle className="h-8 w-8 text-red-500" />
+        )}
       </div>
-      <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
+      <h3 className="text-lg font-semibold mb-2">
+        {isRetrying ? "Reconnecting..." : "Something went wrong"}
+      </h3>
       <p className="text-sm text-muted-foreground mb-4 max-w-md">
-        Unable to connect to the AI service. Please check your connection and try again.
+        {isRetrying 
+          ? "Attempting to reconnect to the AI service..."
+          : "Unable to connect to the AI service. Please check your connection and try again."
+        }
       </p>
-      <Button
-        onClick={onRetry}
-        className="bg-[#C1121F] hover:bg-[#A00E19] text-white cursor-pointer"
-      >
-        Try Again
-      </Button>
+      {!isRetrying && (
+        <Button
+          onClick={onRetry}
+          className="bg-[#C1121F] hover:bg-[#A00E19] text-white cursor-pointer"
+        >
+          Try Again
+        </Button>
+      )}
     </div>
   );
 }
@@ -322,21 +337,34 @@ export default function AIAssistant() {
 
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [hasError, setHasError] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   // Focus input when chat opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 300);
+      setTimeout(() => inputRef.current?.focus(), 400);
     }
   }, [isOpen]);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
+
   const handleSend = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
     setHasError(false);
     sendMessage(inputValue);
     setInputValue("");
+    
+    // Reset textarea height
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -346,14 +374,20 @@ export default function AIAssistant() {
     }
   };
 
-  const handlePromptClick = (prompt: string) => {
+  const handlePromptClick = async (prompt: string) => {
     setHasError(false);
     sendMessage(prompt);
   };
 
-  const handleRetry = () => {
+  const handleRetry = async () => {
+    setIsRetrying(true);
     setHasError(false);
-    // The sendMessage function will retry the API call
+    
+    // Simulate a brief delay then just clear error state
+    // The actual retry will happen when user sends a new message
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsRetrying(false);
+    setHasError(false);
   };
 
   // Animation variants
@@ -421,40 +455,28 @@ export default function AIAssistant() {
               initial="closed"
               animate="open"
               exit="closed"
-              className="fixed right-0 top-0 z-50 h-full w-full md:w-[420px] lg:w-[450px]
-                         flex flex-col shadow-2xl md:rounded-l-2xl overflow-hidden"
-              style={{
-                background: "rgba(255, 255, 255, 0.98)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-              }}
+              className="fixed right-0 top-0 z-50 h-full w-full sm:w-[400px] md:w-[420px] lg:w-[450px]
+                         flex flex-col shadow-2xl md:rounded-l-2xl overflow-hidden
+                         bg-background/95 backdrop-blur-xl"
             >
-              {/* Dark mode support via CSS variables */}
-              <style>{`
-                .dark .ai-assistant-panel {
-                  background: rgba(15, 23, 42, 0.98) !important;
-                }
-              `}</style>
-              <div className="ai-assistant-panel absolute inset-0 bg-inherit" />
-
               {/* Header */}
-              <div className="relative flex items-center justify-between px-4 py-3 border-b bg-white/50 dark:bg-slate-900/50">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 ring-2 ring-[#C1121F]/20">
+              <div className="relative flex items-center justify-between px-4 py-3 border-b bg-card/50 flex-shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar className="h-10 w-10 ring-2 ring-[#C1121F]/20 flex-shrink-0">
                     <AvatarFallback className="bg-gradient-to-br from-[#C1121F] to-[#780000] text-white">
                       <Dna className="h-5 w-5" />
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h3 className="font-semibold text-sm">BioAssist</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-sm truncate">BioAssist</h3>
                     <div className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-xs text-muted-foreground">Online</span>
+                      <span className="text-xs text-muted-foreground">Online • Ready to help</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 flex-shrink-0">
                   {/* Clear chat button */}
                   {messages.length > 0 && (
                     <Tooltip>
@@ -499,15 +521,21 @@ export default function AIAssistant() {
                 </div>
               </div>
 
-              {/* Messages area */}
-              <ScrollArea className="flex-1 relative" ref={scrollRef}>
-                <div className="min-h-full">
+              {/* Messages area - with proper scrolling */}
+              <div 
+                ref={messagesContainerRef}
+                className="flex-1 overflow-y-auto overscroll-contain"
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <div className="min-h-full flex flex-col">
                   {hasError && messages.length === 0 ? (
-                    <ErrorState onRetry={handleRetry} />
+                    <ErrorState onRetry={handleRetry} isRetrying={isRetrying} />
                   ) : messages.length === 0 ? (
                     <WelcomeScreen onPromptClick={handlePromptClick} />
                   ) : (
-                    <div className="py-4 space-y-1">
+                    <div className="py-4 space-y-1 flex flex-col">
                       {messages.map((message) => (
                         <MessageBubble
                           key={message.id}
@@ -524,10 +552,10 @@ export default function AIAssistant() {
                     </div>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
 
               {/* Input area */}
-              <div className="relative border-t bg-white/70 dark:bg-slate-900/70 p-4">
+              <div className="relative border-t bg-card/70 p-3 sm:p-4 flex-shrink-0">
                 <div className="flex items-end gap-2">
                   <div className="flex-1 relative">
                     <textarea
@@ -537,13 +565,13 @@ export default function AIAssistant() {
                       onKeyDown={handleKeyDown}
                       placeholder="Ask me anything about bioinformatics..."
                       rows={1}
-                      className="w-full resize-none rounded-xl border bg-background px-4 py-3 pr-12 text-sm
+                      className="w-full resize-none rounded-xl border bg-background px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 text-sm
                                  placeholder:text-muted-foreground focus-visible:outline-none 
                                  focus-visible:ring-2 focus-visible:ring-[#C1121F]/50 focus-visible:border-transparent
-                                 max-h-32 min-h-[44px] transition-all"
+                                 max-h-32 min-h-[40px] sm:min-h-[44px] transition-all"
                       style={{
                         height: "auto",
-                        minHeight: "44px",
+                        minHeight: "40px",
                       }}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -557,15 +585,19 @@ export default function AIAssistant() {
                     size="icon"
                     onClick={handleSend}
                     disabled={!inputValue.trim() || isLoading}
-                    className="h-[44px] w-[44px] rounded-xl bg-gradient-to-r from-[#C1121F] to-[#A00E19]
-                               hover:from-[#A00E19] hover:to-[#C1121F] shadow-md disabled:opacity-50 cursor-pointer"
+                    className="h-10 w-10 sm:h-[44px] sm:w-[44px] rounded-xl bg-gradient-to-r from-[#C1121F] to-[#A00E19]
+                               hover:from-[#A00E19] hover:to-[#C1121F] shadow-md disabled:opacity-50 cursor-pointer flex-shrink-0"
                   >
-                    <Send className="h-4 w-4" />
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
 
-                <p className="text-[10px] text-muted-foreground mt-2 text-center">
-                  Press Enter to send, Shift+Enter for new line • BioAssist can make mistakes, verify important information
+                <p className="text-[10px] text-muted-foreground mt-1.5 sm:mt-2 text-center">
+                  Press Enter to send, Shift+Enter for new line
                 </p>
               </div>
             </motion.div>

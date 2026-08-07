@@ -15,7 +15,7 @@ export interface UseAIChatOptions {
 
 // Mock AI responses for bioinformatics questions (used as fallback)
 const mockResponses: Record<string, string> = {
-  blast: `## BLAST Results Interpretation
+  blast: `## BLAST Results Interpretation 🧬
 
 Your **BLAST (Basic Local Alignment Search Tool)** results can be interpreted by examining these key metrics:
 
@@ -44,7 +44,7 @@ Your **BLAST (Basic Local Alignment Search Tool)** results can be interpreted by
 
 Would you like me to help you with phylogenetic tree construction from these results?`,
 
-  rnaseq: `## RNA-seq Data Analysis Workflow
+  rnaseq: `## RNA-seq Data Analysis Workflow 📊
 
 Here's a comprehensive pipeline for analyzing RNA sequencing data:
 
@@ -75,7 +75,7 @@ Here's a comprehensive pipeline for analyzing RNA sequencing data:
 
 Need help with a specific step in this workflow?`,
 
-  primers: `## Primer Design Guide
+  primers: `## Primer Design Guide 🧪
 
 Let me walk you through designing optimal primers for your sequence:
 
@@ -114,7 +114,7 @@ Choosing the right alignment tool depends on your data type and goals:
 
 What type of data are you working with?`,
 
-  vcf: `## VCF File Interpretation Guide
+  vcf: `## VCF File Interpretation Guide 🔬
 
 VCF (Variant Call Format) files contain genetic variants:
 
@@ -193,6 +193,8 @@ async function callAI_API(message: string, history: Message[]): Promise<string> 
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
+    console.log(`[BioAssist] Sending request to API...`);
+    
     const response = await fetch(AI_API_ENDPOINT, {
       method: "POST",
       headers: {
@@ -207,12 +209,15 @@ async function callAI_API(message: string, history: Message[]): Promise<string> 
 
     clearTimeout(timeoutId);
 
+    console.log(`[BioAssist] API responded with status: ${response.status}`);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
       throw new Error(`API error (${response.status}): ${errorData.error || response.statusText}`);
     }
 
     const data = await response.json();
+    console.log(`[BioAssist] Received response, keys:`, Object.keys(data));
 
     // Support different response formats from the API
     const content = data.content || data.response || data.message || "";
@@ -224,6 +229,7 @@ async function callAI_API(message: string, history: Message[]): Promise<string> 
     return content;
   } catch (error) {
     clearTimeout(timeoutId);
+    console.warn(`[BioAssist] API call failed:`, error instanceof Error ? error.message : error);
 
     // Re-throw abort errors with a clearer message
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -255,7 +261,7 @@ function loadMessagesFromStorage(storageKey: string): Message[] {
       }));
     }
   } catch (error) {
-    console.error("Failed to load chat history:", error);
+    console.error("[BioAssist] Failed to load chat history:", error);
   }
   return [];
 }
@@ -266,24 +272,40 @@ export function useAIChat(options: UseAIChatOptions = {}) {
   const [messages, setMessages] = useState<Message[]>(() => loadMessagesFromStorage(storageKey));
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isSendingRef = useRef(false);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(messages));
     } catch (error) {
-      console.error("Failed to save chat history:", error);
+      console.error("[BioAssist] Failed to save chat history:", error);
     }
   }, [messages, storageKey]);
 
-  // Auto-scroll to bottom when messages change
+  // Reset sending flag when loading state changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!isLoading) {
+      isSendingRef.current = false;
+    }
+  }, [isLoading]);
 
   const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isLoading) return;
+    // Prevent duplicate sends
+    if (!content.trim() || isLoading || isSendingRef.current) {
+      console.log("[BioAssist] Send blocked:", { 
+        empty: !content.trim(), 
+        isLoading, 
+        isSending: isSendingRef.current 
+      });
+      return;
+    }
+
+    // Set sending flag
+    isSendingRef.current = true;
+    setError(null);
 
     // Add user message
     const userMessage: Message = {
@@ -300,16 +322,16 @@ export function useAIChat(options: UseAIChatOptions = {}) {
 
     try {
       // First, try calling the real AI API
-      console.log("Calling AI API...");
       aiResponseContent = await callAI_API(content, messages);
-      console.log("AI API response received successfully");
+      console.log("[BioAssist] AI API response received successfully");
       
     } catch (error) {
       // Log the error for debugging
-      console.warn("AI API call failed, using fallback response:", error);
+      console.warn("[BioAssist] AI API call failed, using fallback response:", error);
       
       // Fall back to mock response when API fails
       aiResponseContent = generateMockResponse(content);
+      console.log("[BioAssist] Using fallback response");
     }
 
     // Create and add the AI response message
@@ -322,10 +344,12 @@ export function useAIChat(options: UseAIChatOptions = {}) {
 
     setMessages((prev) => [...prev, aiResponse]);
     setIsLoading(false);
+    isSendingRef.current = false;
   }, [isLoading, messages]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setError(null);
     localStorage.removeItem(storageKey);
   }, [storageKey]);
 
@@ -334,7 +358,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
       await navigator.clipboard.writeText(content);
       return true;
     } catch (error) {
-      console.error("Failed to copy:", error);
+      console.error("[BioAssist] Failed to copy:", error);
       return false;
     }
   }, []);
@@ -347,6 +371,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
     messages,
     isLoading,
     isOpen,
+    error,
     messagesEndRef,
     sendMessage,
     clearMessages,
