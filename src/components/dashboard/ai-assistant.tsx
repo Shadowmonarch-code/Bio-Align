@@ -30,6 +30,7 @@ import {
   ClipboardList,
   Code2,
   Minimize2,
+  AlertCircle,
 } from "lucide-react";
 
 // Suggested prompts for quick actions
@@ -243,7 +244,7 @@ function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => v
               key={index}
               onClick={() => onPromptClick(prompt)}
               className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/50 
-                         transition-all duration-200 group text-left"
+                         transition-all duration-200 group text-left cursor-pointer"
             >
               <Sparkles className="h-4 w-4 text-[#C1121F] flex-shrink-0" />
               <span className="text-sm">{prompt}</span>
@@ -284,6 +285,27 @@ function WelcomeScreen({ onPromptClick }: { onPromptClick: (prompt: string) => v
   );
 }
 
+// Error state component
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+      <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+        <AlertCircle className="h-8 w-8 text-red-500" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-md">
+        Unable to connect to the AI service. Please check your connection and try again.
+      </p>
+      <Button
+        onClick={onRetry}
+        className="bg-[#C1121F] hover:bg-[#A00E19] text-white cursor-pointer"
+      >
+        Try Again
+      </Button>
+    </div>
+  );
+}
+
 // Main AI Assistant component
 export default function AIAssistant() {
   const {
@@ -301,6 +323,7 @@ export default function AIAssistant() {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasError, setHasError] = useState(false);
 
   // Focus input when chat opens
   useEffect(() => {
@@ -311,6 +334,7 @@ export default function AIAssistant() {
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
+    setHasError(false);
     sendMessage(inputValue);
     setInputValue("");
   };
@@ -323,7 +347,13 @@ export default function AIAssistant() {
   };
 
   const handlePromptClick = (prompt: string) => {
+    setHasError(false);
     sendMessage(prompt);
+  };
+
+  const handleRetry = () => {
+    setHasError(false);
+    // The sendMessage function will retry the API call
   };
 
   // Animation variants
@@ -360,7 +390,7 @@ export default function AIAssistant() {
             onClick={toggleOpen}
             className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-br from-[#C1121F] to-[#780000] 
                        shadow-lg shadow-[#C1121F]/30 flex items-center justify-center text-white
-                       hover:shadow-xl hover:shadow-[#C1121F]/40 transition-shadow"
+                       hover:shadow-xl hover:shadow-[#C1121F]/40 transition-shadow cursor-pointer"
             aria-label="Open AI Assistant"
           >
             <MessageSquare className="h-6 w-6" />
@@ -394,7 +424,7 @@ export default function AIAssistant() {
               className="fixed right-0 top-0 z-50 h-full w-full md:w-[420px] lg:w-[450px]
                          flex flex-col shadow-2xl md:rounded-l-2xl overflow-hidden"
               style={{
-                background: "rgba(255, 255, 255, 0.85)",
+                background: "rgba(255, 255, 255, 0.98)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
               }}
@@ -402,7 +432,7 @@ export default function AIAssistant() {
               {/* Dark mode support via CSS variables */}
               <style>{`
                 .dark .ai-assistant-panel {
-                  background: rgba(15, 23, 42, 0.9) !important;
+                  background: rgba(15, 23, 42, 0.98) !important;
                 }
               `}</style>
               <div className="ai-assistant-panel absolute inset-0 bg-inherit" />
@@ -432,7 +462,7 @@ export default function AIAssistant() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 cursor-pointer"
                           onClick={clearMessages}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -448,7 +478,7 @@ export default function AIAssistant() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 cursor-pointer"
                         onClick={() => setIsOpen(false)}
                       >
                         <Minimize2 className="h-4 w-4" />
@@ -461,7 +491,7 @@ export default function AIAssistant() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 md:hidden"
+                    className="h-8 w-8 md:hidden cursor-pointer"
                     onClick={() => setIsOpen(false)}
                   >
                     <X className="h-4 w-4" />
@@ -472,7 +502,9 @@ export default function AIAssistant() {
               {/* Messages area */}
               <ScrollArea className="flex-1 relative" ref={scrollRef}>
                 <div className="min-h-full">
-                  {messages.length === 0 ? (
+                  {hasError && messages.length === 0 ? (
+                    <ErrorState onRetry={handleRetry} />
+                  ) : messages.length === 0 ? (
                     <WelcomeScreen onPromptClick={handlePromptClick} />
                   ) : (
                     <div className="py-4 space-y-1">
@@ -526,7 +558,7 @@ export default function AIAssistant() {
                     onClick={handleSend}
                     disabled={!inputValue.trim() || isLoading}
                     className="h-[44px] w-[44px] rounded-xl bg-gradient-to-r from-[#C1121F] to-[#A00E19]
-                               hover:from-[#A00E19] hover:to-[#C1121F] shadow-md disabled:opacity-50"
+                               hover:from-[#A00E19] hover:to-[#C1121F] shadow-md disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

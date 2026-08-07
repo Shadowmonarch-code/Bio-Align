@@ -13,7 +13,7 @@ export interface UseAIChatOptions {
   storageKey?: string;
 }
 
-// Mock AI responses for bioinformatics questions
+// Mock AI responses for bioinformatics questions (used as fallback)
 const mockResponses: Record<string, string> = {
   blast: `## BLAST Results Interpretation
 
@@ -41,13 +41,6 @@ Your **BLAST (Basic Local Alignment Search Tool)** results can be interpreted by
    - Multiple HSPs may indicate domain architecture
    - Gaps represent insertions/deletions
    - Check for frame shifts in translated searches
-
-### Next Steps
-
-\`\`\`bash
-# Download top hits for further analysis
-blastdbcmd -db nr -entry_batch hit_ids.txt -outfmt %f
-\`\`\`
 
 Would you like me to help you with phylogenetic tree construction from these results?`,
 
@@ -80,38 +73,6 @@ Here's a comprehensive pipeline for analyzing RNA sequencing data:
 | Quantification | featureCounts | Accurate, fast |
 | DE Analysis | DESeq2 | Robust statistical model |
 
-### R Code Template
-
-\`\`\`r
-# DESeq2 analysis example
-library(DESeq2)
-
-# Read count matrix
-countData <- read.csv("counts.csv", row.names=1)
-colData <- read.csv("metadata.csv", row.names=1)
-
-# Create DESeqDataSet
-dds <- DESeqDataSetFromMatrix(
-  countData = countData,
-  colData = colData,
-  design = ~ condition
-)
-
-# Run analysis
-dds <- DESeq(dds)
-res <- results(dds, alpha=0.05)
-
-# View results
-head(res[order(res$padj), ])
-\`\`\`
-
-### Key Considerations
-
-- **Biological replicates**: Minimum 3 per condition recommended
-- **Batch effects**: Include in design formula if present
-- **Multiple testing**: FDR correction essential
-- **Gene length bias**: Consider TPM for cross-gene comparison
-
 Need help with a specific step in this workflow?`,
 
   primers: `## Primer Design Guide
@@ -126,188 +87,52 @@ Let me walk you through designing optimal primers for your sequence:
 | **Tm** | 55-65°C (pair within 2°C) | Efficient PCR |
 | **GC%** | 40-60% | Stability |
 | **3' end** | End with G/C (GC clamp) | Polymerase binding |
-| **ΔG** | < -9 kcal/mol | Stable binding |
 
 ### Design Checklist
-
 - [ ] Avoid runs of identical nucleotides (>4)
 - [ ] No self-complementarity (hairpins)
 - [ ] No primer-dimer formation
 - [ ] Amplicon size appropriate for application
-- [ ] Span exon-exon junctions (for qPCR)
-
-### Python Script for Primer Design
-
-\`\`\`python
-from Bio.Seq import Seq
-from Bio.SeqUtils.MeltingTemp import Tm_NN
-
-def analyze_primer(primer_seq: str) -> dict:
-    """Analyze primer properties."""
-    seq = Seq(primer_seq.upper())
-    
-    # Calculate properties
-    gc_content = (seq.count("G") + seq.count("C")) / len(seq) * 100
-    tm = Tm_NN(seq, dnac=250, Na=50, Mg=2)
-    
-    return {
-        "sequence": str(seq),
-        "length": len(seq),
-        "gc_percent": round(gc_content, 1),
-        "tm": round(tm, 1),
-        "gc_clamp": str(seq[-1]) in ["G", "C"]
-    }
-
-# Example usage
-forward_primer = "ATGGTAAACGCCATTTTGCG"
-print(analyze_primer(forward_primer))
-\`\`\`
 
 ### Recommended Tools
-
 1. **Primer3** - Gold standard, command-line available
 2. **NCBI Primer-BLAST** - Specificity checking built-in
 3. **Benchling** - Visual interface with templates
-4. **IDT OligoAnalyzer** - Secondary structure prediction
 
-Would you like me to help you design primers for a specific target sequence? Please share your sequence and I'll provide specific recommendations.`,
+Would you like me to help you design primers for a specific target sequence?`,
 
   alignment: `## Sequence Alignment Tools Comparison
 
 Choosing the right alignment tool depends on your data type and goals:
 
-### Global Alignment Tools Comparison
+| Tool | Speed | Accuracy | Best For |
+|------|-------|----------|----------|
+| **BWA-MEM2** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | DNA-seq, Illumina |
+| **Bowtie2** | ⚡⚡⚡⚡ | ⭐⭐⭐⭐ | DNA-seq, gapped |
+| **STAR** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | RNA-seq, spliced |
+| **Minimap2** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | Long reads, genome |
 
-| Tool | Speed | Accuracy | Best For | Memory Usage |
-|------|-------|----------|----------|--------------|
-| **BWA-MEM2** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | DNA-seq, Illumina | Medium |
-| **Bowtie2** | ⚡⚡⚡⚡ | ⭐⭐⭐⭐ | DNA-seq, gapped | Low |
-| **STAR** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | RNA-seq, spliced | High |
-| **HISAT2** | ⚡⚡⚡⚡ | ⭐⭐⭐⭐ | RNA-seq, small mem | Low |
-| **Minimap2** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | Long reads, genome | Very Low |
-
-### Decision Flowchart
-
-\`\`\`
-Start
-  │
-  ├─▶ Read Type?
-  │     ├─ Short reads (<150bp) ──▶ BWA-MEM2 / Bowtie2
-  │     └─ Long reads (Nanopore/PacBio) ──▶ Minimap2
-  │
-  ├─▶ Application?
-  │     ├─ DNA variant calling ──▶ BWA-MEM2
-  │     ├─ RNA expression ──▶ STAR / HISAT2
-  │     ├─ De novo assembly ──▶ Minimap2 (overlap)
-  │     └─ Isoform discovery ──▶ STAR (2-pass)
-  │
-  └─▶ Resources Available?
-        ├─ High memory ──▶ STAR
-        └─ Limited memory ──▶ HISAT2 / Bowtie2
-\`\`\`
-
-### Quick Start Commands
-
-\`\`\`bash
-# BWA-MEM2 alignment
-bwa-mem2 index reference.fasta
-bwa-mem2 mem -t 16 reference.fasta reads_R1.fastq.gz reads_R2.fastq.gz | \\
-  samtools view -bS - | samtools sort -o aligned.bam -
-
-# STAR alignment (RNA-seq)
-STAR --runThreadN 16 \\
-    --genomeDir star_index/ \\
-    --readFilesIn reads_R1.fastq.gz reads_R2.fastq.gz \\
-    --readFilesCommand zcat \\
-    --outFileNamePrefix sample_ \\
-    --outSAMtype BAM SortedByCoordinate
-\`\`\`
-
-What type of data are you working with? I can give more specific recommendations.`,
+What type of data are you working with?`,
 
   vcf: `## VCF File Interpretation Guide
 
-VCF (Variant Call Format) files contain genetic variants. Here's how to interpret them:
+VCF (Variant Call Format) files contain genetic variants:
 
-### VCF File Structure
-
-\`\`\`
-##fileformat=VCFv4.2
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-#CHROM  POS ID  REF  ALT  QUAL  FILTER  INFO          FORMAT  Sample1
-chr1    12345 .  A    G    45.6   PASS    DP=100;AF=0.5 GT:DP   0/1:50
-\`\`\`
-
-### Column Descriptions
-
-| Column | Description | Example |
-|--------|-------------|---------|
-| **CHROM** | Chromosome name | chr1, chrX |
-| **POS** | Position (1-based) | 12345 |
-| **ID** | Identifier (rsID or .) | rs12345 |
-| **REF** | Reference allele | A |
-| **ALT** | Alternate allele(s) | G |
-| **QUAL** | Quality score | 45.6 |
-| **FILTER** | Filter status | PASS |
-| **INFO** | Additional info | DP=100;AF=0.5 |
+### Key Columns
+| Column | Description |
+|--------|-------------|
+| **CHROM** | Chromosome name |
+| **POS** | Position (1-based) |
+| **REF** | Reference allele |
+| **ALT** | Alternate allele(s) |
+| **QUAL** | Quality score |
 
 ### Common INFO Fields
-
 - **DP**: Total read depth at position
 - **AF**: Allele frequency
-- **Impact**: HIGH/MODERATE/LOW (using SnpEff)
 - **Gene**: Affected gene name
-- **Consequence**: Missense, synonymous, etc.
 
-### Filtering Best Practices
-
-\`\`\`bash
-# Using bcftools for filtering
-bcftools view -i 'QUAL>30 && DP>10 && AF>0.01' input.vcf.gz -Oz -o filtered.vcf.gz
-
-# Extract only PASS variants
-bcftools view -f PASS input.vcf.gz
-
-# Get variant statistics
-bcftools stats input.vcf.gz > vcf_stats.txt
-\`\`\`
-
-### Annotation Tools
-
-1. **SnpEff/SnpSift** - Functional annotation
-2. **VEP (Ensembl)** - Comprehensive annotation
-3. **ANNOVAR** - Gene-based annotation
-4. **vcfanno** - Custom annotation
-
-### Python Parsing Example
-
-\`\`\`python
-import gzip
-
-def parse_vcf(vcf_path: str):
-    """Parse VCF file and yield variants."""
-    opener = gzip.open if vcf_path.endswith('.gz') else open
-    
-    with opener(vcf_path, 'rt') as f:
-        for line in f:
-            if line.startswith('#'):
-                continue
-            
-            fields = line.strip().split('\t')
-            chrom, pos, ref, alt = fields[0], fields[1], fields[3], fields[4]
-            info = dict(item.split('=') if '=' in item else (item, True) 
-                       for item in fields[7].split(';'))
-            
-            yield {
-                'chrom': chrom,
-                'pos': int(pos),
-                'ref': ref,
-                'alt': alt,
-                'info': info
-            }
-\`\`\`
-
-Do you have a specific VCF file you need help interpreting? Share more details about what you're looking for.`,
+Do you have a specific VCF file you need help interpreting?`,
 };
 
 function generateMockResponse(message: string): string {
@@ -334,21 +159,17 @@ function generateMockResponse(message: string): string {
 
 I'm your AI-powered bioinformatics assistant. I can help you with:
 
-- **Analysis Explanation**: Interpret complex results like BLAST, VCF files, and more
-- **Workflow Guidance**: Suggest optimal analysis pipelines for your data type
-- **Error Diagnosis**: Help debug issues with your bioinformatics workflows
-- **Literature Search**: Find relevant papers and methodologies
-- **Protocol Recommendations**: Suggest experimental methods and best practices
-- **Code Generation**: Write Python/R scripts for common analyses
+- **Analysis Explanation**: Interpret BLAST, VCF files, and more
+- **Workflow Guidance**: Suggest analysis pipelines for your data
+- **Error Diagnosis**: Help debug bioinformatics workflows
+- **Code Generation**: Write Python/R scripts for analyses
 
 You asked about: "${message}"
 
-Could you provide more details about what you're working on? For example:
-- What type of data do you have? (DNA-seq, RNA-seq, proteomics, etc.)
+Could you provide more details? For example:
+- What type of data do you have?
 - What analysis are you trying to perform?
-- Are you encountering any errors?
-
-This will help me give you more specific guidance!`;
+- Are you encountering any errors?`;
 }
 
 // API configuration
@@ -393,18 +214,20 @@ async function callAI_API(message: string, history: Message[]): Promise<string> 
 
     const data = await response.json();
 
-    if (!data.content && !data.response && !data.message) {
-      throw new Error("Invalid API response format");
+    // Support different response formats from the API
+    const content = data.content || data.response || data.message || "";
+    
+    if (!content || !content.trim()) {
+      throw new Error("Empty response from API");
     }
 
-    // Support different response formats from the API
-    return data.content || data.response || data.message || "";
+    return content;
   } catch (error) {
     clearTimeout(timeoutId);
 
     // Re-throw abort errors with a clearer message
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("API request timed out");
+      throw new Error("API request timed out. Please try again.");
     }
 
     // Re-throw other errors
@@ -477,16 +300,13 @@ export function useAIChat(options: UseAIChatOptions = {}) {
 
     try {
       // First, try calling the real AI API
+      console.log("Calling AI API...");
       aiResponseContent = await callAI_API(content, messages);
-      
-      if (!aiResponseContent || !aiResponseContent.trim()) {
-        throw new Error("Empty response from API");
-      }
-
       console.log("AI API response received successfully");
+      
     } catch (error) {
       // Log the error for debugging
-      console.warn("AI API call failed, falling back to mock response:", error);
+      console.warn("AI API call failed, using fallback response:", error);
       
       // Fall back to mock response when API fails
       aiResponseContent = generateMockResponse(content);
