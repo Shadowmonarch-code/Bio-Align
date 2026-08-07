@@ -3,7 +3,9 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
-import { useSession, signOut } from "next-auth/react"
+import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useUser } from "@/hooks/use-user"
 import {
   Search,
   Bell,
@@ -429,51 +431,87 @@ function NotificationBell() {
   )
 }
 
-// User Menu Component with session support
+// User Menu Component with proper authentication
 function UserMenu({ onNavigate }: { onNavigate?: (view: string) => void }) {
-  const { data: session } = useSession()
-  
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (session?.user?.name) {
-      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    }
-    if (session?.user?.email) {
-      return session.user.email[0].toUpperCase()
-    }
-    return 'BA'
-  }
+  const router = useRouter()
+  const { 
+    isAuthenticated, 
+    userDisplayName, 
+    userEmail, 
+    userInitials, 
+    userProfile,
+    status 
+  } = useUser()
+  const [isSigningOut, setIsSigningOut] = React.useState(false)
 
-  // Handle sign out
+  // Handle sign out with proper cleanup
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' })
+    setIsSigningOut(true)
+    try {
+      // Sign out and redirect to home page
+      await signOut({ 
+        redirect: false 
+      })
+      // Clear any local state and redirect
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Force redirect even on error
+      window.location.href = '/'
+    } finally {
+      setIsSigningOut(false)
+    }
   }
 
-  // Get display name
-  const displayName = session?.user?.name || 'BioAlign User'
-  const displayEmail = session?.user?.email || 'user@bioalign.io'
+  // Show loading state while checking auth
+  if (status === 'loading') {
+    return (
+      <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3" disabled>
+        <div className="size-7 rounded-full bg-muted animate-pulse" />
+        <span className="hidden md:inline-flex text-sm">Loading...</span>
+      </Button>
+    )
+  }
+
+  // Not authenticated - show nothing or login prompt
+  if (!isAuthenticated) {
+    return null
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3 cursor-pointer">
           <Avatar className="size-7 ring-2 ring-biored/20">
-            <AvatarImage src={session?.user?.image || "/avatars/user.svg"} alt="User" />
+            <AvatarImage src={userProfile?.image || undefined} alt={userDisplayName} />
             <AvatarFallback className="bg-biored/10 text-biored text-xs font-medium">
-              {getUserInitials()}
+              {userInitials}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline-flex text-sm font-medium">{displayName.split(' ')[0]}</span>
+          <span className="hidden md:inline-flex text-sm font-medium max-w-[100px] truncate">
+            {userDisplayName.split(' ')[0]}
+          </span>
           <ChevronRight className="size-3.5 rotate-90 text-muted-foreground hidden md:block" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {displayEmail}
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium leading-none">{userDisplayName}</p>
+              {userProfile?.role === 'admin' && (
+                <Badge variant="default" className="text-[10px] px-1 py-0 bg-biored">Admin</Badge>
+              )}
+            </div>
+            <p className="text-xs leading-none text-muted-foreground truncate max-w-[200px]">
+              {userEmail}
             </p>
+            {userProfile?.institution && (
+              <p className="text-xs leading-none text-muted-foreground mt-1">
+                🏛️ {userProfile.institution}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -490,16 +528,29 @@ function UserMenu({ onNavigate }: { onNavigate?: (view: string) => void }) {
           Help & Support
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
-          <LogOut className="mr-2 size-4" />
-          Log out
+        <DropdownMenuItem 
+          onClick={handleSignOut} 
+          disabled={isSigningOut}
+          className="text-destructive focus:text-destructive cursor-pointer"
+        >
+          {isSigningOut ? (
+            <>
+              <div className="mr-2 size-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
+              Signing out...
+            </>
+          ) : (
+            <>
+              <LogOut className="mr-2 size-4" />
+              Log out
+            </>
+          )}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-// Header Component
+// Header Component with auth awareness
 function Header({
   onMobileMenuClick,
   title,
@@ -539,7 +590,7 @@ function Header({
         <div className="hidden md:block" />
       </div>
 
-      {/* Right section */}
+      {/* Right section - only show user menu when authenticated */}
       <div className="flex items-center gap-1">
         <ThemeToggle />
         <NotificationBell />

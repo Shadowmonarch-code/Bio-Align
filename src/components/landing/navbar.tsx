@@ -227,9 +227,19 @@ export default function Navbar({ onNavigate }: NavbarProps) {
     setAuthError("");
   };
 
-  // Handle sign out
+  // Handle sign out with proper cleanup
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' });
+    try {
+      setIsLoading(true)
+      // Sign out from NextAuth
+      await signOut({ redirect: false })
+      // Force page refresh to clear any cached state
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Fallback: force redirect anyway
+      window.location.href = '/'
+    }
   };
 
   // Reset form when modal opens

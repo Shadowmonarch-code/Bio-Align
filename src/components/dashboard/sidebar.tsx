@@ -4,7 +4,7 @@ import * as React from "react"
 import { ChevronRight, ChevronLeft } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useSession } from "next-auth/react"
+import { useUser } from "@/hooks/use-user"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -128,22 +128,13 @@ function SidebarContent({
   setToolsOpen: (open: boolean) => void
   onNavigate?: (view: string, toolId?: string) => void
 }) {
-  const { data: session } = useSession()
-  
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (session?.user?.name) {
-      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    }
-    if (session?.user?.email) {
-      return session.user.email[0].toUpperCase()
-    }
-    return 'BA'
-  }
-  
-  // Get display name and email
-  const displayName = session?.user?.name || 'BioAlign User'
-  const displayEmail = session?.user?.email || 'user@bioalign.io'
+  const { 
+    isAuthenticated,
+    userDisplayName, 
+    userEmail, 
+    userInitials,
+    status 
+  } = useUser()
   // Handle navigation click
   const handleNavClick = React.useCallback(
     (href: string) => {
@@ -328,35 +319,45 @@ function SidebarContent({
         </div>
       </ScrollArea>
 
-      {/* User Profile Section */}
+      {/* User Profile Section - Only show when authenticated */}
       <Separator className="bg-sidebar-border" />
-      <div className={cn(
-        "flex items-center h-16 px-4 border-t border-sidebar-border",
-        collapsed ? "justify-center" : "gap-3"
-      )}>
-        <Avatar className="size-9 ring-2 ring-biored/20">
-          <AvatarImage src={session?.user?.image || "/avatars/user.svg"} alt="User" />
-          <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
-            {getUserInitials()}
-          </AvatarFallback>
-        </Avatar>
-        <AnimatePresence mode="wait">
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden whitespace-nowrap"
-            >
-              <div className="flex flex-col">
-                <span className="text-sm font-medium leading-none">{displayName}</span>
-                <span className="text-xs text-muted-foreground mt-0.5">{displayEmail}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {isAuthenticated ? (
+        <div className={cn(
+          "flex items-center h-16 px-4 border-t border-sidebar-border",
+          collapsed ? "justify-center" : "gap-3"
+        )}>
+          <Avatar className="size-9 ring-2 ring-biored/20">
+            <AvatarImage src={undefined} alt={userDisplayName} />
+            <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
+          <AnimatePresence mode="wait">
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="overflow-hidden whitespace-nowrap"
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium leading-none">{userDisplayName}</span>
+                  <span className="text-xs text-muted-foreground mt-0.5 truncate max-w-[150px]">
+                    {userEmail}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
+        <div className={cn(
+          "flex items-center h-16 px-4 border-t border-sidebar-border justify-center",
+        )}>
+          <span className="text-xs text-muted-foreground">Not signed in</span>
+        </div>
+      )}
     </div>
   )
 }
