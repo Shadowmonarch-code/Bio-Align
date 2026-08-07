@@ -33,7 +33,6 @@ import {
   Wrench,
   FolderKanban,
   Database,
-  Brain,
   Dna,
   Microscope,
   CircleDot,
@@ -80,8 +79,6 @@ function getNavigationTarget(href: string): { view: string; toolId?: string } {
       return { view: "workspaces" }
     case "/dashboard/databases":
       return { view: "databases" }
-    case "/dashboard/ai-assistant":
-      return { view: "ai-assistant" }
     case "/docs":
       return { view: "documentation" }
     case "/dashboard/settings":
@@ -97,7 +94,6 @@ const mainNavItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isActive: true },
   { title: "Workspaces", href: "/dashboard/workspaces", icon: FolderKanban },
   { title: "Databases", href: "/dashboard/databases", icon: Database },
-  { title: "AI Assistant", href: "/dashboard/ai-assistant", icon: Brain },
 ]
 
 const toolsNavItems: NavItem[] = [

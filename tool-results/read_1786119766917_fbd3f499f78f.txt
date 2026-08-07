@@ -1,0 +1,662 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback } from 'react'
+     4→import { Dna, FlaskConical, Bug, BookOpen, ClipboardList, Code2 } from 'lucide-react'
+     5→import Navbar from '@/components/landing/navbar'
+     6→import HeroSection from '@/components/landing/hero'
+     7→import FeaturesSection from '@/components/landing/features'
+     8→import ToolsShowcase from '@/components/landing/tools-showcase'
+     9→import WorkflowSection from '@/components/landing/workflow'
+    10→import StatisticsSection from '@/components/landing/statistics'
+    11→import TestimonialsSection from '@/components/landing/testimonials'
+    12→import PartnersSection from '@/components/landing/partners'
+    13→import FAQSection from '@/components/landing/faq'
+    14→import FooterSection from '@/components/landing/footer'
+    15→import DocumentationSection from '@/components/landing/documentation'
+    16→import TutorialsSection from '@/components/landing/tutorials'
+    17→import SupportPage from '@/components/landing/support-coffee'
+    18→import AboutCreator from '@/components/landing/about-creator'
+    19→import DashboardLayout from '@/components/dashboard/dashboard-layout'
+    20→import SettingsSection from '@/components/dashboard/settings'
+    21→import ToolsCatalog from '@/components/dashboard/tools-catalog'
+    22→import FileUpload from '@/components/dashboard/file-upload'
+    23→import AIAssistant from '@/components/dashboard/ai-assistant'
+    24→import { Button } from '@/components/ui/button'
+    25→import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
+    26→
+    27→// View types for the application - extended with new views
+    28→type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'ai-assistant'
+    29→
+    30→export default function Home() {
+    31→  const [currentView, setCurrentView] = useState<ViewType>('landing')
+    32→  const [selectedTool, setSelectedTool] = useState<string | null>(null)
+    33→  const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
+    34→  
+    35→  // Ref to control AI assistant from outside
+    36→  const aiAssistantRef = React.useRef<{ toggleOpen: () => void } | null>(null)
+    37→
+    38→  // Main navigation handler - switches between views
+    39→  const handleNavigate = useCallback((view: string) => {
+    40→    setCurrentView(view as ViewType)
+    41→    window.scrollTo(0, 0)
+    42→  }, [])
+    43→
+    44→  // Tool selection handler - opens analysis view with specific tool
+    45→  const handleToolSelect = useCallback((toolId: string) => {
+    46→    if (toolId === 'all') {
+    47→      setCurrentView('tools')
+    48→    } else {
+    49→      setSelectedTool(toolId)
+    50→      setCurrentView('analysis')
+    51→    }
+    52→    window.scrollTo(0, 0)
+    53→  }, [])
+    54→
+    55→  // Sidebar navigation handler - handles both view and tool navigation
+    56→  const handleSidebarNavigate = useCallback((view: string, toolId?: string) => {
+    57→    if (toolId) {
+    58→      setSelectedTool(toolId)
+    59→      setCurrentView('analysis')
+    60→    } else {
+    61→      setCurrentView(view as ViewType)
+    62→    }
+    63→    window.scrollTo(0, 0)
+    64→  }, [])
+    65→
+    66→  // Go back to landing page
+    67→  const handleGoHome = useCallback(() => {
+    68→    setCurrentView('landing')
+    69→    window.scrollTo(0, 0)
+    70→  }, [])
+    71→
+    72→  // Render Landing Page
+    73→  if (currentView === 'landing') {
+    74→    return (
+    75→      <main className="min-h-screen flex flex-col">
+    76→        <Navbar onNavigate={handleNavigate} />
+    77→        
+    78→        {/* Hero Section */}
+    79→        <section id="hero">
+    80→          <HeroSection 
+    81→            onStartClick={() => handleNavigate('dashboard')}
+    82→            onExploreClick={() => handleNavigate('tools')}
+    83→          />
+    84→        </section>
+    85→
+    86→        {/* Partners/Trusted By */}
+    87→        <section id="partners" className="py-16 border-b border-border/50">
+    88→          <PartnersSection />
+    89→        </section>
+    90→
+    91→        {/* Features Section */}
+    92→        <section id="features" className="py-24 relative overflow-hidden">
+    93→          <FeaturesSection onExploreClick={() => handleNavigate('tools')} />
+    94→        </section>
+    95→
+    96→        {/* Popular Tools Showcase */}
+    97→        <section id="tools" className="py-24 bg-muted/30">
+    98→          <ToolsShowcase onLaunchTool={handleToolSelect} />
+    99→        </section>
+   100→
+   101→        {/* Research Workflow */}
+   102→        <section id="workflow" className="py-24 relative">
+   103→          <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
+   104→        </section>
+   105→
+   106→        {/* About Creator Section */}
+   107→        <section id="about" className="py-24 bg-muted/30">
+   108→          <AboutCreator onBack={handleGoHome} />
+   109→        </section>
+   110→
+   111→        {/* Statistics */}
+   112→        <section id="statistics" className="py-24 bg-muted/30">
+   113→          <StatisticsSection />
+   114→        </section>
+   115→
+   116→        {/* Testimonials */}
+   117→        <section id="testimonials" className="py-24">
+   118→          <TestimonialsSection />
+   119→        </section>
+   120→
+   121→        {/* FAQ */}
+   122→        <section id="faq" className="py-24 bg-muted/30">
+   123→          <FAQSection />
+   124→        </section>
+   125→
+   126→        {/* CTA Section */}
+   127→        <section id="cta" className="py-24 relative overflow-hidden">
+   128→          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   129→            <div className="relative rounded-3xl bg-gradient-to-br from-primary via-biored-dark to-biored p-12 md:p-20 text-center text-white overflow-hidden">
+   130→              {/* Background decoration */}
+   131→              <div className="absolute inset-0 opacity-10">
+   132→                <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+   133→                <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl"></div>
+   134→              </div>
+   135→              
+   136→              <div className="relative z-10 space-y-6">
+   137→                <h2 className="text-3xl md:text-5xl font-bold">
+   138→                  Ready to Transform Your Research?
+   139→                </h2>
+   140→                <p className="text-xl text-white/80 max-w-2xl mx-auto">
+   141→                  Join thousands of researchers who are already using BioAlign to accelerate their discoveries.
+   142→                </p>
+   143→                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+   144→                  <Button 
+   145→                    size="lg"
+   146→                    className="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg cursor-pointer"
+   147→                    onClick={() => handleNavigate('dashboard')}
+   148→                  >
+   149→                    Get Started Free
+   150→                  </Button>
+   151→                  <Button 
+   152→                    size="lg"
+   153→                    variant="outline"
+   154→                    className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+   155→                    onClick={() => handleNavigate('tools')}
+   156→                  >
+   157→                    Explore All Tools
+   158→                  </Button>
+   159→                </div>
+   160→                <p className="text-sm text-white/60 pt-2">
+   161→                  No credit card required · Free tier available · Setup in 2 minutes
+   162→                </p>
+   163→              </div>
+   164→            </div>
+   165→          </div>
+   166→        </section>
+   167→
+   168→        {/* Footer */}
+   169→        <FooterSection />
+   170→
+   171→        {/* AI Assistant - Always Available */}
+   172→        <AIAssistant />
+   173→      </main>
+   174→    )
+   175→  }
+   176→
+   177→  // Render Dashboard View
+   178→  if (currentView === 'dashboard') {
+   179→    return (
+   180→      <main className="min-h-screen flex flex-col">
+   181→        <DashboardLayout
+   182→          title="Dashboard"
+   183→          subtitle="Welcome back! Here's your research overview."
+   184→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard' }]}
+   185→          actions={
+   186→            <div className="flex gap-2">
+   187→              <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
+   188→                Upload Files
+   189→              </Button>
+   190→              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+   191→                Browse Tools
+   192→              </Button>
+   193→            </div>
+   194→          }
+   195→          onSidebarNavigate={handleSidebarNavigate}
+   196→        >
+   197→          <div className="space-y-8">
+   198→            {/* Quick Stats */}
+   199→            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+   200→              {[
+   201→                { title: 'Recent Analyses', value: '12', change: '+3 this week', icon: '📊' },
+   202→                { title: 'Saved Projects', value: '5', change: '2 active', icon: '📁' },
+   203→                { title: 'Storage Used', value: '2.4 GB', change: 'of 10 GB', icon: '💾' },
+   204→                { title: 'API Calls', value: '1,234', change: '-12% vs last week', icon: '🔌' },
+   205→              ].map((stat, i) => (
+   206→                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow cursor-pointer hover:border-primary/30">
+   207→                  <div className="flex items-start justify-between">
+   208→                    <div>
+   209→                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+   210→                      <p className="text-2xl font-bold mt-1">{stat.value}</p>
+   211→                      <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+   212→                    </div>
+   213→                    <span className="text-2xl">{stat.icon}</span>
+   214→                  </div>
+   215→                </div>
+   216→              ))}
+   217→            </div>
+   218→
+   219→            {/* Quick Actions */}
+   220→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+   221→              {/* Recent Activity */}
+   222→              <div className="p-6 rounded-xl border bg-card">
+   223→                <h3 className="font-semibold mb-4">Recent Activity</h3>
+   224→                <div className="space-y-4">
+   225→                  {[
+   226→                    { action: 'BLAST Analysis completed', time: '2 hours ago', type: 'success' },
+   227→                    { action: 'Sequence uploaded: sample.fasta', time: '5 hours ago', type: 'info' },
+   228→                    { action: 'Multiple alignment started', time: '1 day ago', type: 'pending' },
+   229→                    { action: 'GC Content analysis', time: '2 days ago', type: 'success' },
+   230→                  ].map((activity, i) => (
+   231→                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
+   232→                      <div className={`w-2 h-2 rounded-full ${
+   233→                        activity.type === 'success' ? 'bg-green-500' :
+   234→                        activity.type === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
+   235→                      }`} />
+   236→                      <div className="flex-1 min-w-0">
+   237→                        <p className="text-sm truncate">{activity.action}</p>
+   238→                        <p className="text-xs text-muted-foreground">{activity.time}</p>
+   239→                      </div>
+   240→                    </div>
+   241→                  ))}
+   242→                </div>
+   243→              </div>
+   244→
+   245→              {/* Quick Launch Tools */}
+   246→              <div className="p-6 rounded-xl border bg-card">
+   247→                <h3 className="font-semibold mb-4">Quick Launch Tools</h3>
+   248→                <div className="grid grid-cols-2 gap-3">
+   249→                  {[
+   250→                    { name: 'BLAST Search', icon: '🔍', tool: 'blast' },
+   251→                    { name: 'Sequence Align', icon: '🧬', tool: 'align' },
+   252→                    { name: 'ORF Finder', icon: '🔎', tool: 'orf' },
+   253→                    { name: 'Translate', icon: '🔄', tool: 'translate' },
+   254→                    { name: 'GC Content', icon: '📈', tool: 'gc' },
+   255→                    { name: 'Primer Design', icon: '🧪', tool: 'primer' },
+   256→                  ].map((tool, i) => (
+   257→                    <button
+   258→                      key={i}
+   259→                      onClick={() => handleToolSelect(tool.tool)}
+   260→                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-primary/5 hover:border-primary/30 transition-colors text-left cursor-pointer"
+   261→                    >
+   262→                      <span>{tool.icon}</span>
+   263→                      <span className="text-sm font-medium">{tool.name}</span>
+   264→                    </button>
+   265→                  ))}
+   266→                </div>
+   267→              </div>
+   268→            </div>
+   269→
+   270→            {/* File Upload Area */}
+   271→            <div className="p-6 rounded-xl border bg-card">
+   272→              <h3 className="font-semibold mb-4">Upload New Data</h3>
+   273→              <FileUpload />
+   274→            </div>
+   275→          </div>
+   276→        </DashboardLayout>
+   277→
+   278→        <AIAssistant />
+   279→        
+   280→        {/* Sticky Footer */}
+   281→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   282→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   283→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   284→        </footer>
+   285→      </main>
+   286→    )
+   287→  }
+   288→
+   289→  // Render Tools Catalog
+   290→  if (currentView === 'tools') {
+   291→    return (
+   292→      <main className="min-h-screen flex flex-col">
+   293→        <DashboardLayout
+   294→          title="Tools Catalog"
+   295→          subtitle="Browse and launch 84+ bioinformatics tools"
+   296→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Tools' }]}
+   297→          actions={
+   298→            <div className="flex gap-2">
+   299→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   300→                ← Back to Home
+   301→              </Button>
+   302→              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   303→                Dashboard
+   304→              </Button>
+   305→            </div>
+   306→          }
+   307→          onSidebarNavigate={handleSidebarNavigate}
+   308→        >
+   309→          <ToolsCatalog onToolSelect={handleToolSelect} />
+   310→        </DashboardLayout>
+   311→
+   312→        <AIAssistant />
+   313→        
+   314→        {/* Sticky Footer */}
+   315→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   316→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   317→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   318→        </footer>
+   319→      </main>
+   320→    )
+   321→  }
+   322→
+   323→  // Render Tool Analysis Page
+   324→  if (currentView === 'analysis') {
+   325→    return (
+   326→      <main className="min-h-screen flex flex-col">
+   327→        <DashboardLayout
+   328→          title={selectedTool ? `${selectedTool} Analysis` : 'Sequence Analysis'}
+   329→          subtitle="Perform comprehensive sequence analysis"
+   330→          breadcrumbs={[
+   331→            { label: 'Home', href: '#', onClick: handleGoHome },
+   332→            { label: 'Tools', href: '#', onClick: () => handleNavigate('tools') },
+   333→            { label: selectedTool || 'Analysis', href: '#' }
+   334→          ]}
+   335→          actions={
+   336→            <div className="flex gap-2">
+   337→              <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+   338→                ← All Tools
+   339→              </Button>
+   340→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   341→                Dashboard
+   342→              </Button>
+   343→            </div>
+   344→          }
+   345→          onSidebarNavigate={handleSidebarNavigate}
+   346→        >
+   347→          <SequenceAnalysisTool selectedTool={selectedTool} />
+   348→        </DashboardLayout>
+   349→
+   350→        <AIAssistant />
+   351→        
+   352→        {/* Sticky Footer */}
+   353→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   354→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   355→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   356→        </footer>
+   357→      </main>
+   358→    )
+   359→  }
+   360→
+   361→  // Render File Upload Page
+   362→  if (currentView === 'upload') {
+   363→    return (
+   364→      <main className="min-h-screen flex flex-col">
+   365→        <DashboardLayout
+   366→          title="File Upload"
+   367→          subtitle="Upload your bioinformatics data files"
+   368→          breadcrumbs={[
+   369→            { label: 'Home', href: '#', onClick: handleGoHome },
+   370→            { label: 'Upload', href: '#' }
+   371→          ]}
+   372→          actions={
+   373→            <div className="flex gap-2">
+   374→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   375→                ← Dashboard
+   376→              </Button>
+   377→              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
+   378→                Tools
+   379→              </Button>
+   380→            </div>
+   381→          }
+   382→          onSidebarNavigate={handleSidebarNavigate}
+   383→        >
+   384→          <div className="max-w-4xl mx-auto space-y-6">
+   385→            <FileUpload />
+   386→            
+   387→            {/* Supported Formats Info */}
+   388→            <div className="p-6 rounded-xl border bg-card">
+   389→              <h3 className="font-semibold mb-4">Supported File Formats</h3>
+   390→              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+   391→                {[
+   392→                  { category: 'Sequence', formats: ['FASTA', 'FASTQ', 'GenBank', 'EMBL'] },
+   393→                  { category: 'Structure', formats: ['PDB', 'CIF', 'MOL', 'SDF'] },
+   394→                  { category: 'Alignment', formats: ['SAM', 'BAM', 'CRAM'] },
+   395→                  { category: 'Variant', formats: ['VCF', 'BED', 'GFF', 'GTF'] },
+   396→                  { category: 'Data', formats: ['CSV', 'TSV', 'XLSX', 'JSON'] },
+   397→                  { category: 'Archive', formats: ['ZIP', 'GZ', 'TAR', 'BZ2'] },
+   398→                ].map((group, i) => (
+   399→                  <div key={i} className="p-3 rounded-lg bg-muted/50">
+   400→                    <p className="text-xs font-medium text-biored mb-2">{group.category}</p>
+   401→                    <div className="flex flex-wrap gap-1">
+   402→                      {group.formats.map((fmt, j) => (
+   403→                        <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-background border">
+   404→                          {fmt}
+   405→                        </span>
+   406→                      ))}
+   407→                    </div>
+   408→                  </div>
+   409→                ))}
+   410→              </div>
+   411→            </div>
+   412→          </div>
+   413→        </DashboardLayout>
+   414→
+   415→        <AIAssistant />
+   416→        
+   417→        {/* Sticky Footer */}
+   418→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   419→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   420→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   421→        </footer>
+   422→      </main>
+   423→    )
+   424→  }
+   425→
+   426→  // Render Databases View
+   427→  if (currentView === 'databases') {
+   428→    return (
+   429→      <main className="min-h-screen flex flex-col">
+   430→        <DashboardLayout
+   431→          title="Databases"
+   432→          subtitle="Search and connect to biological databases worldwide"
+   433→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Databases' }]}
+   434→          actions={
+   435→            <div className="flex gap-2">
+   436→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   437→                ← Back to Home
+   438→              </Button>
+   439→              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   440→                Dashboard
+   441→              </Button>
+   442→            </div>
+   443→          }
+   444→          onSidebarNavigate={handleSidebarNavigate}
+   445→        >
+   446→          <div className="space-y-6">
+   447→            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+   448→              <h3 className="font-semibold mb-2">🔍 Quick Database Access</h3>
+   449→              <p className="text-sm text-muted-foreground">
+   450→                Click on any database below to search directly. You can also use the search button in the navbar for quick access to NCBI, UniProt, PDB, and more!
+   451→              </p>
+   452→            </div>
+   453→            
+   454→            {/* Database Cards Grid */}
+   455→            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+   456→              {[
+   457→                { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', url: 'https://www.ncbi.nlm.nih.gov/', color: 'bg-blue-500' },
+   458→                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', url: 'https://www.uniprot.org/', color: 'bg-green-500' },
+   459→                { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', url: 'https://www.rcsb.org/', color: 'bg-purple-500' },
+   460→                { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', url: 'https://ensembl.org/', color: 'bg-orange-500' },
+   461→                { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', url: 'https://www.genome.jp/kegg/', color: 'bg-teal-500' },
+   462→                { name: 'PubMed', desc: 'Biomedical literature', icon: '📚', url: 'https://pubmed.ncbi.nlm.nih.gov/', color: 'bg-red-500' },
+   463→                { name: 'ClinVar', desc: 'Clinical variants database', icon: '🏥', url: 'https://www.ncbi.nlm.nih.gov/clinvar/', color: 'bg-pink-500' },
+   464→                { name: 'dbSNP', desc: 'Single nucleotide polymorphisms', icon: '🧪', url: 'https://www.ncbi.nlm.nih.gov/snp/', color: 'bg-indigo-500' },
+   465→                { name: 'AlphaFold DB', desc: 'Predicted protein structures', icon: '🤖', url: 'https://alphafold.ebi.ac.uk/', color: 'bg-cyan-500' },
+   466→              ].map((db, i) => (
+   467→                <a
+   468→                  key={i}
+   469→                  href={db.url}
+   470→                  target="_blank"
+   471→                  rel="noopener noreferrer"
+   472→                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all group no-underline"
+   473→                >
+   474→                  <div className="flex items-start justify-between mb-4">
+   475→                    <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
+   476→                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${db.color} text-white`}>
+   477→                      External
+   478→                    </span>
+   479→                  </div>
+   480→                  <h3 className="font-semibold text-lg mb-1 group-hover:text-biored transition-colors">{db.name}</h3>
+   481→                  <p className="text-sm text-muted-foreground">{db.desc}</p>
+   482→                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+   483→                    Open Database →
+   484→                  </button>
+   485→                </a>
+   486→              ))}
+   487→            </div>
+   488→          </div>
+   489→        </DashboardLayout>
+   490→
+   491→        <AIAssistant />
+   492→        
+   493→        {/* Sticky Footer */}
+   494→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   495→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   496→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   497→        </footer>
+   498→      </main>
+   499→    )
+   500→  }
+   501→
+   502→  // Render Documentation Page
+   503→  if (currentView === 'documentation') {
+   504→    return (
+   505→      <>
+   506→        <DocumentationSection onBack={handleGoHome} />
+   507→        <AIAssistant />
+   508→      </>
+   509→    )
+   510→  }
+   511→
+   512→  // Render Tutorials Page
+   513→  if (currentView === 'tutorials') {
+   514→    return (
+   515→      <>
+   516→        <TutorialsSection onBack={handleGoHome} />
+   517→        <AIAssistant />
+   518→      </>
+   519→    )
+   520→  }
+   521→
+   522→  // Render Support/Buy Me Coffee Page
+   523→  if (currentView === 'coffee') {
+   524→    return (
+   525→      <>
+   526→        <SupportPage onBack={handleGoHome} />
+   527→        <AIAssistant />
+   528→      </>
+   529→    )
+   530→  }
+   531→
+   532→  // Render About Creator Page
+   533→  if (currentView === 'about') {
+   534→    return (
+   535→      <>
+   536→        <AboutCreator onBack={handleGoHome} />
+   537→        <AIAssistant />
+   538→      </>
+   539→    )
+   540→  }
+   541→
+   542→  // Render AI Assistant Page (dedicated full page)
+   543→  if (currentView === 'ai-assistant') {
+   544→    return (
+   545→      <main className="min-h-screen flex flex-col">
+   546→        <DashboardLayout
+   547→          title="AI Assistant"
+   548→          subtitle="Your intelligent bioinformatics companion"
+   549→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'AI Assistant' }]}
+   550→          actions={
+   551→            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   552→              ← Back to Dashboard
+   553→            </Button>
+   554→          }
+   555→          onSidebarNavigate={handleSidebarNavigate}
+   556→        >
+   557→          <div className="max-w-4xl mx-auto space-y-6">
+   558→            {/* AI Assistant Welcome */}
+   559→            <div className="text-center py-8">
+   560→              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#C1121F] to-[#780000] mb-6">
+   561→                <Dna className="h-10 w-10 text-white" />
+   562→              </div>
+   563→              <h1 className="text-3xl font-bold mb-3">BioAssist AI Assistant</h1>
+   564→              <p className="text-muted-foreground max-w-xl mx-auto">
+   565→                Your intelligent bioinformatics companion. Ask me anything about sequence analysis,
+   566→                genomics workflows, data interpretation, and more.
+   567→              </p>
+   568→            </div>
+   569→            
+   570→            {/* Quick Prompts Grid */}
+   571→            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   572→              {[
+   573→                { icon: '🧬', title: 'BLAST Analysis', desc: 'Interpret BLAST results and alignment scores', prompt: 'Explain my BLAST results' },
+   574→                { icon: '📊', title: 'RNA-seq Workflow', desc: 'Guide through transcriptome analysis pipeline', prompt: 'How do I analyze RNA-seq data?' },
+   575→                { icon: '🧪', title: 'Primer Design', desc: 'Get help designing PCR primers', prompt: 'Design primers for this sequence' },
+   576→                { icon: '🔬', title: 'Variant Analysis', desc: 'Understand VCF files and mutations', prompt: 'Help me interpret this VCF file' },
+   577→              ].map((item, i) => (
+   578→                <button
+   579→                  key={i}
+   580→                  onClick={() => {
+   581→                    // This will be handled by the AI assistant component
+   582→                    setAiAssistantOpen(true)
+   583→                    setTimeout(() => {
+   584→                      // Dispatch custom event to send message to AI assistant
+   585→                      window.dispatchEvent(new CustomEvent('ai-prompt', { detail: item.prompt }))
+   586→                    }, 300)
+   587→                  }}
+   588→                  className="p-5 rounded-xl border bg-card hover:bg-accent/50 hover:border-biored/30 transition-all text-left cursor-pointer group"
+   589→                >
+   590→                  <div className="flex items-start gap-4">
+   591→                    <span className="text-3xl group-hover:scale-110 transition-transform">{item.icon}</span>
+   592→                    <div>
+   593→                      <h3 className="font-semibold group-hover:text-biored transition-colors">{item.title}</h3>
+   594→                      <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+   595→                    </div>
+   596→                  </div>
+   597→                </button>
+   598→              ))}
+   599→            </div>
+   600→            
+   601→            {/* Capabilities Section */}
+   602→            <div className="p-6 rounded-xl border bg-card">
+   603→              <h2 className="font-semibold text-lg mb-4">What I Can Help With</h2>
+   604→              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+   605→                {[
+   606→                  { icon: Dna, title: 'Sequence Analysis', color: 'text-emerald-500' },
+   607→                  { icon: FlaskConical, title: 'Workflow Guidance', color: 'text-blue-500' },
+   608→                  { icon: Bug, title: 'Error Diagnosis', color: 'text-orange-500' },
+   609→                  { icon: BookOpen, title: 'Literature Search', color: 'text-purple-500' },
+   610→                  { icon: ClipboardList, title: 'Protocol Recommendations', color: 'text-pink-500' },
+   611→                  { icon: Code2, title: 'Code Generation', color: 'text-cyan-500' },
+   612→                ].map((cap, i) => (
+   613→                  <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/50">
+   614→                    <cap.icon className={`h-6 w-6 ${cap.color}`} />
+   615→                    <span className="text-xs font-medium text-center">{cap.title}</span>
+   616→                  </div>
+   617→                ))}
+   618→              </div>
+   619→            </div>
+   620→          </div>
+   621→        </DashboardLayout>
+   622→
+   623→        <AIAssistant />
+   624→        
+   625→        {/* Sticky Footer */}
+   626→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   627→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   628→          <p className="text-xs mt-1">by Toufik Mahata</p>
+   629→        </footer>
+   630→      </main>
+   631→    )
+   632→  }
+   633→
+   634→  // Render Settings Page
+   635→  if (currentView === 'settings') {
+   636→    return (
+   637→      <>
+   638→        <SettingsSection onBack={() => handleNavigate('dashboard')} />
+   639→        <AIAssistant />
+   640→      </>
+   641→    )
+   642→  }
+   643→
+   644→  // Fallback - return landing if view not recognized
+   645→  return (
+   646→    <main className="min-h-screen flex flex-col">
+   647→      <Navbar onNavigate={handleNavigate} />
+   648→      <div className="flex-1 flex items-center justify-center">
+   649→        <div className="text-center space-y-4">
+   650→          <h1 className="text-2xl font-bold">Page Not Found</h1>
+   651→          <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+   652→          <Button onClick={handleGoHome} className="bg-biored hover:bg-biored-dark text-white cursor-pointer">
+   653→            Go Home
+   654→          </Button>
+   655→        </div>
+   656→      </div>
+   657→      <FooterSection />
+   658→      <AIAssistant />
+   659→    </main>
+   660→  )
+   661→}
+   662→

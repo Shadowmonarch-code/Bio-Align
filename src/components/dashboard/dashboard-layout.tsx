@@ -91,10 +91,9 @@ const databaseLinks = [
 // Search Dialog Component with full functionality
 interface SearchDialogProps {
   onNavigate?: (view: string, toolId?: string) => void
-  onOpenAI?: () => void
 }
 
-function SearchDialog({ onNavigate, onOpenAI }: SearchDialogProps) {
+function SearchDialog({ onNavigate }: SearchDialogProps) {
   const [open, setOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -157,13 +156,6 @@ function SearchDialog({ onNavigate, onOpenAI }: SearchDialogProps) {
   const handleDatabaseClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer')
     setOpen(false)
-  }
-
-  const handleAIAssistant = () => {
-    setOpen(false)
-    if (onOpenAI) {
-      onOpenAI()
-    }
   }
 
   const hasResults = filteredTools.length > 0 || filteredDatabases.length > 0
@@ -251,12 +243,12 @@ function SearchDialog({ onNavigate, onOpenAI }: SearchDialogProps) {
                         <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘P</kbd>
                       </button>
                       <button
-                        onClick={handleAIAssistant}
+                        onClick={() => onNavigate?.('workspaces')}
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
                       >
-                        <BrainIcon className="size-4 text-purple-500" />
-                        <span>Ask AI Assistant</span>
-                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘A</kbd>
+                        <FolderIcon className="size-4 text-green-500" />
+                        <span>Open Workspaces</span>
+                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘W</kbd>
                       </button>
                     </div>
 
@@ -492,7 +484,6 @@ function Header({
   actions,
   breadcrumbs = [],
   onSearchNavigate,
-  onOpenAI,
 }: {
   onMobileMenuClick: () => void
   title?: string
@@ -500,7 +491,6 @@ function Header({
   actions?: React.ReactNode
   breadcrumbs?: Array<{ label: string; href?: string }>
   onSearchNavigate?: (view: string, toolId?: string) => void
-  onOpenAI?: () => void
 }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 sm:px-6 lg:px-8">
@@ -518,7 +508,7 @@ function Header({
       {/* Left section */}
       <div className="flex flex-1 items-center gap-4">
         {/* Search */}
-        <SearchDialog onNavigate={onSearchNavigate} onOpenAI={onOpenAI} />
+        <SearchDialog onNavigate={onSearchNavigate} />
 
         {/* Spacer for mobile */}
         <div className="hidden md:block" />

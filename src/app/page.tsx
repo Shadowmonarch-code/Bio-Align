@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Dna, FlaskConical, Bug, BookOpen, ClipboardList, Code2 } from 'lucide-react'
 import Navbar from '@/components/landing/navbar'
 import HeroSection from '@/components/landing/hero'
 import FeaturesSection from '@/components/landing/features'
@@ -20,21 +19,15 @@ import DashboardLayout from '@/components/dashboard/dashboard-layout'
 import SettingsSection from '@/components/dashboard/settings'
 import ToolsCatalog from '@/components/dashboard/tools-catalog'
 import FileUpload from '@/components/dashboard/file-upload'
-import AIAssistant from '@/components/dashboard/ai-assistant'
 import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
 
 // View types for the application - extended with new views
-type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'ai-assistant'
+type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about'
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
-  const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
-  
-  // Ref to control AI assistant from outside
-  const aiAssistantRef = React.useRef<{ toggleOpen: () => void } | null>(null)
-
   // Main navigation handler - switches between views
   const handleNavigate = useCallback((view: string) => {
     setCurrentView(view as ViewType)
@@ -167,9 +160,6 @@ export default function Home() {
 
         {/* Footer */}
         <FooterSection />
-
-        {/* AI Assistant - Always Available */}
-        <AIAssistant />
       </main>
     )
   }
@@ -275,8 +265,146 @@ export default function Home() {
           </div>
         </DashboardLayout>
 
-        <AIAssistant />
         
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
+    )
+  }
+
+  // Render Workspaces View
+  if (currentView === 'workspaces') {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <DashboardLayout
+          title="Workspaces"
+          subtitle="Manage your analysis projects and collaborations"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Workspaces' }]}
+          actions={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                ← Dashboard
+              </Button>
+              <Button className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+                + New Workspace
+              </Button>
+            </div>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <div className="space-y-6">
+            {/* Workspace Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { title: 'Total Workspaces', value: '5', icon: '📁', color: 'text-blue-500' },
+                { title: 'Shared with Me', value: '3', icon: '👥', color: 'text-green-500' },
+                { title: 'Recent Activity', value: '12', icon: '⚡', color: 'text-orange-500' },
+              ].map((stat, i) => (
+                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{stat.icon}</span>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+                      <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Workspaces Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { 
+                  name: 'BLAST Analysis Project', 
+                  desc: 'Comparative genomics study',
+                  updated: '2 hours ago',
+                  tools: ['BLAST', 'ClustalW'],
+                  members: 2,
+                  status: 'active'
+                },
+                { 
+                  name: 'RNA-seq Pipeline', 
+                  desc: 'Differential expression analysis',
+                  updated: '1 day ago',
+                  tools: ['STAR', 'DESeq2'],
+                  members: 1,
+                  status: 'active'
+                },
+                { 
+                  name: 'Primer Design Set', 
+                  desc: 'PCR primer collection for experiments',
+                  updated: '3 days ago',
+                  tools: ['Primer3'],
+                  members: 3,
+                  status: 'shared'
+                },
+                { 
+                  name: 'Variant Calling Study', 
+                  desc: 'SNP analysis from WGS data',
+                  updated: '1 week ago',
+                  tools: ['GATK', 'VCFtools'],
+                  members: 1,
+                  status: 'completed'
+                },
+                { 
+                  name: 'Protein Structure Analysis', 
+                  desc: 'AlphaFold predictions and docking',
+                  updated: '2 weeks ago',
+                  tools: ['AlphaFold', 'AutoDock'],
+                  members: 2,
+                  status: 'active'
+                },
+              ].map((workspace, i) => (
+                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all cursor-pointer group">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-biored/10 to-biored/20 flex items-center justify-center group-hover:from-biored/20 group-hover:to-biored/30 transition-colors">
+                      <span className="text-lg">🧬</span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      workspace.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      workspace.status === 'shared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>
+                      {workspace.status}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold mb-1 group-hover:text-biored transition-colors">{workspace.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-3">{workspace.desc}</p>
+                  
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {workspace.tools.map((tool, j) => (
+                      <span key={j} className="px-2 py-0.5 rounded-md bg-muted text-xs font-medium">{tool}</span>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      👥 {workspace.members} member{workspace.members > 1 ? 's' : ''}
+                    </span>
+                    <span>{workspace.updated}</span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add new workspace card */}
+              <button 
+                onClick={() => alert('Create new workspace feature coming soon!')}
+                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-biored/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
+              >
+                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-biored/10 flex items-center justify-center mb-3 transition-colors">
+                  <span className="text-2xl group-hover:text-biored transition-colors">+</span>
+                </div>
+                <p className="font-medium group-hover:text-biored transition-colors">Create New Workspace</p>
+                <p className="text-sm text-muted-foreground mt-1">Start a new project</p>
+              </button>
+            </div>
+          </div>
+        </DashboardLayout>
+
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
@@ -309,7 +437,6 @@ export default function Home() {
           <ToolsCatalog onToolSelect={handleToolSelect} />
         </DashboardLayout>
 
-        <AIAssistant />
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
@@ -347,7 +474,6 @@ export default function Home() {
           <SequenceAnalysisTool selectedTool={selectedTool} />
         </DashboardLayout>
 
-        <AIAssistant />
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
@@ -412,7 +538,6 @@ export default function Home() {
           </div>
         </DashboardLayout>
 
-        <AIAssistant />
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
@@ -488,7 +613,6 @@ export default function Home() {
           </div>
         </DashboardLayout>
 
-        <AIAssistant />
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
@@ -504,7 +628,6 @@ export default function Home() {
     return (
       <>
         <DocumentationSection onBack={handleGoHome} />
-        <AIAssistant />
       </>
     )
   }
@@ -514,7 +637,6 @@ export default function Home() {
     return (
       <>
         <TutorialsSection onBack={handleGoHome} />
-        <AIAssistant />
       </>
     )
   }
@@ -524,7 +646,6 @@ export default function Home() {
     return (
       <>
         <SupportPage onBack={handleGoHome} />
-        <AIAssistant />
       </>
     )
   }
@@ -534,100 +655,7 @@ export default function Home() {
     return (
       <>
         <AboutCreator onBack={handleGoHome} />
-        <AIAssistant />
       </>
-    )
-  }
-
-  // Render AI Assistant Page (dedicated full page)
-  if (currentView === 'ai-assistant') {
-    return (
-      <main className="min-h-screen flex flex-col">
-        <DashboardLayout
-          title="AI Assistant"
-          subtitle="Your intelligent bioinformatics companion"
-          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'AI Assistant' }]}
-          actions={
-            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-              ← Back to Dashboard
-            </Button>
-          }
-          onSidebarNavigate={handleSidebarNavigate}
-        >
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* AI Assistant Welcome */}
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#C1121F] to-[#780000] mb-6">
-                <Dna className="h-10 w-10 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold mb-3">BioAssist AI Assistant</h1>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Your intelligent bioinformatics companion. Ask me anything about sequence analysis,
-                genomics workflows, data interpretation, and more.
-              </p>
-            </div>
-            
-            {/* Quick Prompts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { icon: '🧬', title: 'BLAST Analysis', desc: 'Interpret BLAST results and alignment scores', prompt: 'Explain my BLAST results' },
-                { icon: '📊', title: 'RNA-seq Workflow', desc: 'Guide through transcriptome analysis pipeline', prompt: 'How do I analyze RNA-seq data?' },
-                { icon: '🧪', title: 'Primer Design', desc: 'Get help designing PCR primers', prompt: 'Design primers for this sequence' },
-                { icon: '🔬', title: 'Variant Analysis', desc: 'Understand VCF files and mutations', prompt: 'Help me interpret this VCF file' },
-              ].map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    // This will be handled by the AI assistant component
-                    setAiAssistantOpen(true)
-                    setTimeout(() => {
-                      // Dispatch custom event to send message to AI assistant
-                      window.dispatchEvent(new CustomEvent('ai-prompt', { detail: item.prompt }))
-                    }, 300)
-                  }}
-                  className="p-5 rounded-xl border bg-card hover:bg-accent/50 hover:border-biored/30 transition-all text-left cursor-pointer group"
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="text-3xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                    <div>
-                      <h3 className="font-semibold group-hover:text-biored transition-colors">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            {/* Capabilities Section */}
-            <div className="p-6 rounded-xl border bg-card">
-              <h2 className="font-semibold text-lg mb-4">What I Can Help With</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[
-                  { icon: Dna, title: 'Sequence Analysis', color: 'text-emerald-500' },
-                  { icon: FlaskConical, title: 'Workflow Guidance', color: 'text-blue-500' },
-                  { icon: Bug, title: 'Error Diagnosis', color: 'text-orange-500' },
-                  { icon: BookOpen, title: 'Literature Search', color: 'text-purple-500' },
-                  { icon: ClipboardList, title: 'Protocol Recommendations', color: 'text-pink-500' },
-                  { icon: Code2, title: 'Code Generation', color: 'text-cyan-500' },
-                ].map((cap, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/50">
-                    <cap.icon className={`h-6 w-6 ${cap.color}`} />
-                    <span className="text-xs font-medium text-center">{cap.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </DashboardLayout>
-
-        <AIAssistant />
-        
-        {/* Sticky Footer */}
-        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
-        </footer>
-      </main>
     )
   }
 
@@ -636,7 +664,6 @@ export default function Home() {
     return (
       <>
         <SettingsSection onBack={() => handleNavigate('dashboard')} />
-        <AIAssistant />
       </>
     )
   }
@@ -655,7 +682,6 @@ export default function Home() {
         </div>
       </div>
       <FooterSection />
-      <AIAssistant />
     </main>
   )
 }
