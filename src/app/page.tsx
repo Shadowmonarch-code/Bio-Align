@@ -11,15 +11,20 @@ import TestimonialsSection from '@/components/landing/testimonials'
 import PartnersSection from '@/components/landing/partners'
 import FAQSection from '@/components/landing/faq'
 import FooterSection from '@/components/landing/footer'
+import DocumentationSection from '@/components/landing/documentation'
+import TutorialsSection from '@/components/landing/tutorials'
+import SupportPage from '@/components/landing/support-coffee'
+import AboutCreator from '@/components/landing/about-creator'
 import DashboardLayout from '@/components/dashboard/dashboard-layout'
+import SettingsSection from '@/components/dashboard/settings'
 import ToolsCatalog from '@/components/dashboard/tools-catalog'
 import FileUpload from '@/components/dashboard/file-upload'
 import AIAssistant from '@/components/dashboard/ai-assistant'
 import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
 
-// View types for the application
-type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings'
+// View types for the application - extended with new views
+type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about'
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
@@ -91,6 +96,11 @@ export default function Home() {
         {/* Research Workflow */}
         <section id="workflow" className="py-24 relative">
           <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
+        </section>
+
+        {/* About Creator Section */}
+        <section id="about" className="py-24 bg-muted/30">
+          <AboutCreator onBack={handleGoHome} />
         </section>
 
         {/* Statistics */}
@@ -414,39 +424,60 @@ export default function Home() {
       <main className="min-h-screen flex flex-col">
         <DashboardLayout
           title="Databases"
-          subtitle="Connect to biological databases"
+          subtitle="Search and connect to biological databases worldwide"
           breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Databases' }]}
           actions={
-            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-              ← Dashboard
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
+              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                Dashboard
+              </Button>
+            </div>
           }
           onSidebarNavigate={handleSidebarNavigate}
         >
           <div className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+              <h3 className="font-semibold mb-2">🔍 Quick Database Access</h3>
+              <p className="text-sm text-muted-foreground">
+                Click on any database below to search directly. You can also use the search button in the navbar for quick access to NCBI, UniProt, PDB, and more!
+              </p>
+            </div>
+            
             {/* Database Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', status: 'Connected', color: 'bg-blue-500' },
-                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', status: 'Connected', color: 'bg-green-500' },
-                { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', status: 'Connected', color: 'bg-purple-500' },
-                { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', status: 'Connected', color: 'bg-orange-500' },
-                { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', status: 'Available', color: 'bg-teal-500' },
-                { name: 'ClinVar', desc: 'Clinical variants database', icon: '🏥', status: 'Available', color: 'bg-red-500' },
+                { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', url: 'https://www.ncbi.nlm.nih.gov/', color: 'bg-blue-500' },
+                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', url: 'https://www.uniprot.org/', color: 'bg-green-500' },
+                { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', url: 'https://www.rcsb.org/', color: 'bg-purple-500' },
+                { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', url: 'https://ensembl.org/', color: 'bg-orange-500' },
+                { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', url: 'https://www.genome.jp/kegg/', color: 'bg-teal-500' },
+                { name: 'PubMed', desc: 'Biomedical literature', icon: '📚', url: 'https://pubmed.ncbi.nlm.nih.gov/', color: 'bg-red-500' },
+                { name: 'ClinVar', desc: 'Clinical variants database', icon: '🏥', url: 'https://www.ncbi.nlm.nih.gov/clinvar/', color: 'bg-pink-500' },
+                { name: 'dbSNP', desc: 'Single nucleotide polymorphisms', icon: '🧪', url: 'https://www.ncbi.nlm.nih.gov/snp/', color: 'bg-indigo-500' },
+                { name: 'AlphaFold DB', desc: 'Predicted protein structures', icon: '🤖', url: 'https://alphafold.ebi.ac.uk/', color: 'bg-cyan-500' },
               ].map((db, i) => (
-                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all cursor-pointer group">
+                <a
+                  key={i}
+                  href={db.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all group no-underline"
+                >
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${db.color} text-white`}>
-                      {db.status}
+                      External
                     </span>
                   </div>
-                  <h3 className="font-semibold text-lg mb-1">{db.name}</h3>
+                  <h3 className="font-semibold text-lg mb-1 group-hover:text-biored transition-colors">{db.name}</h3>
                   <p className="text-sm text-muted-foreground">{db.desc}</p>
-                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1">
-                    Connect →
+                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Open Database →
                   </button>
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -460,6 +491,56 @@ export default function Home() {
           <p className="text-xs mt-1">by Toufik Mahata</p>
         </footer>
       </main>
+    )
+  }
+
+  // Render Documentation Page
+  if (currentView === 'documentation') {
+    return (
+      <>
+        <DocumentationSection onBack={handleGoHome} />
+        <AIAssistant />
+      </>
+    )
+  }
+
+  // Render Tutorials Page
+  if (currentView === 'tutorials') {
+    return (
+      <>
+        <TutorialsSection onBack={handleGoHome} />
+        <AIAssistant />
+      </>
+    )
+  }
+
+  // Render Support/Buy Me Coffee Page
+  if (currentView === 'coffee') {
+    return (
+      <>
+        <SupportPage onBack={handleGoHome} />
+        <AIAssistant />
+      </>
+    )
+  }
+
+  // Render About Creator Page
+  if (currentView === 'about') {
+    return (
+      <>
+        <AboutCreator onBack={handleGoHome} />
+        <AIAssistant />
+      </>
+    )
+  }
+
+  // Render Settings Page
+  if (currentView === 'settings') {
+    return (
+      <>
+        <SettingsSection onBack={() => handleNavigate('dashboard')} />
+        <AIAssistant />
+      </>
     )
   }
 

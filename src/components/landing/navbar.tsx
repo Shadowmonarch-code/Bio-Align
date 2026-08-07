@@ -15,13 +15,19 @@ import {
   Database,
   BookOpen,
   GraduationCap,
-  CreditCard,
+  Coffee,
   ArrowRight,
   LogIn,
   LogOut,
   UserPlus,
   User,
   Loader2,
+  Search,
+  Settings,
+  HelpCircle,
+  Phone,
+  Mail,
+  ExternalLink,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -45,44 +51,60 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Navigation links configuration
+// Navigation links configuration - all now functional
 const navLinks = [
   {
     name: "Dashboard",
     href: "#dashboard",
     icon: LayoutDashboard,
     description: "Your analytics hub",
+    action: "dashboard" as const,
   },
   {
     name: "Tools",
     href: "#tools",
     icon: Wrench,
     description: "Bioinformatics toolkit",
+    action: "tools" as const,
   },
   {
     name: "Databases",
     href: "#databases",
     icon: Database,
-    description: "Genomic databases",
+    description: "Search NCBI & more",
+    action: "databases" as const,
   },
   {
     name: "Documentation",
     href: "#documentation",
     icon: BookOpen,
     description: "API & guides",
+    action: "documentation" as const,
   },
   {
     name: "Tutorials",
     href: "#tutorials",
     icon: GraduationCap,
     description: "Learn BioAlign",
+    action: "tutorials" as const,
   },
   {
-    name: "Pricing",
-    href: "#pricing",
-    icon: CreditCard,
-    description: "Plans & pricing",
+    name: "Support Me",
+    href: "#coffee",
+    icon: Coffee,
+    description: "Buy me a coffee ☕",
+    action: "coffee" as const,
   },
+];
+
+// Database search options
+const databaseOptions = [
+  { id: "ncbi", name: "NCBI GenBank", url: "https://www.ncbi.nlm.nih.gov/", description: "Nucleotide sequences", color: "bg-blue-500" },
+  { id: "uniprot", name: "UniProt", url: "https://www.uniprot.org/", description: "Protein database", color: "bg-green-500" },
+  { id: "pdb", name: "PDB", url: "https://www.rcsb.org/", description: "Protein structures", color: "bg-purple-500" },
+  { id: "ensembl", name: "Ensembl", url: "https://ensembl.org/", description: "Genome browser", color: "bg-orange-500" },
+  { id: "kegg", name: "KEGG", url: "https://www.genome.jp/kegg/", description: "Pathway database", color: "bg-teal-500" },
+  { id: "pubmed", name: "PubMed", url: "https://pubmed.ncbi.nlm.nih.gov/", description: "Literature search", color: "bg-red-500" },
 ];
 
 // Animation variants (using tuple types for framer-motion compatibility)
@@ -110,12 +132,20 @@ export default function Navbar({ onNavigate }: NavbarProps) {
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [authMode, setAuthMode] = React.useState<"signin" | "signup">("signin");
   
+  // Search state
+  const [showSearch, setShowSearch] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchResults, setSearchResults] = React.useState<typeof databaseOptions>([]);
+  
   // Form state
   const [authEmail, setAuthEmail] = React.useState("");
   const [authPassword, setAuthPassword] = React.useState("");
   const [authName, setAuthName] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [authError, setAuthError] = React.useState("");
+  
+  // Contact modal
+  const [showContactModal, setShowContactModal] = React.useState(false);
   
   const { theme, setTheme } = useTheme();
   const { data: session, status } = useSession();
@@ -153,24 +183,25 @@ export default function Navbar({ onNavigate }: NavbarProps) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  // Handle navigation click
-  const handleNavClick = (href: string) => {
+  // Handle navigation click - ALL links are now functional
+  const handleNavClick = (href: string, action?: string) => {
     setIsMobileOpen(false);
     
-    // Check if it's a special navigation action
-    if (onNavigate) {
-      if (href === '#dashboard' || href === '#get-started') {
-        onNavigate('dashboard');
-        window.scrollTo({ top: 0 });
-        return;
-      }
+    if (action && onNavigate) {
+      onNavigate(action);
+      window.scrollTo({ top: 0 });
+      return;
     }
     
-    // Regular anchor scrolling
+    // For landing page sections that exist
     const elementId = href.substring(1);
     const element = document.getElementById(elementId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
+    } else if (onNavigate) {
+      // Navigate to view if section doesn't exist on current page
+      onNavigate(elementId);
+      window.scrollTo({ top: 0 });
     }
   };
 
@@ -272,6 +303,25 @@ export default function Navbar({ onNavigate }: NavbarProps) {
     }
   };
 
+  // Handle database search
+  const handleDatabaseSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length > 0) {
+      const filtered = databaseOptions.filter(db => 
+        db.name.toLowerCase().includes(query.toLowerCase()) ||
+        db.description.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  // Open external database link
+  const openDatabaseLink = (url: string, dbName: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   // User initials for avatar
   const getUserInitials = () => {
     if (session?.user?.name) {
@@ -309,7 +359,12 @@ export default function Navbar({ onNavigate }: NavbarProps) {
               className="group flex items-center gap-2.5 no-underline"
               onClick={(e) => {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                if (onNavigate) {
+                  onNavigate('landing');
+                  window.scrollTo({ top: 0 });
+                } else {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
               }}
             >
               <div className="relative flex items-center justify-center">
@@ -331,19 +386,21 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavClick(link.href);
+                  handleNavClick(link.href, link.action);
                 }}
                 className={cn(
                   "relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer",
                   "hover:text-foreground hover:bg-accent/10",
-                  activeSection === link.href.substring(1)
+                  activeSection === link.href.substring(1) || 
+                  (link.href.substring(1) === 'coffee' && activeSection === 'pricing')
                     ? "text-biored font-semibold"
                     : "text-muted-foreground"
                 )}
               >
                 <span className="relative z-10">{link.name}</span>
                 {/* Active indicator */}
-                {activeSection === link.href.substring(1) && (
+                {(activeSection === link.href.substring(1) || 
+                  (link.href.substring(1) === 'coffee' && activeSection === 'pricing')) && (
                   <motion.div
                     layoutId="activeNav"
                     className="absolute inset-0 rounded-md bg-biored/10 border border-biored/20"
@@ -360,6 +417,17 @@ export default function Navbar({ onNavigate }: NavbarProps) {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Global Search Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSearch(!showSearch)}
+              className="relative size-9 rounded-full hover:bg-accent/10 cursor-pointer"
+              aria-label="Search databases"
+            >
+              <Search className="size-4" />
+            </Button>
+
             {/* Theme Toggle */}
             {mounted && (
               <Button
@@ -396,6 +464,17 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                 </AnimatePresence>
               </Button>
             )}
+
+            {/* Contact Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowContactModal(true)}
+              className="hidden md:flex size-9 rounded-full hover:bg-accent/10 cursor-pointer"
+              aria-label="Contact us"
+            >
+              <Phone className="size-4" />
+            </Button>
 
             {/* Auth Section */}
             {status === "loading" ? (
@@ -559,7 +638,8 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                             href={link.href}
                             onClick={(e) => {
                               e.preventDefault();
-                              handleNavClick(link.href);
+                              setIsMobileOpen(false);
+                              handleNavClick(link.href, link.action);
                             }}
                             className={cn(
                               "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 no-underline cursor-pointer",
@@ -579,6 +659,18 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                           </a>
                         );
                       })}
+                      
+                      {/* Contact option in mobile */}
+                      <button
+                        onClick={() => {
+                          setIsMobileOpen(false);
+                          setShowContactModal(true);
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-left cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                      >
+                        <Phone className="size-5 shrink-0" />
+                        <span>Contact Us</span>
+                      </button>
                     </nav>
                   </div>
 
@@ -592,6 +684,81 @@ export default function Navbar({ onNavigate }: NavbarProps) {
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
       <div className="h-16" />
+
+      {/* Global Database Search Dropdown */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b shadow-lg"
+          >
+            <div className="max-w-4xl mx-auto p-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 size-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search databases (NCBI, UniProt, PDB, PubMed...)"
+                  value={searchQuery}
+                  onChange={(e) => handleDatabaseSearch(e.target.value)}
+                  className="pl-12 pr-4 py-3 text-base h-12"
+                  autoFocus
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSearch(false)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+              
+              {/* Search Results / Quick Access */}
+              <div className="mt-4">
+                {searchQuery.length > 0 ? (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Matching Databases:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {searchResults.map((db) => (
+                        <button
+                          key={db.id}
+                          onClick={() => openDatabaseLink(db.url, db.name)}
+                          className="flex items-center gap-3 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer text-left"
+                        >
+                          <div className={`w-3 h-3 rounded-full ${db.color}`} />
+                          <div>
+                            <p className="font-medium text-sm">{db.name}</p>
+                            <p className="text-xs text-muted-foreground">{db.description}</p>
+                          </div>
+                          <ExternalLink className="size-3 ml-auto text-muted-foreground" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Quick Access to Biological Databases:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                      {databaseOptions.map((db) => (
+                        <button
+                          key={db.id}
+                          onClick={() => openDatabaseLink(db.url, db.name)}
+                          className="flex flex-col items-center gap-1 p-3 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all cursor-pointer"
+                        >
+                          <div className={`w-4 h-4 rounded-full ${db.color}`} />
+                          <span className="text-xs font-medium">{db.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Authentication Modal */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
@@ -722,6 +889,73 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                 )}
               </p>
             </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contact Us Modal */}
+      <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="relative">
+            <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white">
+              <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+                <Phone className="size-5" />
+                Contact Us
+              </DialogTitle>
+              <DialogDescription className="text-white/80 text-center mt-1">
+                Get in touch with the BioAlign team
+              </DialogDescription>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Email Contact */}
+              <a
+                href="mailto:toufikmahata20@gmail.com"
+                className="flex items-center gap-4 p-4 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all no-underline group"
+              >
+                <div className="size-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Mail className="size-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Email</p>
+                  <p className="text-sm text-muted-foreground group-hover:text-biored transition-colors">
+                    toufikmahata20@gmail.com
+                  </p>
+                </div>
+              </a>
+
+              {/* Phone Contact */}
+              <a
+                href="tel:+916296159691"
+                className="flex items-center gap-4 p-4 rounded-lg border hover:border-biored/30 hover:bg-biored/5 transition-all no-underline group"
+              >
+                <div className="size-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Phone className="size-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Phone</p>
+                  <p className="text-sm text-muted-foreground group-hover:text-biored transition-colors">
+                    +91 62961 56961
+                  </p>
+                </div>
+              </a>
+
+              {/* Availability Notice */}
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <p className="text-sm text-muted-foreground text-center">
+                  🕐 Available Monday-Friday, 9 AM - 6 PM IST<br/>
+                  📍 CBSH, RPCAU, Pusa, New Delhi
+                </p>
+              </div>
+
+              <Button 
+                onClick={() => setShowContactModal(false)}
+                className="w-full cursor-pointer"
+                variant="outline"
+              >
+                Close
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
