@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
+import { Dna, FlaskConical, Bug, BookOpen, ClipboardList, Code2 } from 'lucide-react'
 import Navbar from '@/components/landing/navbar'
 import HeroSection from '@/components/landing/hero'
 import FeaturesSection from '@/components/landing/features'
@@ -24,11 +25,15 @@ import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
 
 // View types for the application - extended with new views
-type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about'
+type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'ai-assistant'
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
+  
+  // Ref to control AI assistant from outside
+  const aiAssistantRef = React.useRef<{ toggleOpen: () => void } | null>(null)
 
   // Main navigation handler - switches between views
   const handleNavigate = useCallback((view: string) => {
@@ -531,6 +536,98 @@ export default function Home() {
         <AboutCreator onBack={handleGoHome} />
         <AIAssistant />
       </>
+    )
+  }
+
+  // Render AI Assistant Page (dedicated full page)
+  if (currentView === 'ai-assistant') {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <DashboardLayout
+          title="AI Assistant"
+          subtitle="Your intelligent bioinformatics companion"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'AI Assistant' }]}
+          actions={
+            <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+              ← Back to Dashboard
+            </Button>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* AI Assistant Welcome */}
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#C1121F] to-[#780000] mb-6">
+                <Dna className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold mb-3">BioAssist AI Assistant</h1>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Your intelligent bioinformatics companion. Ask me anything about sequence analysis,
+                genomics workflows, data interpretation, and more.
+              </p>
+            </div>
+            
+            {/* Quick Prompts Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { icon: '🧬', title: 'BLAST Analysis', desc: 'Interpret BLAST results and alignment scores', prompt: 'Explain my BLAST results' },
+                { icon: '📊', title: 'RNA-seq Workflow', desc: 'Guide through transcriptome analysis pipeline', prompt: 'How do I analyze RNA-seq data?' },
+                { icon: '🧪', title: 'Primer Design', desc: 'Get help designing PCR primers', prompt: 'Design primers for this sequence' },
+                { icon: '🔬', title: 'Variant Analysis', desc: 'Understand VCF files and mutations', prompt: 'Help me interpret this VCF file' },
+              ].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    // This will be handled by the AI assistant component
+                    setAiAssistantOpen(true)
+                    setTimeout(() => {
+                      // Dispatch custom event to send message to AI assistant
+                      window.dispatchEvent(new CustomEvent('ai-prompt', { detail: item.prompt }))
+                    }, 300)
+                  }}
+                  className="p-5 rounded-xl border bg-card hover:bg-accent/50 hover:border-biored/30 transition-all text-left cursor-pointer group"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="text-3xl group-hover:scale-110 transition-transform">{item.icon}</span>
+                    <div>
+                      <h3 className="font-semibold group-hover:text-biored transition-colors">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Capabilities Section */}
+            <div className="p-6 rounded-xl border bg-card">
+              <h2 className="font-semibold text-lg mb-4">What I Can Help With</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { icon: Dna, title: 'Sequence Analysis', color: 'text-emerald-500' },
+                  { icon: FlaskConical, title: 'Workflow Guidance', color: 'text-blue-500' },
+                  { icon: Bug, title: 'Error Diagnosis', color: 'text-orange-500' },
+                  { icon: BookOpen, title: 'Literature Search', color: 'text-purple-500' },
+                  { icon: ClipboardList, title: 'Protocol Recommendations', color: 'text-pink-500' },
+                  { icon: Code2, title: 'Code Generation', color: 'text-cyan-500' },
+                ].map((cap, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/50">
+                    <cap.icon className={`h-6 w-6 ${cap.color}`} />
+                    <span className="text-xs font-medium text-center">{cap.title}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+
+        <AIAssistant />
+        
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
     )
   }
 

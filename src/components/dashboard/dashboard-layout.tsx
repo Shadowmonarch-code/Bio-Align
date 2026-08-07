@@ -63,9 +63,61 @@ interface DashboardLayoutProps {
   onSidebarNavigate?: (view: string, toolId?: string) => void
 }
 
-// Search Dialog Component (simplified - can be enhanced with cmdk)
-function SearchDialog() {
+// Tools data for search
+const searchableTools = [
+  { id: 'blast', name: 'BLAST Search', category: 'Sequence Analysis', icon: '🔍', href: '/dashboard/tools/sequence' },
+  { id: 'align', name: 'Multiple Sequence Alignment', category: 'Sequence Analysis', icon: '🧬', href: '/dashboard/tools/sequence' },
+  { id: 'orf', name: 'ORF Finder', category: 'Sequence Analysis', icon: '🔎', href: '/dashboard/tools/sequence' },
+  { id: 'translate', name: 'Translate Sequence', category: 'Sequence Analysis', icon: '🔄', href: '/dashboard/tools/sequence' },
+  { id: 'gc', name: 'GC Content Calculator', category: 'Sequence Analysis', icon: '📈', href: '/dashboard/tools/sequence' },
+  { id: 'primer', name: 'Primer Design', category: 'Primer Design', icon: '🧪', href: '/dashboard/tools/primer' },
+  { id: 'protein', name: 'Protein Analysis', category: 'Protein Analysis', icon: '🔬', href: '/dashboard/tools/protein' },
+  { id: 'genomics', name: 'Variant Analysis', category: 'Genomics', icon: '🧬', href: '/dashboard/tools/genomics' },
+  { id: 'rnaseq', name: 'RNA-seq Analysis', category: 'Transcriptomics', icon: '🧪', href: '/dashboard/tools/transcriptomics' },
+  { id: 'phylo', name: 'Phylogenetic Tree', category: 'Phylogenetics', icon: '🌳', href: '/dashboard/tools/phylogenetics' },
+  { id: 'docking', name: 'Molecular Docking', category: 'Molecular Docking', icon: '⚛️', href: '/dashboard/tools/docking' },
+  { id: 'crispr', name: 'CRISPR Design', category: 'CRISPR Tools', icon: '✂️', href: '/dashboard/tools/crispr' },
+]
+
+const databaseLinks = [
+  { name: 'NCBI GenBank', url: 'https://www.ncbi.nlm.nih.gov/' },
+  { name: 'UniProt', url: 'https://www.uniprot.org/' },
+  { name: 'PDB', url: 'https://www.rcsb.org/' },
+  { name: 'Ensembl', url: 'https://ensembl.org/' },
+  { name: 'KEGG', url: 'https://www.genome.jp/kegg/' },
+  { name: 'PubMed', url: 'https://pubmed.ncbi.nlm.nih.gov/' },
+]
+
+// Search Dialog Component with full functionality
+interface SearchDialogProps {
+  onNavigate?: (view: string, toolId?: string) => void
+  onOpenAI?: () => void
+}
+
+function SearchDialog({ onNavigate, onOpenAI }: SearchDialogProps) {
   const [open, setOpen] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Filter tools based on search query
+  const filteredTools = React.useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const query = searchQuery.toLowerCase()
+    return searchableTools.filter(tool => 
+      tool.name.toLowerCase().includes(query) || 
+      tool.category.toLowerCase().includes(query) ||
+      tool.id.toLowerCase().includes(query)
+    )
+  }, [searchQuery])
+
+  // Filter databases based on search query
+  const filteredDatabases = React.useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const query = searchQuery.toLowerCase()
+    return databaseLinks.filter(db => 
+      db.name.toLowerCase().includes(query)
+    )
+  }, [searchQuery])
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,11 +125,49 @@ function SearchDialog() {
         e.preventDefault()
         setOpen((prev) => !prev)
       }
+      // Close on Escape
+      if (e.key === "Escape" && open) {
+        e.preventDefault()
+        setOpen(false)
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [open])
+
+  // Focus input when dialog opens
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
+    // Reset search when closing
+    if (!open) {
+      setSearchQuery("")
+    }
+  }, [open])
+
+  const handleToolClick = (toolId: string) => {
+    setOpen(false)
+    if (onNavigate) {
+      onNavigate('analysis', toolId)
+    }
+  }
+
+  const handleDatabaseClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+    setOpen(false)
+  }
+
+  const handleAIAssistant = () => {
+    setOpen(false)
+    if (onOpenAI) {
+      onOpenAI()
+    }
+  }
+
+  const hasResults = filteredTools.length > 0 || filteredDatabases.length > 0
+  const showInitial = !searchQuery.trim()
 
   return (
     <>
@@ -85,7 +175,7 @@ function SearchDialog() {
         <TooltipTrigger asChild>
           <Button
             variant="outline"
-            className="relative h-9 w-full max-w-sm justify-start gap-2 text-sm text-muted-foreground sm:pr-12"
+            className="relative h-9 w-full max-w-sm justify-start gap-2 text-sm text-muted-foreground sm:pr-12 cursor-pointer"
             onClick={() => setOpen(true)}
           >
             <Search className="size-4" />
@@ -117,42 +207,127 @@ function SearchDialog() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed left-1/2 top-[20%] z-50 w-full max-w-lg -translate-x-1/2 overflow-hidden rounded-xl border bg-background shadow-2xl"
+              className="fixed left-1/2 top-[15%] z-50 w-full max-w-lg -translate-x-1/2 overflow-hidden rounded-xl border bg-background shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
+              {/* Search Input Header */}
               <div className="flex items-center border-b px-4">
                 <Search className="size-4 shrink-0 text-muted-foreground" />
                 <Input
-                  placeholder="Search tools, workspaces, databases..."
+                  ref={inputRef}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tools, databases, analysis..."
                   className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  autoFocus
                 />
                 <kbd className="pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                   ESC
                 </kbd>
               </div>
-              <div className="p-4">
-                <p className="text-sm text-muted-foreground">Start typing to search...</p>
-                <div className="mt-4 space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                    Quick Actions
-                  </p>
-                  {[
-                    { icon: DnaIcon, label: "Run Sequence Analysis", shortcut: "S" },
-                    { icon: FolderIcon, label: "Open Workspace", shortcut: "W" },
-                    { icon: BrainIcon, label: "Ask AI Assistant", shortcut: "A" },
-                  ].map((action) => (
-                    <button
-                      key={action.label}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent transition-colors"
-                    >
-                      <action.icon className="size-4 text-muted-foreground" />
-                      <span>{action.label}</span>
-                      <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">
-                        {action.shortcut}
-                      </kbd>
-                    </button>
-                  ))}
-                </div>
+              
+              {/* Search Results */}
+              <div className="max-h-[400px] overflow-y-auto">
+                {showInitial ? (
+                  /* Initial State - Quick Actions */
+                  <div className="p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
+                      Quick Actions
+                    </p>
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => handleToolClick('blast')}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                      >
+                        <DnaIcon className="size-4 text-biored" />
+                        <span>Run BLAST Search</span>
+                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘S</kbd>
+                      </button>
+                      <button
+                        onClick={() => handleToolClick('primer')}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                      >
+                        <FolderIcon className="size-4 text-blue-500" />
+                        <span>Design Primers</span>
+                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘P</kbd>
+                      </button>
+                      <button
+                        onClick={handleAIAssistant}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                      >
+                        <BrainIcon className="size-4 text-purple-500" />
+                        <span>Ask AI Assistant</span>
+                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘A</kbd>
+                      </button>
+                    </div>
+
+                    <div className="mt-6">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
+                        Popular Databases
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {databaseLinks.slice(0, 6).map((db) => (
+                          <button
+                            key={db.name}
+                            onClick={() => handleDatabaseClick(db.url)}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                          >
+                            <span className="text-xs">🔗</span>
+                            <span className="truncate">{db.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : hasResults ? (
+                  /* Search Results */
+                  <div className="p-2">
+                    {filteredTools.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 py-2">
+                          Tools ({filteredTools.length})
+                        </p>
+                        {filteredTools.map((tool) => (
+                          <button
+                            key={tool.id}
+                            onClick={() => handleToolClick(tool.id)}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                          >
+                            <span className="text-base">{tool.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{tool.name}</p>
+                              <p className="text-xs text-muted-foreground">{tool.category}</p>
+                            </div>
+                            <ChevronRight className="size-4 text-muted-foreground" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {filteredDatabases.length > 0 && (
+                      <div className={filteredTools.length > 0 ? "mt-2 pt-2 border-t" : ""}>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 py-2">
+                          Databases ({filteredDatabases.length})
+                        </p>
+                        {filteredDatabases.map((db) => (
+                          <button
+                            key={db.name}
+                            onClick={() => handleDatabaseClick(db.url)}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                          >
+                            <span>🔗</span>
+                            <span className="flex-1 truncate">{db.name}</span>
+                            <span className="text-xs text-muted-foreground">External →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* No Results */
+                  <div className="p-8 text-center">
+                    <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>
@@ -316,12 +491,16 @@ function Header({
   subtitle,
   actions,
   breadcrumbs = [],
+  onSearchNavigate,
+  onOpenAI,
 }: {
   onMobileMenuClick: () => void
   title?: string
   subtitle?: string
   actions?: React.ReactNode
   breadcrumbs?: Array<{ label: string; href?: string }>
+  onSearchNavigate?: (view: string, toolId?: string) => void
+  onOpenAI?: () => void
 }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 sm:px-6 lg:px-8">
@@ -339,7 +518,7 @@ function Header({
       {/* Left section */}
       <div className="flex flex-1 items-center gap-4">
         {/* Search */}
-        <SearchDialog />
+        <SearchDialog onNavigate={onSearchNavigate} onOpenAI={onOpenAI} />
 
         {/* Spacer for mobile */}
         <div className="hidden md:block" />
@@ -408,6 +587,7 @@ export default function DashboardLayout({
             subtitle={subtitle}
             actions={actions}
             breadcrumbs={displayBreadcrumbs}
+            onSearchNavigate={onSidebarNavigate}
           />
 
           {/* Page Title & Breadcrumbs Section */}
