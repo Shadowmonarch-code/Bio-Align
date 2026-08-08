@@ -21,9 +21,13 @@ import ToolsCatalog from '@/components/dashboard/tools-catalog'
 import FileUpload from '@/components/dashboard/file-upload'
 import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
+import DatasetManager from '@/components/dataset/dataset-manager'
+import PlantBreedingModule from '@/components/plant-breeding/plant-breeding-module'
+import ThesisStudio from '@/components/thesis/thesis-studio'
+import AnalyzeMyData from '@/components/ai/analyze-my-data'
 
 // View types for the application - extended with new views
-type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'workspaces'
+type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'workspaces' | 'dataset' | 'plant-breeding' | 'thesis' | 'analyze-data'
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
@@ -665,6 +669,120 @@ export default function Home() {
       <>
         <SettingsSection onBack={() => handleNavigate('dashboard')} />
       </>
+    )
+  }
+
+  // Render Plant Breeding Module Page
+  if (currentView === 'plant-breeding') {
+    return (
+      <main className="min-h-screen flex flex-col bg-background">
+        <DashboardLayout
+          title="Plant Breeding Analysis"
+          subtitle="Professional quantitative genetics tools for crop improvement research"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Plant Breeding' }]}
+          actions={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                ← Dashboard
+              </Button>
+              <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+                Tools
+              </Button>
+            </div>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <PlantBreedingModule />
+        </DashboardLayout>
+
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
+    )
+  }
+
+  // Render Dataset Manager Page
+  if (currentView === 'dataset') {
+    return (
+      <main className="min-h-screen flex flex-col bg-background">
+        <DashboardLayout
+          title="Dataset Manager"
+          subtitle="Upload, explore, clean, and transform your datasets"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Dataset Manager' }]}
+          actions={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                ← Dashboard
+              </Button>
+            </div>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <DatasetManager 
+            onDatasetLoaded={(ds) => console.log('Dataset loaded:', ds.name)}
+            onAnalyzeClick={(ds) => {
+              console.log('Analyze clicked:', ds.name)
+              // Navigate to analysis with this dataset
+              handleNavigate('analysis')
+            }}
+          />
+        </DashboardLayout>
+
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
+    )
+  }
+
+  // Render Thesis Studio Page
+  if (currentView === 'thesis') {
+    return (
+      <main className="min-h-screen flex flex-col bg-background">
+        <ThesisStudio />
+
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
+    )
+  }
+
+  // Render Analyze My Data Page (Prominent Feature)
+  if (currentView === 'analyze-data') {
+    return (
+      <main className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
+        <DashboardLayout
+          title="✨ Analyze My Data"
+          subtitle="AI-powered intelligent analysis recommendations for your research data"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Analyze My Data' }]}
+          actions={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                ← Dashboard
+              </Button>
+            </div>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <div className="py-6">
+            <AnalyzeMyData />
+          </div>
+        </DashboardLayout>
+
+        {/* Sticky Footer */}
+        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+          <p className="text-xs mt-1">by Toufik Mahata</p>
+        </footer>
+      </main>
     )
   }
 
