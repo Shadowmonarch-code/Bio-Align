@@ -307,7 +307,7 @@ function calculateNumericStats(values: number[]): Omit<ColumnInfo, 'name' | 'typ
   }
 }
 
-function calculateCategoricalStats(values: string[]): Omit<ColumnInfo, 'name' | 'type' | keyof ReturnType<typeof calculateNumericStats>> {
+function calculateCategoricalStats(values: string[]): Pick<ColumnInfo, 'uniqueCount' | 'categories' | 'mostFrequent'> {
   const categories: Record<string, number> = {}
   values.forEach(v => {
     const key = String(v)
@@ -318,7 +318,6 @@ function calculateCategoricalStats(values: string[]): Omit<ColumnInfo, 'name' | 
   const mostFrequent = sortedCategories[0]?.[0] || ''
   
   return {
-    missingCount: 0,
     uniqueCount: Object.keys(categories).length,
     categories,
     mostFrequent,
@@ -339,7 +338,6 @@ function calculateColumnStats(name: string, values: string[], type: ColumnInfo['
       name,
       type,
       missingCount,
-      uniqueCount: new Set(numericValues).size,
       ...calculateNumericStats(numericValues),
     }
   } else if (type === 'categorical') {
@@ -347,7 +345,6 @@ function calculateColumnStats(name: string, values: string[], type: ColumnInfo['
       name,
       type,
       missingCount,
-      uniqueCount: new Set(nonEmptyValues).size,
       ...calculateCategoricalStats(nonEmptyValues),
     }
   }
@@ -2148,5 +2145,5 @@ export default function DatasetManager({
   )
 }
 
-// Export types for external use
-export type { ColumnInfo, DatasetInfo, DatasetManagerProps, SortConfig, FilterCondition }
+// DatasetManager component is exported above
+// Types are exported at their definition location

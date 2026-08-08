@@ -1686,8 +1686,8 @@ function RenderResult({ result }: { result?: Record<string, unknown> }) {
               ))}
             </tbody>
           </table>
-          {result.summary && (
-            <p className="mt-3 text-xs text-muted-foreground italic">{result.summary as string}</p>
+          {result.summary != null && (
+            <p className="mt-3 text-xs text-muted-foreground italic">{String(result.summary)}</p>
           )}
         </div>
       )
@@ -1762,8 +1762,8 @@ function RenderResult({ result }: { result?: Record<string, unknown> }) {
               </tbody>
             </table>
           </div>
-          {result.note && (
-            <p className="text-xs text-muted-foreground italic">{result.note as string}</p>
+          {result.note != null && (
+            <p className="text-xs text-muted-foreground italic">{String(result.note)}</p>
           )}
         </div>
       )
@@ -1861,9 +1861,9 @@ function RenderResult({ result }: { result?: Record<string, unknown> }) {
             </div>
           </div>
 
-          {result.interpretation && (
+          {result.interpretation != null && (
             <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-sm text-blue-800 dark:text-blue-200">
-              <strong>Interpretation:</strong> {result.interpretation as string}
+              <strong>Interpretation:</strong> {String(result.interpretation)}
             </div>
           )}
         </div>
@@ -1892,9 +1892,9 @@ function RenderResult({ result }: { result?: Record<string, unknown> }) {
               <div className="text-lg font-bold text-[#C1121F]">{result.rSquared as string}</div>
             </div>
           </div>
-          {result.interpretation && (
+          {result.interpretation != null && (
             <p className="text-sm text-muted-foreground italic p-3 bg-muted/30 rounded-lg">
-              {result.interpretation as string}
+              {String(result.interpretation)}
             </p>
           )}
         </div>
@@ -1907,14 +1907,6 @@ function RenderResult({ result }: { result?: Record<string, unknown> }) {
         </div>
       )
   }
-}
-
-// Export types for external use
-export type {
-  DatasetInspection,
-  AnalysisRecommendation,
-  VisualizationRecommendation,
-  AnalysisResult,
 }
 
 // Export utility functions for external use

@@ -40,8 +40,8 @@ export interface ANOVASource {
   ss: number;
   df: number;
   ms: number;
-  f: number;
-  pValue: number;
+  f?: number;
+  pValue?: number;
 }
 
 /**
@@ -2334,7 +2334,9 @@ export function cutDendrogram(
 ): number[][] {
   if (nClusters <= 0) return [];
   if (nClusters === 1) {
-    return [dendrogram.labels || []];
+    // Return single cluster with all indices
+    const n = dendrogram.labels?.length || dendrogram.size;
+    return [Array.from({ length: n }, (_, i) => i)];
   }
   
   // Get all merge heights
@@ -2351,7 +2353,8 @@ export function cutDendrogram(
   collectHeights(dendrogram);
   
   if (heights.length === 0) {
-    return [dendrogram.labels || []];
+    const n = dendrogram.labels?.length || dendrogram.size;
+    return [Array.from({ length: n }, (_, i) => i)];
   }
   
   // Sort by height and find cut threshold
@@ -2701,7 +2704,7 @@ export function tukeyHSD(
   const tCrit = criticalT(alpha, dfError);
   const qApprox = Math.sqrt(2) * tCrit;
   
-  const comparisons = [];
+  const comparisons: { i: number; j: number; diff: number; se: number; q: number; p: number; significant: boolean }[] = [];
   
   for (let i = 0; i < k; i++) {
     for (let j = i + 1; j < k; j++) {

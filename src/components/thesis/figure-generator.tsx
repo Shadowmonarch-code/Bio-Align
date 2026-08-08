@@ -189,8 +189,8 @@ export default function FigureGenerator({ onFigureCreate, existingFigures }: Fig
     margin: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     items: string[],
-    colors?: string[],
-    legendConfig: { position: string; fontSize: number; fontFamily: string }
+    legendConfig: { position: string; fontSize: number; fontFamily: string },
+    colors?: string[]
   ) => {
     let legendX: number, legendY: number
     
@@ -301,7 +301,7 @@ export default function FigureGenerator({ onFigureCreate, existingFigures }: Fig
     ctx.stroke()
 
     if (cfg.showLegend) {
-      drawLegend(ctx, margin, chartWidth, ['Treatment A'], undefined, {
+      drawLegend(ctx, margin, chartWidth, ['Treatment A'], {
         position: cfg.legendPosition,
         fontSize: cfg.fontSize,
         fontFamily: cfg.fontFamily
@@ -1032,7 +1032,7 @@ export default function FigureGenerator({ onFigureCreate, existingFigures }: Fig
                       <img src={selectedFigure.dataUrl} alt={selectedFigure.title} className="max-w-full h-auto" style={{ maxHeight: '400px' }} />
                     ) : (
                       <div className="w-full h-64 flex items-center justify-center bg-muted rounded">
-                        <ImageIcon className="w-16 h-16 text-muted-foreground/30" alt="" />
+                        <ImageIcon className="w-16 h-16 text-muted-foreground/30" />
                       </div>
                     )}
                   </div>

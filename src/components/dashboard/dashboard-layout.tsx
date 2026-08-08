@@ -670,7 +670,7 @@ export default function DashboardLayout({
                           {index === displayBreadcrumbs.length - 1 || (!crumb.href && !('onClick' in crumb)) ? (
                             <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                           ) : 'onClick' in crumb && crumb.onClick ? (
-                            <button onClick={crumb.onClick} className="flex items-center gap-1.5 hover:text-biored transition-colors">
+                            <button onClick={(e) => { e.preventDefault(); (crumb.onClick as () => void)(); }} className="flex items-center gap-1.5 hover:text-biored transition-colors">
                               {crumb.label}
                             </button>
                           ) : (

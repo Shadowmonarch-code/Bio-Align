@@ -154,6 +154,7 @@ export default function AIAssistant() {
   
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load messages from localStorage on mount
   useEffect(() => {

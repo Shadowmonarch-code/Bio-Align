@@ -1,7 +1,7 @@
 // Tools Data for BioAlign Platform
 // Comprehensive bioinformatics tools catalog
 
-export type ToolStatus = 'available' | 'beta' | 'deprecated' | 'maintenance';
+export type ToolStatus = 'available' | 'beta' | 'deprecated' | 'maintenance' | 'coming-soon';
 
 export interface BioTool {
   id: string;
@@ -23,6 +23,7 @@ export interface ToolCategory {
   icon: string;
   color: string;
   count: number;
+  tools?: BioTool[];
 }
 
 // Tool Categories

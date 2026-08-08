@@ -397,7 +397,9 @@ function SidebarContent({
                 className="w-full justify-center h-10 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 onClick={() => toggleSection(section.id)}
               >
-                <section.icon className="size-4" style={{ color: section.color }} />
+                <span style={{ color: section.color }} className="size-4 flex items-center justify-center">
+                  <section.icon className="size-4" />
+                </span>
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -420,10 +422,11 @@ function SidebarContent({
             className="w-full justify-between h-10 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
           >
             <div className="flex items-center gap-3">
-              <section.icon 
-                className="size-4 shrink-0 transition-colors group-hover:opacity-80" 
-                style={{ color: section.color }} 
-              />
+              <span style={{ color: section.color }} className="size-4 shrink-0 flex items-center justify-center transition-colors group-hover:opacity-80">
+                <section.icon 
+                  className="size-4" 
+                />
+              </span>
               <span className="font-medium">{section.emoji} {section.title}</span>
             </div>
             <motion.div
@@ -464,7 +467,9 @@ function SidebarContent({
                           className="w-full justify-between h-8 pl-6 pr-3 text-sm hover:bg-sidebar-accent/50"
                         >
                           <div className="flex items-center gap-2">
-                            <item.icon className="size-3.5" style={{ color: section.color }} />
+                            <span style={{ color: section.color }} className="size-3.5 flex items-center justify-center">
+                              <item.icon className="size-3.5" />
+                            </span>
                             <span>{item.title}</span>
                           </div>
                           <motion.div

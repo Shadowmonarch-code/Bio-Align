@@ -19,6 +19,49 @@ import {
   CheckCircle2,
   Circle,
   Loader2,
+  // Icon components for dynamic rendering
+  Dna,
+  ArrowLeftRight,
+  Microscope,
+  TreePine,
+  Atom,
+  FlaskConical,
+  TestTube,
+  Globe,
+  Target,
+  Database,
+  Zap,
+  FileText,
+  BarChart3,
+  LineChart,
+  PieChart,
+  ScatterChart,
+  Activity,
+  TrendingUp,
+  Brain,
+  Calculator,
+  GitBranch,
+  Layers,
+  Users,
+  Leaf,
+  Wheat,
+  Sprout,
+  Flower2,
+  Beaker,
+  Network,
+  Settings,
+  ChevronRight,
+  MousePointerClick,
+  Box,
+  ScanLine,
+  Waves,
+  Hexagon,
+  Puzzle,
+  Eye,
+  Download,
+  Upload,
+  Play,
+  Info,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -53,6 +96,128 @@ import {
 // ==================== TYPES ====================
 type ViewMode = "grid" | "list"
 type SortOption = "name" | "category" | "recent" | "popular"
+
+// ==================== ICON MAP ====================
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Dna,
+  ArrowLeftRight,
+  Microscope,
+  TreePine,
+  Atom,
+  FlaskConical,
+  TestTube,
+  Globe,
+  Target,
+  Database,
+  Zap,
+  FileText,
+  BarChart3,
+  LineChart,
+  PieChart,
+  ScatterChart,
+  Activity,
+  TrendingUp,
+  Brain,
+  Calculator,
+  GitBranch,
+  Layers,
+  Users,
+  Leaf,
+  Wheat,
+  Sprout,
+  Flower2,
+  Beaker,
+  Network,
+  Settings,
+  ChevronRight,
+  MousePointerClick,
+  Box,
+  ScanLine,
+  Waves,
+  Hexagon,
+  Puzzle,
+  Eye,
+  Download,
+  Upload,
+  Play,
+  Info,
+  Search,
+  Star,
+  Grid3X3,
+  List,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Rocket,
+  Sparkles,
+  Filter,
+  X,
+  Heart,
+  ExternalLink,
+  CheckCircle2,
+  Circle,
+  Loader2,
+}
+
+function getIconComponent(iconName: string): React.ComponentType<{ className?: string }> {
+  return iconMap[iconName] || Circle
+}
+
+// Icon wrapper component - renders icon by name without creating component references
+function DynamicIcon({ name, className }: { name: string; className?: string }) {
+  // Use a span with inline SVG or fallback to Circle
+  const props = { className }
+  switch (name) {
+    case 'Dna': return <Dna {...props} />
+    case 'ArrowLeftRight': return <ArrowLeftRight {...props} />
+    case 'Microscope': return <Microscope {...props} />
+    case 'TreePine': return <TreePine {...props} />
+    case 'Atom': return <Atom {...props} />
+    case 'FlaskConical': return <FlaskConical {...props} />
+    case 'TestTube': return <TestTube {...props} />
+    case 'Globe': return <Globe {...props} />
+    case 'Target': return <Target {...props} />
+    case 'Database': return <Database {...props} />
+    case 'Zap': return <Zap {...props} />
+    case 'FileText': return <FileText {...props} />
+    case 'BarChart3': return <BarChart3 {...props} />
+    case 'LineChart': return <LineChart {...props} />
+    case 'PieChart': return <PieChart {...props} />
+    case 'ScatterChart': return <ScatterChart {...props} />
+    case 'Activity': return <Activity {...props} />
+    case 'TrendingUp': return <TrendingUp {...props} />
+    case 'Brain': return <Brain {...props} />
+    case 'Calculator': return <Calculator {...props} />
+    case 'GitBranch': return <GitBranch {...props} />
+    case 'Layers': return <Layers {...props} />
+    case 'Users': return <Users {...props} />
+    case 'Leaf': return <Leaf {...props} />
+    case 'Wheat': return <Wheat {...props} />
+    case 'Sprout': return <Sprout {...props} />
+    case 'Flower2': return <Flower2 {...props} />
+    case 'Beaker': return <Beaker {...props} />
+    case 'Network': return <Network {...props} />
+    case 'Settings': return <Settings {...props} />
+    case 'ChevronRight': return <ChevronRight {...props} />
+    case 'Search': return <Search {...props} />
+    case 'Star': return <Star {...props} />
+    case 'Grid3X3': return <Grid3X3 {...props} />
+    case 'List': return <List {...props} />
+    case 'Clock': return <Clock {...props} />
+    case 'ChevronDown': return <ChevronDown {...props} />
+    case 'ChevronUp': return <ChevronUp {...props} />
+    case 'Rocket': return <Rocket {...props} />
+    case 'Sparkles': return <Sparkles {...props} />
+    case 'Filter': return <Filter {...props} />
+    case 'X': return <X {...props} />
+    case 'Heart': return <Heart {...props} />
+    case 'ExternalLink': return <ExternalLink {...props} />
+    case 'CheckCircle2': return <CheckCircle2 {...props} />
+    case 'Circle': return <Circle {...props} />
+    case 'Loader2': return <Loader2 {...props} />
+    default: return <Circle {...props} />
+  }
+}
 
 // ==================== ICON COMPONENTS ====================
 function StatusIcon({ status }: { status: ToolStatus }) {
@@ -161,10 +326,9 @@ function CategoryCard({
   onToggle: () => void
   onClick: () => void
 }) {
-  const Icon = category.icon
-  const availableTools = category.tools.filter(
+  const availableTools = category.tools?.filter(
     (t) => t.status === "available"
-  ).length
+  ).length || 0
 
   return (
     <motion.div
@@ -198,7 +362,7 @@ function CategoryCard({
                 color: category.color,
               }}
             >
-              <Icon className="size-6" />
+              <DynamicIcon name={category.icon} className="size-6" />
             </motion.div>
 
             {/* Content */}
@@ -224,10 +388,10 @@ function CategoryCard({
                   style={{
                     backgroundColor: `${category.color}15`,
                     color: category.color,
-                    borderColor: `${category.color}30`,
+                  borderColor: `${category.color}30`,
                   }}
                 >
-                  {category.tools.length} tools
+                  {category.tools?.length || 0} tools
                 </Badge>
                 <Badge
                   variant="outline"
@@ -271,7 +435,6 @@ function ToolCard({
   onToggleFavorite: () => void
   onLaunch: () => void
 }) {
-  const Icon = tool.icon
   const category = toolCategories.find((c) => c.id === tool.category)
 
   if (viewMode === "list") {
@@ -295,7 +458,7 @@ function ToolCard({
             color: category?.color || "#64748B",
           }}
         >
-          <Icon className="size-5" />
+          <DynamicIcon name={tool.icon} className="size-5" />
         </div>
 
         {/* Content */}
@@ -391,7 +554,7 @@ function ToolCard({
                 color: category?.color || "#64748B",
               }}
             >
-              <Icon className="size-5" />
+              <DynamicIcon name={tool.icon} className="size-5" />
             </motion.div>
             <div className="flex items-center gap-1">
               <StatusIcon status={tool.status} />
@@ -499,7 +662,6 @@ function EmptyState({
   }
 
   const config = configs[type]
-  const Icon = config.icon
 
   return (
     <motion.div
@@ -508,7 +670,7 @@ function EmptyState({
       className="flex flex-col items-center justify-center py-16 px-4 text-center"
     >
       <div className="size-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-        <Icon className="size-8 text-muted-foreground" />
+        <config.icon className="size-8 text-muted-foreground" />
       </div>
       <h3 className="text-lg font-semibold mb-2">{config.title}</h3>
       <p className="text-sm text-muted-foreground max-w-md">{config.description}</p>
@@ -599,13 +761,13 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
 
     switch (activeTab) {
       case "recent":
-        tools = recentlyUsedTools
+        tools = recentlyUsedTools()
         break
       case "favorites":
         tools = getAllTools().filter((t) => favorites.has(t.id))
         break
       case "popular":
-        tools = popularTools
+        tools = popularTools()
         break
       default:
         tools = getAllTools()
@@ -638,7 +800,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
     return toolCategories
       .map((cat) => ({
         ...cat,
-        tools: cat.tools.filter((tool) => {
+        tools: cat.tools?.filter((tool) => {
           const matchesSearch =
             !searchQuery.trim() ||
             tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -650,7 +812,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
           return matchesSearch && matchesStatus
         }),
       }))
-      .filter((cat) => cat.tools.length > 0)
+      .filter((cat) => (cat.tools?.length || 0) > 0)
   }, [searchQuery, statusFilter])
 
   // Handle tool launch
@@ -874,7 +1036,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                           <h2 className="text-lg font-semibold">
                             {category.name} Tools
                           </h2>
-                          <Badge variant="secondary">{category.tools.length}</Badge>
+                          <Badge variant="secondary">{category.tools?.length || 0}</Badge>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -892,7 +1054,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                           }
                         >
                           <AnimatePresence mode="popLayout">
-                            {category.tools.map((tool) => (
+                            {category.tools?.map((tool) => (
                               <ToolCard
                                 key={tool.id}
                                 tool={tool}
@@ -950,8 +1112,8 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
               }
             >
               <AnimatePresence mode="popLayout">
-                {recentlyUsedTools.length > 0 ? (
-                  recentlyUsedTools.map((tool) => (
+                {recentlyUsedTools().length > 0 ? (
+                  recentlyUsedTools().map((tool) => (
                     <ToolCard
                       key={tool.id}
                       tool={tool}
@@ -1006,7 +1168,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
               }
             >
               <AnimatePresence mode="popLayout">
-                {popularTools.map((tool) => (
+                {popularTools().map((tool) => (
                   <ToolCard
                     key={tool.id}
                     tool={tool}
@@ -1036,7 +1198,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                     color: category.color,
                   }}
                 >
-                  <category.icon className="size-6" />
+                  <DynamicIcon name={category.icon} className="size-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">{category.name}</h2>
@@ -1052,7 +1214,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                     color: category.color,
                   }}
                 >
-                  {category.tools.length} tools
+                  {category.tools?.length || 0} tools
                 </Badge>
               </div>
 
@@ -1065,7 +1227,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                 }
               >
                 <AnimatePresence mode="popLayout">
-                  {category.tools.map((tool) => (
+                  {category.tools?.map((tool) => (
                     <ToolCard
                       key={tool.id}
                       tool={tool}

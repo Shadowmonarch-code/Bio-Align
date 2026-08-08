@@ -93,6 +93,7 @@ export interface NoteRecord {
   title: string
   content: string
   tags: string[]
+  isPinned?: boolean
   createdAt: Date
   updatedAt: Date
 }

@@ -272,7 +272,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
     },
   },
 };
@@ -285,7 +285,7 @@ const statCardVariants = {
     scale: 1,
     transition: {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
     },
   },
 };
@@ -416,7 +416,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className="mt-16 md:mt-24 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6"
         >
           {stats.map((stat, index) => (

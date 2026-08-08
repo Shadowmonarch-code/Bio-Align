@@ -1,0 +1,1077 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useMemo, useCallback, useRef } from 'react'
+     4→import { motion, AnimatePresence } from 'framer-motion'
+     5→import {
+     6→  Image as ImageIcon,
+     7→  Plus,
+     8→  Download,
+     9→  Trash2,
+    10→  Copy,
+    11→  Settings,
+    12→  Eye,
+    13→  Type,
+    14→  Palette,
+    15→  Maximize2,
+    16→  BarChart3,
+    17→  LineChart,
+    18→  Activity,
+    19→  Ruler,
+    20→  Layers,
+    21→  Zap
+    22→} from 'lucide-react'
+    23→import { Button } from '@/components/ui/button'
+    24→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+    25→import { Input } from '@/components/ui/input'
+    26→import { Textarea } from '@/components/ui/textarea'
+    27→import { Badge } from '@/components/ui/badge'
+    28→import { Separator } from '@/components/ui/separator'
+    29→import { ScrollArea } from '@/components/ui/scroll-area'
+    30→import {
+    31→  Select,
+    32→  SelectContent,
+    33→  SelectItem,
+    34→  SelectTrigger,
+    35→  SelectValue,
+    36→} from '@/components/ui/select'
+    37→import { Label } from '@/components/ui/label'
+    38→import { Slider } from '@/components/ui/slider'
+    39→import { Switch } from '@/components/ui/switch'
+    40→import {
+    41→  Dialog,
+    42→  DialogContent,
+    43→  DialogHeader,
+    44→  DialogTitle,
+    45→  DialogTrigger,
+    46→} from '@/components/ui/dialog'
+    47→import {
+    48→  DropdownMenu,
+    49→  DropdownMenuContent,
+    50→  DropdownMenuItem,
+    51→  DropdownMenuTrigger,
+    52→} from '@/components/ui/dropdown-menu'
+    53→
+    54→export interface FigureRecord {
+    55→  id: string
+    56→  title: string
+    57→  type: 'bar' | 'line' | 'scatter' | 'box' | 'heatmap' | 'pie' | 'histogram' | 'violin'
+    58→  dataUrl: string
+    59→  caption: string
+    60→  dimensions: { width: number; height: number }
+    61→  journalStyle?: string
+    62→}
+    63→
+    64→interface FigureGeneratorProps {
+    65→  onFigureCreate: (figure: FigureRecord) => void
+    66→  existingFigures: FigureRecord[]
+    67→}
+    68→
+    69→// Color palettes for figures
+    70→const COLOR_PALETTES = {
+    71→  academic: ['#C1121F', '#1E3A5F', '#2D6A4F', '#9B2226', '#0A4B5C', '#588157', '#6D597A', '#E29578'],
+    72→  nature: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'],
+    73→  colorblind: ['#0077BB', '#33BBEE', '#009988', '#EE7733', '#CC3311', '#EE3377', '#BBBBBB', '#000000'],
+    74→  grayscale: ['#333333', '#666666', '#999999', '#BBBBBB', '#DDDDDD', '#444444', '#777777', '#AAAAAA'],
+    75→  warm: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#FFFFD2'],
+    76→  cool: ['#74B9FF', '#0984E3', '#00CEC9', '#55EFC4', '#81ECEC', '#A29BFE', '#DFE6E9', '#B2BEC3'],
+    77→}
+    78→
+    79→// Dimension presets
+    80→const DIMENSION_PRESETS = [
+    81→  { name: 'Single Column', width: 89, height: 67 },
+    82→  { name: 'Double Column', width: 183, height: 137 },
+    83→  { name: 'Square', width: 89, height: 89 },
+    84→  { name: 'Presentation', width: 160, height: 90 },
+    85→  { name: 'Custom', width: 120, height: 90 },
+    86→]
+    87→
+    88→// Font options
+    89→const FONT_OPTIONS = [
+    90→  { value: 'Arial', label: 'Arial' },
+    91→  { value: 'Helvetica', label: 'Helvetica' },
+    92→  { value: 'Times New Roman', label: 'Times New Roman' },
+    93→  { value: 'Georgia', label: 'Georgia' },
+    94→  { value: 'Verdana', label: 'Verdana' },
+    95→]
+    96→
+    97→type FigureType = FigureRecord['type']
+    98→
+    99→// Custom SVG icons for chart types
+   100→function ScatterChartIcon(props: React.SVGProps<SVGSVGElement>) {
+   101→  return (
+   102→    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+   103→      <circle cx="7" cy="15" r="2"/>
+   104→      <circle cx="12" cy="9" r="2"/>
+   105→      <circle cx="17" cy="13" r="2"/>
+   106→      <circle cx="9" cy="6" r="2"/>
+   107→      <circle cx="15" cy="17" r="2"/>
+   108→      <path d="M3 21h18M3 3v18"/>
+   109→    </svg>
+   110→  )
+   111→}
+   112→
+   113→function PieChartIcon(props: React.SVGProps<SVGSVGElement>) {
+   114→  return (
+   115→    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+   116→      <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+   117→      <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+   118→    </svg>
+   119→  )
+   120→}
+   121→
+   122→function BoxPlotIcon(props: React.SVGProps<SVGSVGElement>) {
+   123→  return (
+   124→    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+   125→      <rect x="4" y="4" width="16" height="16" rx="2"/>
+   126→      <path d="M4 12h16M8 4v16M16 4v16"/>
+   127→    </svg>
+   128→  )
+   129→}
+   130→
+   131→function HistogramIcon(props: React.SVGProps<SVGSVGElement>) {
+   132→  return (
+   133→    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+   134→      <rect x="3" y="12" width="4" height="9" rx="1"/>
+   135→      <rect x="9" y="8" width="4" height="13" rx="1"/>
+   136→      <rect x="15" y="4" width="4" height="17" rx="1"/>
+   137→    </svg>
+   138→  )
+   139→}
+   140→
+   141→export default function FigureGenerator({ onFigureCreate, existingFigures }: FigureGeneratorProps) {
+   142→  const [figures, setFigures] = useState<FigureRecord[]>(existingFigures)
+   143→  const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null)
+   144→  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+   145→  
+   146→  // New figure state
+   147→  const [figureType, setFigureType] = useState<FigureType>('bar')
+   148→  const [figureTitle, setFigureTitle] = useState('')
+   149→  const [figureCaption, setFigureCaption] = useState('')
+   150→  
+   151→  // Configuration state
+   152→  const [config, setConfig] = useState({
+   153→    width: 400,
+   154→    height: 300,
+   155→    fontFamily: 'Arial',
+   156→    fontSize: 12,
+   157→    colorPalette: 'academic' as keyof typeof COLOR_PALETTES,
+   158→    showLegend: true,
+   159→    legendPosition: 'right' as 'top' | 'bottom' | 'left' | 'right',
+   160→    showGrid: true,
+   161→    showErrorBars: true,
+   162→    errorBarStyle: 'sd' as 'sd' | 'se' | 'ci',
+   163→    axisLineWidth: 1,
+   164→    tickLength: 5,
+   165→    dpi: 300,
+   166→    format: 'png' as 'png' | 'svg' | 'pdf' | 'tiff',
+   167→  })
+   168→
+   169→  const canvasRef = useRef<HTMLCanvasElement>(null)
+   170→
+   171→  const selectedFigure = useMemo(() =>
+   172→    figures.find(f => f.id === selectedFigureId),
+   173→    [figures, selectedFigureId]
+   174→  )
+   175→
+   176→  const currentColors = COLOR_PALETTES[config.colorPalette]
+   177→
+   178→  // Sample data for preview
+   179→  const sampleData = useMemo(() => ({
+   180→    labels: ['Variety A', 'Variety B', 'Variety C', 'Variety D', 'Variety E'],
+   181→    values: [4.5, 5.2, 3.8, 6.1, 4.9],
+   182→    errorValues: [0.3, 0.4, 0.35, 0.45, 0.32],
+   183→    secondaryValues: [3.8, 4.5, 4.2, 5.5, 4.3],
+   184→  }), [])
+   185→
+   186→  // Drawing helper functions - defined first to avoid reference errors
+   187→  const drawLegend = useCallback((
+   188→    ctx: CanvasRenderingContext2D,
+   189→    margin: { top: number; right: number; bottom: number; left: number },
+   190→    chartWidth: number,
+   191→    items: string[],
+   192→    colors?: string[],
+   193→    legendConfig: { position: string; fontSize: number; fontFamily: string }
+   194→  ) => {
+   195→    let legendX: number, legendY: number
+   196→    
+   197→    switch (legendConfig.position) {
+   198→      case 'top':
+   199→        legendX = margin.left + chartWidth / 2 - (items.length * 60) / 2
+   200→        legendY = 10
+   201→        break
+   202→      case 'bottom':
+   203→        legendX = margin.left + chartWidth / 2 - (items.length * 60) / 2
+   204→        legendY = margin.top + 350 + 20
+   205→        break
+   206→      case 'left':
+   207→        legendX = 10
+   208→        legendY = margin.top + 20
+   209→        break
+   210→      default:
+   211→        legendX = margin.left + chartWidth + 15
+   212→        legendY = margin.top + 20
+   213→    }
+   214→
+   215→    items.forEach((item, index) => {
+   216→      if (colors) {
+   217→        ctx.fillStyle = colors[index % colors.length]
+   218→      } else {
+   219→        ctx.fillStyle = currentColors[0]
+   220→      }
+   221→      ctx.fillRect(legendX, legendY + index * 20, 14, 14)
+   222→
+   223→      ctx.fillStyle = '#333333'
+   224→      ctx.font = `${legendConfig.fontSize - 1}px ${legendConfig.fontFamily}`
+   225→      ctx.textAlign = 'left'
+   226→      ctx.textBaseline = 'middle'
+   227→      ctx.fillText(item, legendX + 18, legendY + index * 20 + 7)
+   228→    })
+   229→  }, [currentColors])
+   230→
+   231→  const drawBarChart = useCallback((
+   232→    ctx: CanvasRenderingContext2D, 
+   233→    margin: { top: number; right: number; bottom: number; left: number }, 
+   234→    chartWidth: number, 
+   235→    chartHeight: number,
+   236→    cfg: typeof config
+   237→  ) => {
+   238→    const maxValue = Math.max(...sampleData.values) * 1.2
+   239→    const barWidth = chartWidth / sampleData.labels.length * 0.7
+   240→    const gap = chartWidth / sampleData.labels.length * 0.3
+   241→
+   242→    // Grid lines
+   243→    if (cfg.showGrid) {
+   244→      ctx.strokeStyle = '#E5E7EB'
+   245→      ctx.lineWidth = 0.5
+   246→      for (let i = 0; i <= 5; i++) {
+   247→        const y = margin.top + (chartHeight / 5) * i
+   248→        ctx.beginPath()
+   249→        ctx.moveTo(margin.left, y)
+   250→        ctx.lineTo(margin.left + chartWidth, y)
+   251→        ctx.stroke()
+   252→
+   253→        ctx.fillStyle = '#666666'
+   254→        ctx.font = `${cfg.fontSize}px ${cfg.fontFamily}`
+   255→        ctx.textAlign = 'right'
+   256→        const value = (maxValue - (maxValue / 5) * i).toFixed(1)
+   257→        ctx.fillText(value, margin.left - 10, y + 4)
+   258→      }
+   259→    }
+   260→
+   261→    // Bars
+   262→    sampleData.values.forEach((value, index) => {
+   263→      const x = margin.left + (chartWidth / sampleData.labels.length) * index + gap / 2
+   264→      const barHeight = (value / maxValue) * chartHeight
+   265→      const y = margin.top + chartHeight - barHeight
+   266→
+   267→      ctx.fillStyle = currentColors[index % currentColors.length]
+   268→      ctx.fillRect(x, y, barWidth, barHeight)
+   269→
+   270→      if (cfg.showErrorBars) {
+   271→        const errorY = (sampleData.errorValues[index] / maxValue) * chartHeight
+   272→        ctx.strokeStyle = '#000000'
+   273→        ctx.lineWidth = 1.5
+   274→        ctx.beginPath()
+   275→        ctx.moveTo(x + barWidth / 2, y - errorY)
+   276→        ctx.lineTo(x + barWidth / 2, y + errorY)
+   277→        ctx.moveTo(x + barWidth / 2 - 5, y - errorY)
+   278→        ctx.lineTo(x + barWidth / 2 + 5, y - errorY)
+   279→        ctx.moveTo(x + barWidth / 2 - 5, y + errorY)
+   280→        ctx.lineTo(x + barWidth / 2 + 5, y + errorY)
+   281→        ctx.stroke()
+   282→      }
+   283→
+   284→      ctx.fillStyle = '#666666'
+   285→      ctx.font = `${cfg.fontSize}px ${cfg.fontFamily}`
+   286→      ctx.textAlign = 'center'
+   287→      ctx.save()
+   288→      ctx.translate(x + barWidth / 2, margin.top + chartHeight + 15)
+   289→      ctx.rotate(-Math.PI / 6)
+   290→      ctx.fillText(sampleData.labels[index], 0, 0)
+   291→      ctx.restore()
+   292→    })
+   293→
+   294→    // Axis lines
+   295→    ctx.strokeStyle = '#333333'
+   296→    ctx.lineWidth = cfg.axisLineWidth
+   297→    ctx.beginPath()
+   298→    ctx.moveTo(margin.left, margin.top)
+   299→    ctx.lineTo(margin.left, margin.top + chartHeight)
+   300→    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight)
+   301→    ctx.stroke()
+   302→
+   303→    if (cfg.showLegend) {
+   304→      drawLegend(ctx, margin, chartWidth, ['Treatment A'], undefined, {
+   305→        position: cfg.legendPosition,
+   306→        fontSize: cfg.fontSize,
+   307→        fontFamily: cfg.fontFamily
+   308→      })
+   309→    }
+   310→  }, [sampleData, currentColors, drawLegend])
+   311→
+   312→  const drawLineChart = useCallback((
+   313→    ctx: CanvasRenderingContext2D,
+   314→    margin: { top: number; right: number; bottom: number; left: number },
+   315→    chartWidth: number,
+   316→    chartHeight: number,
+   317→    cfg: typeof config
+   318→  ) => {
+   319→    const allValues = [...sampleData.values, ...sampleData.secondaryValues]
+   320→    const maxValue = Math.max(...allValues) * 1.2
+   321→    const minValue = Math.min(...allValues) * 0.8
+   322→    const range = maxValue - minValue
+   323→
+   324→    if (cfg.showGrid) {
+   325→      ctx.strokeStyle = '#E5E7EB'
+   326→      ctx.lineWidth = 0.5
+   327→      for (let i = 0; i <= 5; i++) {
+   328→        const y = margin.top + (chartHeight / 5) * i
+   329→        ctx.beginPath()
+   330→        ctx.moveTo(margin.left, y)
+   331→        ctx.lineTo(margin.left + chartWidth, y)
+   332→        ctx.stroke()
+   333→      }
+   334→    }
+   335→
+   336→    // Draw line 1
+   337→    ctx.strokeStyle = currentColors[0]
+   338→    ctx.lineWidth = 2
+   339→    ctx.beginPath()
+   340→    sampleData.values.forEach((value, index) => {
+   341→      const x = margin.left + (chartWidth / (sampleData.values.length - 1)) * index
+   342→      const y = margin.top + chartHeight - ((value - minValue) / range) * chartHeight
+   343→      if (index === 0) ctx.moveTo(x, y)
+   344→      else ctx.lineTo(x, y)
+   345→    })
+   346→    ctx.stroke()
+   347→
+   348→    sampleData.values.forEach((value, index) => {
+   349→      const x = margin.left + (chartWidth / (sampleData.values.length - 1)) * index
+   350→      const y = margin.top + chartHeight - ((value - minValue) / range) * chartHeight
+   351→      
+   352→      ctx.fillStyle = currentColors[0]
+   353→      ctx.beginPath()
+   354→      ctx.arc(x, y, 5, 0, Math.PI * 2)
+   355→      ctx.fill()
+   356→    })
+   357→
+   358→    // X-axis labels
+   359→    sampleData.labels.forEach((label, index) => {
+   360→      const x = margin.left + (chartWidth / (sampleData.labels.length - 1)) * index
+   361→      ctx.fillStyle = '#666666'
+   362→      ctx.font = `${cfg.fontSize}px ${cfg.fontFamily}`
+   363→      ctx.textAlign = 'center'
+   364→      ctx.save()
+   365→      ctx.translate(x, margin.top + chartHeight + 15)
+   366→      ctx.rotate(-Math.PI / 6)
+   367→      ctx.fillText(label, 0, 0)
+   368→      ctx.restore()
+   369→    })
+   370→
+   371→    ctx.strokeStyle = '#333333'
+   372→    ctx.lineWidth = cfg.axisLineWidth
+   373→    ctx.beginPath()
+   374→    ctx.moveTo(margin.left, margin.top)
+   375→    ctx.lineTo(margin.left, margin.top + chartHeight)
+   376→    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight)
+   377→    ctx.stroke()
+   378→  }, [sampleData, currentColors])
+   379→
+   380→  const drawScatterChart = useCallback((
+   381→    ctx: CanvasRenderingContext2D,
+   382→    margin: { top: number; right: number; bottom: number; left: number },
+   383→    chartWidth: number,
+   384→    chartHeight: number,
+   385→    cfg: typeof config
+   386→  ) => {
+   387→    const points = Array.from({ length: 30 }, () => ({
+   388→      x: Math.random() * 10,
+   389→      y: Math.random() * 10 + Math.random() * 3,
+   390→    }))
+   391→
+   392→    const maxX = Math.max(...points.map(p => p.x)) * 1.1
+   393→    const maxY = Math.max(...points.map(p => p.y)) * 1.1
+   394→
+   395→    if (cfg.showGrid) {
+   396→      ctx.strokeStyle = '#E5E7EB'
+   397→      ctx.lineWidth = 0.5
+   398→      for (let i = 0; i <= 5; i++) {
+   399→        const x = margin.left + (chartWidth / 5) * i
+   400→        const y = margin.top + (chartHeight / 5) * i
+   401→        ctx.beginPath()
+   402→        ctx.moveTo(x, margin.top)
+   403→        ctx.lineTo(x, margin.top + chartHeight)
+   404→        ctx.moveTo(margin.left, y)
+   405→        ctx.lineTo(margin.left + chartWidth, y)
+   406→        ctx.stroke()
+   407→      }
+   408→    }
+   409→
+   410→    points.forEach(point => {
+   411→      const x = margin.left + (point.x / maxX) * chartWidth
+   412→      const y = margin.top + chartHeight - (point.y / maxY) * chartHeight
+   413→      
+   414→      ctx.fillStyle = currentColors[0] + 'CC'
+   415→      ctx.strokeStyle = currentColors[0]
+   416→      ctx.lineWidth = 1.5
+   417→      ctx.beginPath()
+   418→      ctx.arc(x, y, 6, 0, Math.PI * 2)
+   419→      ctx.fill()
+   420→      ctx.stroke()
+   421→    })
+   422→
+   423→    ctx.strokeStyle = '#333333'
+   424→    ctx.lineWidth = cfg.axisLineWidth
+   425→    ctx.beginPath()
+   426→    ctx.moveTo(margin.left, margin.top)
+   427→    ctx.lineTo(margin.left, margin.top + chartHeight)
+   428→    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight)
+   429→    ctx.stroke()
+   430→  }, [currentColors])
+   431→
+   432→  const drawBoxPlot = useCallback((
+   433→    ctx: CanvasRenderingContext2D,
+   434→    margin: { top: number; right: number; bottom: number; left: number },
+   435→    chartWidth: number,
+   436→    chartHeight: number,
+   437→    cfg: typeof config
+   438→  ) => {
+   439→    const boxData = [
+   440→      { min: 2.1, q1: 3.5, median: 4.5, q3: 5.2, max: 6.8, outliers: [7.5] },
+   441→      { min: 2.8, q1: 4.0, median: 5.2, q3: 6.0, max: 7.2, outliers: [] },
+   442→      { min: 1.5, q1: 3.0, median: 3.8, q3: 4.5, max: 5.5, outliers: [6.2, 6.8] },
+   443→      { min: 3.2, q1: 4.8, median: 6.1, q3: 7.0, max: 8.2, outliers: [] },
+   444→      { min: 2.5, q1: 3.8, median: 4.9, q3: 5.6, max: 6.5, outliers: [7.1] },
+   445→    ]
+   446→
+   447→    const globalMax = 9
+   448→    const boxWidth = chartWidth / boxData.length * 0.5
+   449→
+   450→    if (cfg.showGrid) {
+   451→      ctx.strokeStyle = '#E5E7EB'
+   452→      ctx.lineWidth = 0.5
+   453→      for (let i = 0; i <= 5; i++) {
+   454→        const y = margin.top + (chartHeight / 5) * i
+   455→        ctx.beginPath()
+   456→        ctx.moveTo(margin.left, y)
+   457→        ctx.lineTo(margin.left + chartWidth, y)
+   458→        ctx.stroke()
+   459→      }
+   460→    }
+   461→
+   462→    boxData.forEach((box, index) => {
+   463→      const centerX = margin.left + (chartWidth / boxData.length) * (index + 0.5)
+   464→      
+   465→      const scaleY = (value: number) => margin.top + chartHeight - (value / globalMax) * chartHeight
+   466→
+   467→      ctx.strokeStyle = '#333333'
+   468→      ctx.lineWidth = 1.5
+   469→      ctx.beginPath()
+   470→      ctx.moveTo(centerX, scaleY(box.min))
+   471→      ctx.lineTo(centerX, scaleY(box.q1))
+   472→      ctx.moveTo(centerX, scaleY(box.q3))
+   473→      ctx.lineTo(centerX, scaleY(box.max))
+   474→      ctx.stroke()
+   475→
+   476→      ctx.beginPath()
+   477→      ctx.moveTo(centerX - boxWidth / 3, scaleY(box.min))
+   478→      ctx.lineTo(centerX + boxWidth / 3, scaleY(box.min))
+   479→      ctx.moveTo(centerX - boxWidth / 3, scaleY(box.max))
+   480→      ctx.lineTo(centerX + boxWidth / 3, scaleY(box.max))
+   481→      ctx.stroke()
+   482→
+   483→      ctx.fillStyle = currentColors[index % currentColors.length] + '40'
+   484→      ctx.strokeStyle = currentColors[index % currentColors.length]
+   485→      ctx.lineWidth = 2
+   486→      ctx.fillRect(centerX - boxWidth / 2, scaleY(box.q3), boxWidth, scaleY(box.q1) - scaleY(box.q3))
+   487→      ctx.strokeRect(centerX - boxWidth / 2, scaleY(box.q3), boxWidth, scaleY(box.q1) - scaleY(box.q3))
+   488→
+   489→      ctx.strokeStyle = '#000000'
+   490→      ctx.lineWidth = 2
+   491→      ctx.beginPath()
+   492→      ctx.moveTo(centerX - boxWidth / 2, scaleY(box.median))
+   493→      ctx.lineTo(centerX + boxWidth / 2, scaleY(box.median))
+   494→      ctx.stroke()
+   495→
+   496→      box.outliers.forEach(outlier => {
+   497→        ctx.fillStyle = '#FFFFFF'
+   498→        ctx.strokeStyle = currentColors[index % currentColors.length]
+   499→        ctx.lineWidth = 1.5
+   500→        ctx.beginPath()
+   501→        ctx.arc(centerX, scaleY(outlier), 4, 0, Math.PI * 2)
+   502→        ctx.fill()
+   503→        ctx.stroke()
+   504→      })
+   505→
+   506→      ctx.fillStyle = '#666666'
+   507→      ctx.font = `${cfg.fontSize}px ${cfg.fontFamily}`
+   508→      ctx.textAlign = 'center'
+   509→      ctx.save()
+   510→      ctx.translate(centerX, margin.top + chartHeight + 15)
+   511→      ctx.rotate(-Math.PI / 6)
+   512→      ctx.fillText(sampleData.labels[index], 0, 0)
+   513→      ctx.restore()
+   514→    })
+   515→  }, [currentColors, sampleData])
+   516→
+   517→  const drawHistogram = useCallback((
+   518→    ctx: CanvasRenderingContext2D,
+   519→    margin: { top: number; right: number; bottom: number; left: number },
+   520→    chartWidth: number,
+   521→    chartHeight: number,
+   522→    cfg: typeof config
+   523→  ) => {
+   524→    const bins = [8, 15, 25, 18, 12, 6, 3]
+   525→    const maxCount = Math.max(...bins) * 1.2
+   526→    const binWidth = chartWidth / bins.length
+   527→
+   528→    if (cfg.showGrid) {
+   529→      ctx.strokeStyle = '#E5E7EB'
+   530→      ctx.lineWidth = 0.5
+   531→      for (let i = 0; i <= 5; i++) {
+   532→        const y = margin.top + (chartHeight / 5) * i
+   533→        ctx.beginPath()
+   534→        ctx.moveTo(margin.left, y)
+   535→        ctx.lineTo(margin.left + chartWidth, y)
+   536→        ctx.stroke()
+   537→      }
+   538→    }
+   539→
+   540→    bins.forEach((count, index) => {
+   541→      const x = margin.left + binWidth * index
+   542→      const barHeight = (count / maxCount) * chartHeight
+   543→      const y = margin.top + chartHeight - barHeight
+   544→
+   545→      ctx.fillStyle = currentColors[0] + 'CC'
+   546→      ctx.strokeStyle = currentColors[0]
+   547→      ctx.lineWidth = 1
+   548→      ctx.fillRect(x + 2, y, binWidth - 4, barHeight)
+   549→      ctx.strokeRect(x + 2, y, binWidth - 4, barHeight)
+   550→    })
+   551→
+   552→    ctx.strokeStyle = '#333333'
+   553→    ctx.lineWidth = cfg.axisLineWidth
+   554→    ctx.beginPath()
+   555→    ctx.moveTo(margin.left, margin.top)
+   556→    ctx.lineTo(margin.left, margin.top + chartHeight)
+   557→    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight)
+   558→    ctx.stroke()
+   559→  }, [currentColors])
+   560→
+   561→  const drawPieChart = useCallback((
+   562→    ctx: CanvasRenderingContext2D,
+   563→    width: number,
+   564→    height: number,
+   565→    cfg: typeof config
+   566→  ) => {
+   567→    const data = [30, 25, 20, 15, 10]
+   568→    const total = data.reduce((a, b) => a + b, 0)
+   569→    const centerX = width / 2 - 50
+   570→    const centerY = height / 2
+   571→    const radius = Math.min(width, height) / 3
+   572→
+   573→    let startAngle = -Math.PI / 2
+   574→
+   575→    data.forEach((value, index) => {
+   576→      const sliceAngle = (value / total) * Math.PI * 2
+   577→      const endAngle = startAngle + sliceAngle
+   578→
+   579→      ctx.fillStyle = currentColors[index % currentColors.length]
+   580→      ctx.beginPath()
+   581→      ctx.moveTo(centerX, centerY)
+   582→      ctx.arc(centerX, centerY, radius, startAngle, endAngle)
+   583→      ctx.closePath()
+   584→      ctx.fill()
+   585→
+   586→      ctx.strokeStyle = '#FFFFFF'
+   587→      ctx.lineWidth = 2
+   588→      ctx.stroke()
+   589→
+   590→      const midAngle = startAngle + sliceAngle / 2
+   591→      const labelRadius = radius * 0.7
+   592→      const labelX = centerX + Math.cos(midAngle) * labelRadius
+   593→      const labelY = centerY + Math.sin(midAngle) * labelRadius
+   594→
+   595→      ctx.fillStyle = '#FFFFFF'
+   596→      ctx.font = `bold ${cfg.fontSize}px ${cfg.fontFamily}`
+   597→      ctx.textAlign = 'center'
+   598→      ctx.textBaseline = 'middle'
+   599→      ctx.fillText(`${value}%`, labelX, labelY)
+   600→
+   601→      startAngle = endAngle
+   602→    })
+   603→
+   604→    const legendItems = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
+   605→    legendItems.forEach((item, index) => {
+   606→      const legendX = width - 90
+   607→      const legendY = 50 + index * 22
+   608→
+   609→      ctx.fillStyle = currentColors[index % currentColors.length]
+   610→      ctx.fillRect(legendX, legendY, 12, 12)
+   611→
+   612→      ctx.fillStyle = '#333333'
+   613→      ctx.font = `${cfg.fontSize - 1}px ${cfg.fontFamily}`
+   614→      ctx.textAlign = 'left'
+   615→      ctx.textBaseline = 'middle'
+   616→      ctx.fillText(item, legendX + 16, legendY + 6)
+   617→    })
+   618→  }, [currentColors])
+   619→
+   620→  // Main draw function - defined after helpers
+   621→  const drawFigure = useCallback((canvas: HTMLCanvasElement, type: FigureType) => {
+   622→    const ctx = canvas.getContext('2d')
+   623→    if (!ctx) return
+   624→
+   625→    const { width, height } = config
+   626→    canvas.width = width * 2
+   627→    canvas.height = height * 2
+   628→    ctx.scale(2, 2)
+   629→
+   630→    ctx.fillStyle = '#FFFFFF'
+   631→    ctx.fillRect(0, 0, width, height)
+   632→
+   633→    const margin = { top: 40, right: config.showLegend && config.legendPosition === 'right' ? 100 : 20, bottom: 60, left: 60 }
+   634→    const chartWidth = width - margin.left - margin.right
+   635→    const chartHeight = height - margin.top - margin.bottom
+   636→
+   637→    switch (type) {
+   638→      case 'bar':
+   639→        drawBarChart(ctx, margin, chartWidth, chartHeight, config)
+   640→        break
+   641→      case 'line':
+   642→        drawLineChart(ctx, margin, chartWidth, chartHeight, config)
+   643→        break
+   644→      case 'scatter':
+   645→        drawScatterChart(ctx, margin, chartWidth, chartHeight, config)
+   646→        break
+   647→      case 'box':
+   648→        drawBoxPlot(ctx, margin, chartWidth, chartHeight, config)
+   649→        break
+   650→      case 'histogram':
+   651→        drawHistogram(ctx, margin, chartWidth, chartHeight, config)
+   652→        break
+   653→      case 'pie':
+   654→        drawPieChart(ctx, width, height, config)
+   655→        break
+   656→      default:
+   657→        drawBarChart(ctx, margin, chartWidth, chartHeight, config)
+   658→    }
+   659→
+   660→    ctx.fillStyle = '#000000'
+   661→    ctx.font = `bold ${config.fontSize + 2}px ${config.fontFamily}`
+   662→    ctx.textAlign = 'center'
+   663→    ctx.fillText(figureTitle || 'Sample Figure Title', width / 2, 25)
+   664→
+   665→  }, [config, figureTitle, drawBarChart, drawLineChart, drawScatterChart, drawBoxPlot, drawHistogram, drawPieChart])
+   666→
+   667→  // Redraw when config changes
+   668→  React.useEffect(() => {
+   669→    if (canvasRef.current) {
+   670→      drawFigure(canvasRef.current, figureType)
+   671→    }
+   672→  }, [config, figureType, drawFigure])
+   673→
+   674→  const handleCreateFigure = () => {
+   675→    if (!canvasRef.current) return
+   676→
+   677→    const newFigure: FigureRecord = {
+   678→      id: `figure-${Date.now()}`,
+   679→      title: figureTitle || `${figureType.charAt(0).toUpperCase() + figureType.slice(1)} Chart`,
+   680→      type: figureType,
+   681→      dataUrl: canvasRef.current.toDataURL(`image/${config.format}`, 1.0),
+   682→      caption: figureCaption || 'Figure caption describing the visualization.',
+   683→      dimensions: { width: config.width, height: config.height },
+   684→      journalStyle: 'APA',
+   685→    }
+   686→
+   687→    setFigures(prev => [...prev, newFigure])
+   688→    onFigureCreate(newFigure)
+   689→    setSelectedFigureId(newFigure.id)
+   690→    setIsCreateDialogOpen(false)
+   691→
+   692→    setFigureTitle('')
+   693→    setFigureCaption('')
+   694→  }
+   695→
+   696→  const handleDeleteFigure = (figureId: string) => {
+   697→    setFigures(prev => prev.filter(f => f.id !== figureId))
+   698→    if (selectedFigureId === figureId) {
+   699→      setSelectedFigureId(null)
+   700→    }
+   701→  }
+   702→
+   703→  const handleExportFigure = (format: 'png' | 'svg' | 'pdf') => {
+   704→    if (!canvasRef.current || !selectedFigure) return
+   705→
+   706→    let mimeType = 'image/png'
+   707→    let extension = 'png'
+   708→    
+   709→    switch (format) {
+   710→      case 'svg':
+   711→        alert('SVG export requires additional processing. PNG exported instead.')
+   712→        break
+   713→      case 'pdf':
+   714→        alert('PDF export would require a PDF library. PNG exported instead.')
+   715→        break
+   716→      default:
+   717→        mimeType = 'image/png'
+   718→        extension = 'png'
+   719→    }
+   720→
+   721→    const link = document.createElement('a')
+   722→    link.download = `${selectedFigure.title.replace(/\s+/g, '_')}.${extension}`
+   723→    link.href = canvasRef.current.toDataURL(mimeType, 1.0)
+   724→    link.click()
+   725→  }
+   726→
+   727→  return (
+   728→    <div className="space-y-6">
+   729→      {/* Header */}
+   730→      <Card>
+   731→        <CardHeader>
+   732→          <div className="flex items-center justify-between flex-wrap gap-4">
+   733→            <div>
+   734→              <CardTitle className="flex items-center gap-2">
+   735→                <ImageIcon className="w-5 h-5 text-[#C1121F]" />
+   736→                Publication-Quality Figure Generator
+   737→              </CardTitle>
+   738→              <CardDescription>Create professional figures for your thesis</CardDescription>
+   739→            </div>
+   740→            
+   741→            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+   742→              <DialogTrigger asChild>
+   743→                <Button className="bg-[#C1121F] hover:bg-[#9B0F1A] gap-2">
+   744→                  <Plus className="w-4 h-4" /> New Figure
+   745→                </Button>
+   746→              </DialogTrigger>
+   747→              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+   748→                <DialogHeader>
+   749→                  <DialogTitle>Create New Figure</DialogTitle>
+   750→                </DialogHeader>
+   751→
+   752→                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+   753→                  {/* Left Panel */}
+   754→                  <div className="lg:col-span-1 space-y-4">
+   755→                    {/* Chart Type Selection */}
+   756→                    <div className="space-y-2">
+   757→                      <Label>Chart Type</Label>
+   758→                      <div className="grid grid-cols-2 gap-2">
+   759→                        {[
+   760→                          { type: 'bar' as FigureType, icon: BarChart3, label: 'Bar' },
+   761→                          { type: 'line' as FigureType, icon: LineChart, label: 'Line' },
+   762→                          { type: 'scatter' as FigureType, icon: ScatterChartIcon, label: 'Scatter' },
+   763→                          { type: 'box' as FigureType, icon: BoxPlotIcon, label: 'Box Plot' },
+   764→                          { type: 'histogram' as FigureType, icon: HistogramIcon, label: 'Histogram' },
+   765→                          { type: 'pie' as FigureType, icon: PieChartIcon, label: 'Pie' },
+   766→                        ].map(({ type, icon: Icon, label }) => (
+   767→                          <button
+   768→                            key={type}
+   769→                            onClick={() => setFigureType(type)}
+   770→                            className={`p-3 rounded-lg border flex flex-col items-center gap-1 transition-all ${
+   771→                              figureType === type
+   772→                                ? 'border-[#C1121F] bg-[#C1121F]/5'
+   773→                                : 'hover:border-muted-foreground/30'
+   774→                            }`}
+   775→                          >
+   776→                            <Icon className={`w-5 h-5 ${figureType === type ? 'text-[#C1121F]' : ''}`} />
+   777→                            <span className="text-xs">{label}</span>
+   778→                          </button>
+   779→                        ))}
+   780→                      </div>
+   781→                    </div>
+   782→
+   783→                    {/* Dimensions */}
+   784→                    <div className="space-y-2">
+   785→                      <Label className="flex items-center gap-2">
+   786→                        <Ruler className="w-4 h-4" /> Dimensions
+   787→                      </Label>
+   788→                      <Select 
+   789→                        value={`${config.width}x${config.height}`} 
+   790→                        onValueChange={(v) => {
+   791→                          const [w, h] = v.split('x').map(Number)
+   792→                          setConfig(prev => ({ ...prev, width: w, height: h }))
+   793→                        }}
+   794→                      >
+   795→                        <SelectTrigger><SelectValue /></SelectTrigger>
+   796→                        <SelectContent>
+   797→                          {DIMENSION_PRESETS.map(preset => (
+   798→                            <SelectItem key={preset.name} value={`${preset.width}x${preset.height}`}>
+   799→                              {preset.name} ({preset.width}×{preset.height}mm)
+   800→                            </SelectItem>
+   801→                          ))}
+   802→                        </SelectContent>
+   803→                      </Select>
+   804→                    </div>
+   805→
+   806→                    {/* Font */}
+   807→                    <div className="space-y-2">
+   808→                      <Label className="flex items-center gap-2">
+   809→                        <Type className="w-4 h-4" /> Typography
+   810→                      </Label>
+   811→                      <Select 
+   812→                        value={config.fontFamily} 
+   813→                        onValueChange={(v) => setConfig(prev => ({ ...prev, fontFamily: v }))}
+   814→                      >
+   815→                        <SelectTrigger><SelectValue /></SelectTrigger>
+   816→                        <SelectContent>
+   817→                          {FONT_OPTIONS.map(font => (
+   818→                            <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+   819→                          ))}
+   820→                        </SelectContent>
+   821→                      </Select>
+   822→                      
+   823→                      <div className="space-y-1">
+   824→                        <div className="flex justify-between text-xs text-muted-foreground">
+   825→                          <span>Font Size</span>
+   826→                          <span>{config.fontSize}pt</span>
+   827→                        </div>
+   828→                        <Slider
+   829→                          value={[config.fontSize]}
+   830→                          onValueChange={([v]) => setConfig(prev => ({ ...prev, fontSize: v }))}
+   831→                          min={8}
+   832→                          max={18}
+   833→                          step={1}
+   834→                        />
+   835→                      </div>
+   836→                    </div>
+   837→
+   838→                    {/* Colors */}
+   839→                    <div className="space-y-2">
+   840→                      <Label className="flex items-center gap-2">
+   841→                        <Palette className="w-4 h-4" /> Color Palette
+   842→                      </Label>
+   843→                      <div className="grid grid-cols-3 gap-2">
+   844→                        {(Object.keys(COLOR_PALETTES) as (keyof typeof COLOR_PALETTES)[]).map(palette => (
+   845→                          <button
+   846→                            key={palette}
+   847→                            onClick={() => setConfig(prev => ({ ...prev, colorPalette: palette }))}
+   848→                            className={`p-2 rounded border ${
+   849→                              config.colorPalette === palette ? 'border-[#C1121F]' : ''
+   850→                            }`}
+   851→                          >
+   852→                            <div className="flex gap-0.5">
+   853→                              {COLOR_PALETTES[palette].slice(0, 4).map((color, i) => (
+   854→                                <div key={i} className="w-4 h-4 rounded-sm" style={{ backgroundColor: color }} />
+   855→                              ))}
+   856→                            </div>
+   857→                            <span className="text-xs mt-1 capitalize">{palette}</span>
+   858→                          </button>
+   859→                        ))}
+   860→                      </div>
+   861→                    </div>
+   862→
+   863→                    {/* Options */}
+   864→                    <div className="space-y-3">
+   865→                      <Label className="flex items-center gap-2">
+   866→                        <Settings className="w-4 h-4" /> Display Options
+   867→                      </Label>
+   868→                      
+   869→                      <div className="space-y-2">
+   870→                        <div className="flex items-center justify-between">
+   871→                          <span className="text-sm">Show Legend</span>
+   872→                          <Switch checked={config.showLegend} onCheckedChange={(v) => setConfig(prev => ({ ...prev, showLegend: v }))} />
+   873→                        </div>
+   874→                        <div className="flex items-center justify-between">
+   875→                          <span className="text-sm">Show Grid</span>
+   876→                          <Switch checked={config.showGrid} onCheckedChange={(v) => setConfig(prev => ({ ...prev, showGrid: v }))} />
+   877→                        </div>
+   878→                        <div className="flex items-center justify-between">
+   879→                          <span className="text-sm">Error Bars</span>
+   880→                          <Switch checked={config.showErrorBars} onCheckedChange={(v) => setConfig(prev => ({ ...prev, showErrorBars: v }))} />
+   881→                        </div>
+   882→                      </div>
+   883→
+   884→                      {config.showLegend && (
+   885→                        <div className="space-y-2">
+   886→                          <Label className="text-sm">Legend Position</Label>
+   887→                          <Select value={config.legendPosition} onValueChange={(v) => setConfig(prev => ({ ...prev, legendPosition: v as typeof config.legendPosition }))}>
+   888→                            <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+   889→                            <SelectContent>
+   890→                              <SelectItem value="top">Top</SelectItem>
+   891→                              <SelectItem value="bottom">Bottom</SelectItem>
+   892→                              <SelectItem value="left">Left</SelectItem>
+   893→                              <SelectItem value="right">Right</SelectItem>
+   894→                            </SelectContent>
+   895→                          </Select>
+   896→                        </div>
+   897→                      )}
+   898→                    </div>
+   899→
+   900→                    {/* Title & Caption */}
+   901→                    <div className="space-y-2 pt-2 border-t">
+   902→                      <Label>Title</Label>
+   903→                      <Input value={figureTitle} onChange={(e) => setFigureTitle(e.target.value)} placeholder="Figure title..." />
+   904→                      <Label>Caption</Label>
+   905→                      <Textarea value={figureCaption} onChange={(e) => setFigureCaption(e.target.value)} placeholder="Figure caption..." className="min-h-[60px]" />
+   906→                    </div>
+   907→                  </div>
+   908→
+   909→                  {/* Right Panel - Preview */}
+   910→                  <div className="lg:col-span-2 space-y-4">
+   911→                    <div className="border rounded-lg p-4 bg-white dark:bg-slate-900">
+   912→                      <div className="flex items-center justify-between mb-4">
+   913→                        <span className="text-sm font-medium">Preview</span>
+   914→                        <Badge variant="secondary">{config.width}×{config.height}mm @ {config.dpi} DPI</Badge>
+   915→                      </div>
+   916→                      
+   917→                      <div className="flex justify-center p-4 bg-muted/20 rounded">
+   918→                        <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto', border: '1px solid #e5e7eb' }} />
+   919→                      </div>
+   920→                    </div>
+   921→
+   922→                    <div className="flex justify-end gap-3 pt-4">
+   923→                      <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+   924→                      <Button onClick={handleCreateFigure} className="bg-[#C1121F] hover:bg-[#9B0F1A]">Create Figure</Button>
+   925→                    </div>
+   926→                  </div>
+   927→                </div>
+   928→              </DialogContent>
+   929→            </Dialog>
+   930→          </div>
+   931→        </CardHeader>
+   932→      </Card>
+   933→
+   934→      {/* Figures List and Preview */}
+   935→      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+   936→        {/* Figures Gallery */}
+   937→        <div className="lg:col-span-1 space-y-3">
+   938→          <h3 className="font-medium text-sm text-muted-foreground">Your Figures ({figures.length})</h3>
+   939→          
+   940→          <ScrollArea className="h-[500px]">
+   941→            <div className="grid grid-cols-2 gap-3 pr-2">
+   942→              {figures.length > 0 ? (
+   943→                figures.map((figure) => (
+   944→                  <motion.div
+   945→                    key={figure.id}
+   946→                    initial={{ opacity: 0, scale: 0.95 }}
+   947→                    animate={{ opacity: 1, scale: 1 }}
+   948→                    whileHover={{ scale: 1.02 }}
+   949→                    onClick={() => setSelectedFigureId(figure.id)}
+   950→                    className={`cursor-pointer rounded-lg border overflow-hidden transition-all group ${
+   951→                      selectedFigureId === figure.id
+   952→                        ? 'border-[#C1121F] ring-2 ring-[#C1121F]/20'
+   953→                        : 'hover:border-muted-foreground/30'
+   954→                    }`}
+   955→                  >
+   956→                    <div className="aspect-square bg-muted relative">
+   957→                      {figure.dataUrl ? (
+   958→                        <img src={figure.dataUrl} alt={figure.title} className="w-full h-full object-contain" />
+   959→                      ) : (
+   960→                        <div className="w-full h-full flex items-center justify-center">
+   961→                          <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
+   962→                        </div>
+   963→                      )}
+   964→                      
+   965→                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+   966→                        <Button variant="secondary" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleExportFigure('png') }}>
+   967→                          <Download className="w-4 h-4" />
+   968→                        </Button>
+   969→                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleDeleteFigure(figure.id) }}>
+   970→                          <Trash2 className="w-4 h-4" />
+   971→                        </Button>
+   972→                      </div>
+   973→                    </div>
+   974→                    
+   975→                    <div className="p-2">
+   976→                      <p className="text-xs font-medium truncate">{figure.title}</p>
+   977→                      <Badge variant="secondary" className="mt-1 text-xs">{figure.type.toUpperCase()}</Badge>
+   978→                    </div>
+   979→                  </motion.div>
+   980→                ))
+   981→              ) : (
+   982→                <div className="col-span-2 text-center py-12">
+   983→                  <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+   984→                  <p className="text-sm text-muted-foreground">No figures yet</p>
+   985→                  <p className="text-xs text-muted-foreground mt-1">Create your first figure</p>
+   986→                </div>
+   987→              )}
+   988→            </div>
+   989→          </ScrollArea>
+   990→        </div>
+   991→
+   992→        {/* Selected Figure Preview */}
+   993→        <div className="lg:col-span-2">
+   994→          {selectedFigure ? (
+   995→            <Card className="h-full">
+   996→              <CardHeader className="pb-3">
+   997→                <div className="flex items-center justify-between flex-wrap gap-4">
+   998→                  <div>
+   999→                    <CardTitle className="text-base">{selectedFigure.title}</CardTitle>
+  1000→                    <CardDescription className="mt-1">
+  1001→                      {selectedFigure.dimensions.width}×{selectedFigure.dimensions.height}mm • {selectedFigure.type}
+  1002→                    </CardDescription>
+  1003→                  </div>
+  1004→                  
+  1005→                  <div className="flex items-center gap-2">
+  1006→                    <DropdownMenu>
+  1007→                      <DropdownMenuTrigger asChild>
+  1008→                        <Button variant="outline" size="sm" className="gap-1">
+  1009→                          <Download className="w-4 h-4" /> Export
+  1010→                        </Button>
+  1011→                      </DropdownMenuTrigger>
+  1012→                      <DropdownMenuContent align="end">
+  1013→                        <DropdownMenuItem onClick={() => handleExportFigure('png')}>Export as PNG (300 DPI)</DropdownMenuItem>
+  1014→                        <DropdownMenuItem onClick={() => handleExportFigure('svg')}>Export as SVG</DropdownMenuItem>
+  1015→                        <DropdownMenuItem onClick={() => handleExportFigure('pdf')}>Export as PDF</DropdownMenuItem>
+  1016→                      </DropdownMenuContent>
+  1017→                    </DropdownMenu>
+  1018→                    
+  1019→                    <Button variant="outline" size="sm" onClick={() => handleDeleteFigure(selectedFigure.id)} className="gap-1 text-red-500 hover:text-red-600">
+  1020→                      <Trash2 className="w-4 h-4" /> Delete
+  1021→                    </Button>
+  1022→                  </div>
+  1023→                </div>
+  1024→              </CardHeader>
+  1025→              
+  1026→              <Separator />
+  1027→
+  1028→              <CardContent className="pt-6">
+  1029→                <div className="border rounded-lg p-6 bg-white dark:bg-slate-900 inline-block w-full">
+  1030→                  <div className="flex justify-center">
+  1031→                    {selectedFigure.dataUrl ? (
+  1032→                      <img src={selectedFigure.dataUrl} alt={selectedFigure.title} className="max-w-full h-auto" style={{ maxHeight: '400px' }} />
+  1033→                    ) : (
+  1034→                      <div className="w-full h-64 flex items-center justify-center bg-muted rounded">
+  1035→                        <ImageIcon className="w-16 h-16 text-muted-foreground/30" alt="" />
+  1036→                      </div>
+  1037→                    )}
+  1038→                  </div>
+  1039→                  
+  1040→                  <p className="text-sm italic text-center mt-4 text-muted-foreground">{selectedFigure.caption}</p>
+  1041→                </div>
+  1042→
+  1043→                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+  1044→                  <div className="p-3 bg-muted/30 rounded-lg text-center">
+  1045→                    <p className="text-xs text-muted-foreground">Dimensions</p>
+  1046→                    <p className="font-medium text-sm">{selectedFigure.dimensions.width}×{selectedFigure.dimensions.height} mm</p>
+  1047→                  </div>
+  1048→                  <div className="p-3 bg-muted/30 rounded-lg text-center">
+  1049→                    <p className="text-xs text-muted-foreground">Type</p>
+  1050→                    <p className="font-medium text-sm capitalize">{selectedFigure.type}</p>
+  1051→                  </div>
+  1052→                  <div className="p-3 bg-muted/30 rounded-lg text-center">
+  1053→                    <p className="text-xs text-muted-foreground">Resolution</p>
+  1054→                    <p className="font-medium text-sm">300 DPI</p>
+  1055→                  </div>
+  1056→                  <div className="p-3 bg-muted/30 rounded-lg text-center">
+  1057→                    <p className="text-xs text-muted-foreground">Format</p>
+  1058→                    <p className="font-medium text-sm">PNG</p>
+  1059→                  </div>
+  1060→                </div>
+  1061→              </CardContent>
+  1062→            </Card>
+  1063→          ) : (
+  1064→            <Card className="h-full flex items-center justify-center min-h-[400px]">
+  1065→              <div className="text-center">
+  1066→                <Maximize2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+  1067→                <h3 className="text-lg font-medium mb-2">Select or Create a Figure</h3>
+  1068→                <p className="text-sm text-muted-foreground">Choose an existing figure or create a new publication-quality one</p>
+  1069→              </div>
+  1070→            </Card>
+  1071→          )}
+  1072→        </div>
+  1073→      </div>
+  1074→    </div>
+  1075→  )
+  1076→}
+  1077→

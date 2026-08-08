@@ -55,6 +55,7 @@ export default function DiversityAnalysisComponent({ className }: DiversityAnaly
   const [rawData, setRawData] = useState('')
   const [parsedData, setParsedData] = useState<number[][]>([])
   const [genotypeNames, setGenotypeNames] = useState<string[]>([])
+  const [traitNames, setTraitNames] = useState<string[]>([])
   
   // Analysis options
   const [distanceMethod, setDistanceMethod] = useState<DistanceMethod>('euclidean')
@@ -90,6 +91,7 @@ export default function DiversityAnalysisComponent({ className }: DiversityAnaly
       }
 
       setGenotypeNames(names)
+      setTraitNames(headers.slice(1))  // Store trait names (excluding Genotype column)
       setParsedData(data)
       setError(null)
       return true
@@ -182,7 +184,7 @@ export default function DiversityAnalysisComponent({ className }: DiversityAnaly
     ]
     
     // Distance matrix header
-    rows.push([''] + genotypeNames)
+    rows.push(['', ...genotypeNames])
     
     for (let i = 0; i < genotypeNames.length; i++) {
       rows.push([genotypeNames[i], ...distanceMatrix[i].map(d => d.toFixed(4))])
@@ -271,6 +273,7 @@ export default function DiversityAnalysisComponent({ className }: DiversityAnaly
     const clusterColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
     
     function getClusterColor(labelIdx: number): string {
+      if (!result) return '#94a3b8'
       for (let i = 0; i < result.clusterGroups.length; i++) {
         if (result.clusterGroups[i].includes(labelIdx)) {
           return clusterColors[i % clusterColors.length]
@@ -402,6 +405,7 @@ export default function DiversityAnalysisComponent({ className }: DiversityAnaly
     const clusterColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
     
     function getClusterColor(idx: number): string {
+      if (!result) return '#94a3b8'
       for (let i = 0; i < result.clusterGroups.length; i++) {
         if (result.clusterGroups[i].includes(idx)) {
           return clusterColors[i % clusterColors.length]

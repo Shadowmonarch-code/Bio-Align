@@ -185,7 +185,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Installation Commands</h3>
-                  {section.content.map((item, idx) => (
+                  {section.content?.map((item, idx) => (
                     <div key={idx} className="relative group">
                       <pre className="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto font-mono">
                         {item.code}
@@ -206,7 +206,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Quick Start Steps</h3>
                   <div className="bg-card border rounded-xl p-6 space-y-4">
-                    {section.content[1]?.steps?.map((step, idx) => (
+                    {section.content?.[1]?.steps?.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-3">
                         <span className="size-6 rounded-full bg-biored/10 text-biored text-sm font-medium flex items-center justify-center shrink-0">
                           {idx + 1}

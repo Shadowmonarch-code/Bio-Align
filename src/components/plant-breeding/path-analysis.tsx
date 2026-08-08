@@ -159,7 +159,7 @@ export default function PathAnalysisComponent({ className }: PathAnalysisProps) 
     ]
     
     // Add indirect effects header
-    rows.push([''] + result.independentVariables)
+    rows.push(['', ...result.independentVariables])
     
     for (let i = 0; i < result.independentVariables.length; i++) {
       rows.push([
@@ -556,7 +556,7 @@ export default function PathAnalysisComponent({ className }: PathAnalysisProps) 
                   <tbody>
                     {result.independentVariables.map((varName, i) => {
                       const directEff = result.directEffects[i]
-                      const totalCorr = corrMatrix ? corrMatrix[result.independentVariables.findIndex(v => v === varName)]?.[variableNames.indexOf(result.dependentVar)] || 0 : 0
+                      const totalCorr = corrMatrix ? corrMatrix[result.independentVariables.findIndex(v => v === varName)]?.[variableNames.indexOf(result.dependentVariable)] || 0 : 0
                       
                       return (
                         <tr key={i} className="border-b hover:bg-muted/30">

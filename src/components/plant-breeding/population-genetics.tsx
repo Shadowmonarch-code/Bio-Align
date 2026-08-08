@@ -133,7 +133,7 @@ export default function PopulationGeneticsAnalyzer({ className }: PopulationGene
       ['Diversity Measures', 'Value', 'Interpretation'],
       ['Expected Heterozygosity (He)', result.expectedHeterozygosity.toFixed(4), 'Gene diversity'],
       ['Observed Heterozygosity (Ho)', result.observedHeterozygosity.toFixed(4), 'Actual heterozygotes proportion'],
-      ['Fixation Index (F)', result.fixationIndex.toFixed(4), result.fixationIndex > 0 ? 'Deficit' : 'Excess' || '-'],
+      ['Fixation Index (F)', result.fixationIndex.toFixed(4), result.fixationIndex > 0 ? 'Deficit' : 'Excess'],
       ['Genetic Diversity', result.geneticDiversity.toFixed(4), '-'],
       [''],
       ['Hardy-Weinberg Equilibrium Test'],
