@@ -1,0 +1,595 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback } from 'react'
+     4→import { motion } from 'framer-motion'
+     5→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Input } from '@/components/ui/input'
+     8→import { Label } from '@/components/ui/label'
+     9→import { Textarea } from '@/components/ui/textarea'
+    10→import { Badge } from '@/components/ui/badge'
+    11→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    12→import { 
+    13→  Calculator, 
+    14→  Upload, 
+    15→  FileText, 
+    16→  Download,
+    17→  Info,
+    18→  TrendingUp,
+    19→  BarChart3,
+    20→  AlertCircle
+    21→} from 'lucide-react'
+    22→import { calculateGeneticParameters, GeneticParameters } from '@/lib/statistics-engine'
+    23→
+    24→interface GeneticParametersProps {
+    25→  className?: string
+    26→}
+    27→
+    28→// Sample data for testing
+    29→const SAMPLE_DATA = `Genotype,Rep1,Rep2,Rep3
+    30→G1,4520,4380,4610
+    31→G2,3890,4020,3750
+    32→G3,4210,4350,4180
+    33→G4,3980,4120,4050
+    34→G5,4780,4650,4890
+    35→G6,4420,4510,4380
+    36→G7,3650,3780,3590
+    37→G8,4150,4280,4120
+    38→G9,4890,4750,4980
+    39→G10,4320,4450,4280`
+    40→
+    41→export default function GeneticParametersCalculator({ className }: GeneticParametersProps) {
+    42→  const [rawData, setRawData] = useState('')
+    43→  const [parsedData, setParsedData] = useState<number[][]>([])
+    44→  const [genotypeNames, setGenotypeNames] = useState<string[]>([])
+    45→  const [result, setResult] = useState<GeneticParameters | null>(null)
+    46→  const [error, setError] = useState<string | null>(null)
+    47→  const [selectionIntensity, setSelectionIntensity] = useState(2.06)
+    48→  const [isLoading, setIsLoading] = useState(false)
+    49→
+    50→  // Parse CSV data
+    51→  const parseData = useCallback((text: string) => {
+    52→    try {
+    53→      const lines = text.trim().split('\n').filter(line => line.trim())
+    54→      if (lines.length < 3) {
+    55→        throw new Error('Need at least header + 2 genotypes')
+    56→      }
+    57→
+    58→      const headers = lines[0].split(',').map(h => h.trim())
+    59→      const names: string[] = []
+    60→      const data: number[][] = []
+    61→
+    62→      for (let i = 1; i < lines.length; i++) {
+    63→        const values = lines[i].split(',').map(v => v.trim())
+    64→        names.push(values[0])
+    65→        const rowValues = values.slice(1).map(v => parseFloat(v))
+    66→        
+    67→        if (rowValues.some(v => isNaN(v))) {
+    68→          throw new Error(`Invalid number in row ${i + 1}`)
+    69→        }
+    70→        data.push(rowValues)
+    71→      }
+    72→
+    73→      setGenotypeNames(names)
+    74→      setParsedData(data)
+    75→      setError(null)
+    76→      return { names, data }
+    77→    } catch (err) {
+    78→      setError(err instanceof Error ? err.message : 'Failed to parse data')
+    79→      return null
+    80→    }
+    81→  }, [])
+    82→
+    83→  // Calculate genetic parameters
+    84→  const handleCalculate = useCallback(() => {
+    85→    if (parsedData.length === 0) {
+    86→      const parsed = parseData(rawData)
+    87→      if (!parsed) return
+    88→      calculateFromData(parsed.data)
+    89→    } else {
+    90→      calculateFromData(parsedData)
+    91→    }
+    92→  }, [parsedData, rawData, parseData])
+    93→
+    94→  const calculateFromData = (data: number[][]) => {
+    95→    setIsLoading(true)
+    96→    setError(null)
+    97→    
+    98→    try {
+    99→      // Small delay to show loading state
+   100→      setTimeout(() => {
+   101→        const params = calculateGeneticParameters(data, selectionIntensity)
+   102→        setResult(params)
+   103→        setIsLoading(false)
+   104→      }, 300)
+   105→    } catch (err) {
+   106→      setError(err instanceof Error ? err.message : 'Calculation failed')
+   107→      setIsLoading(false)
+   108→    }
+   109→  }
+   110→
+   111→  // Load sample data
+   112→  const loadSampleData = () => {
+   113→    setRawData(SAMPLE_DATA)
+   114→    const parsed = parseData(SAMPLE_DATA)
+   115→    if (parsed) {
+   116→      setParsedData(parsed.data)
+   117→      setGenotypeNames(parsed.names)
+   118→    }
+   119→  }
+   120→
+   121→  // Handle file upload
+   122→  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+   123→    const file = event.target.files?.[0]
+   124→    if (!file) return
+   125→
+   126→    const reader = new FileReader()
+   127→    reader.onload = (e) => {
+   128→      const text = e.target?.result as string
+   129→      setRawData(text)
+   130→      parseData(text)
+   131→    }
+   132→    reader.readAsText(file)
+   133→  }
+   134→
+   135→  // Export results as CSV
+   136→  const exportResults = () => {
+   137→    if (!result) return
+   138→    
+   139→    const rows = [
+   140→      ['Parameter', 'Value', 'Interpretation'],
+   141→      ['Phenotypic Variance (σ²P)', result.phenotypicVariance.toFixed(4), 'Total observed variation'],
+   142→      ['Genotypic Variance (σ²g)', result.genotypicVariance.toFixed(4), 'Genetic contribution to variation'],
+   143→      ['Environmental Variance (σ²e)', result.environmentalVariance.toFixed(4), 'Environmental contribution'],
+   144→      ['GCV (%)', result.gcv.toFixed(2), result.gcv > 20 ? 'High' : result.gcv > 10 ? 'Medium' : 'Low'],
+   145→      ['PCV (%)', result.pcv.toFixed(2), '-'],
+   146→      ['Broad-sense Heritability (H²)', (result.broadSenseHeritability * 100).toFixed(2) + '%', 
+   147→       result.broadSenseHeritability >= 0.8 ? 'Very High' : 
+   148→       result.broadSenseHeritability >= 0.6 ? 'High' : 
+   149→       result.broadSenseHeritability >= 0.4 ? 'Moderate' : 'Low'],
+   150→      ['Heritability SE', result.heritabilitySE.toFixed(4), '-'],
+   151→      ['Genetic Advance', result.geneticAdvance.toFixed(4), '-'],
+   152→      ['Genetic Advance %', result.geneticAdvancePercent.toFixed(2) + '%',
+   153→       result.geneticAdvancePercent >= 20 ? 'Very High' : 
+   154→       result.geneticAdvancePercent >= 10 ? 'High' :
+   155→       result.geneticAdvancePercent >= 5 ? 'Moderate' : 'Low'],
+   156→      ['Trait Mean', result.traitMean.toFixed(4), '-'],
+   157→      ['Trait SD', result.traitSD.toFixed(4), '-'],
+   158→      ['', '', ''],
+   159→      ['Interpretation', result.interpretation, '']
+   160→    ]
+   161→
+   162→    const csv = rows.map(row => row.join(',')).join('\n')
+   163→    const blob = new Blob([csv], { type: 'text/csv' })
+   164→    const url = URL.createObjectURL(blob)
+   165→    const a = document.createElement('a')
+   166→    a.href = url
+   167→    a.download = 'genetic_parameters.csv'
+   168→    a.click()
+   169→    URL.revokeObjectURL(url)
+   170→  }
+   171→
+   172→  // Render gauge chart for heritability
+   173→  const renderHeritabilityGauge = (value: number) => {
+   174→    const percentage = Math.min(value * 100, 100)
+   175→    const color = value >= 0.8 ? '#22c55e' : value >= 0.6 ? '#84cc16' : value >= 0.4 ? '#eab308' : value >= 0.2 ? '#f97316' : '#ef4444'
+   176→    
+   177→    return (
+   178→      <div className="relative w-32 h-16 mx-auto">
+   179→        <svg viewBox="0 0 120 60" className="w-full h-full">
+   180→          {/* Background arc */}
+   181→          <path
+   182→            d="M 10 55 A 50 50 0 0 1 110 55"
+   183→            fill="none"
+   184→            stroke="#e5e7eb"
+   185→            strokeWidth="10"
+   186→            strokeLinecap="round"
+   187→          />
+   188→          {/* Value arc */}
+   189→          <path
+   190→            d={`M 10 55 A 50 50 0 ${percentage > 50 ? 1 : 0} 1 ${10 + (percentage / 100) * 100} ${55 - Math.sin((percentage / 100) * Math.PI) * 50}`}
+   191→            fill="none"
+   192→            stroke={color}
+   193→            strokeWidth="10"
+   194→            strokeLinecap="round"
+   195→          />
+   196→          {/* Needle */}
+   197→          <line
+   198→            x1="60"
+   199→            y1="55"
+   200→            x2={60 + 40 * Math.cos(Math.PI - (percentage / 100) * Math.PI)}
+   201→            y2={55 - 40 * Math.sin((percentage / 100) * Math.PI)}
+   202→            stroke="#374151"
+   203→            strokeWidth="2"
+   204→            strokeLinecap="round"
+   205→          />
+   206→          {/* Center circle */}
+   207→          <circle cx="60" cy="55" r="5" fill="#374151" />
+   208→        </svg>
+   209→        <div className="absolute bottom-0 left-0 right-0 text-center">
+   210→          <span className="text-lg font-bold" style={{ color }}>{(value * 100).toFixed(1)}%</span>
+   211→        </div>
+   212→      </div>
+   213→    )
+   214→  }
+   215→
+   216→  return (
+   217→    <div className={`space-y-6 ${className || ''}`}>
+   218→      {/* Input Section */}
+   219→      <Card>
+   220→        <CardHeader>
+   221→          <CardTitle className="flex items-center gap-2">
+   222→            <Calculator className="h-5 w-5 text-primary" />
+   223→            Genetic Parameters Calculator
+   224→          </CardTitle>
+   225→          <CardDescription>
+   226→            Calculate variance components, heritability, and genetic advance from genotype × replication data
+   227→          </CardDescription>
+   228→        </CardHeader>
+   229→        <CardContent>
+   230→          <Tabs defaultValue="paste" className="w-full">
+   231→            <TabsList className="grid w-full grid-cols-2">
+   232→              <TabsTrigger value="paste" className="gap-2">
+   233→                <FileText className="h-4 w-4" />
+   234→                Paste Data
+   235→              </TabsTrigger>
+   236→              <TabsTrigger value="upload" className="gap-2">
+   237→                <Upload className="h-4 w-4" />
+   238→                Upload CSV
+   239→              </TabsTrigger>
+   240→            </TabsList>
+   241→
+   242→            <TabsContent value="paste" className="space-y-4 mt-4">
+   243→              <div>
+   244→                <Label htmlFor="data-input">Enter your data (CSV format)</Label>
+   245→                <Textarea
+   246→                  id="data-input"
+   247→                  placeholder={`Genotype,Rep1,Rep2,Rep3\nG1,4520,4380,4610\nG2,3890,4020,3750\n...`}
+   248→                  value={rawData}
+   249→                  onChange={(e) => setRawData(e.target.value)}
+   250→                  className="mt-2 font-mono text-sm min-h-[150px]"
+   251→                />
+   252→              </div>
+   253→              <div className="flex gap-2">
+   254→                <Button onClick={loadSampleData} variant="outline" size="sm">
+   255→                  Load Sample Data
+   256→                </Button>
+   257→                <Button 
+   258→                  onClick={() => parseData(rawData)} 
+   259→                  variant="outline" 
+   260→                  size="sm"
+   261→                  disabled={!rawData.trim()}
+   262→                >
+   263→                  Parse Data
+   264→                </Button>
+   265→              </div>
+   266→            </TabsContent>
+   267→
+   268→            <TabsContent value="upload" className="space-y-4 mt-4">
+   269→              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+   270→                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+   271→                <p className="text-sm text-muted-foreground mb-4">
+   272→                  Upload a CSV file with genotype × replication data
+   273→                </p>
+   274→                <Input
+   275→                  type="file"
+   276→                  accept=".csv,.txt"
+   277→                  onChange={handleFileUpload}
+   278→                  className="max-w-xs mx-auto"
+   279→                />
+   280→              </div>
+   281→            </TabsContent>
+   282→          </Tabs>
+   283→
+   284→          {/* Selection Intensity */}
+   285→          <div className="mt-4 flex items-end gap-4">
+   286→            <div className="flex-1 max-w-xs">
+   287→              <Label htmlFor="selection-intensity">Selection Intensity (K)</Label>
+   288→              <Input
+   289→                id="selection-intensity"
+   290→                type="number"
+   291→                step="0.01"
+   292→                value={selectionIntensity}
+   293→                onChange={(e) => setSelectionIntensity(parseFloat(e.target.value) || 2.06)}
+   294→                className="mt-1"
+   295→              />
+   296→              <p className="text-xs text-muted-foreground mt-1">
+   297→                Default 2.06 for 5% selection intensity
+   298→              </p>
+   299→            </div>
+   300→            
+   301→            <Button 
+   302→              onClick={handleCalculate} 
+   303→              disabled={parsedData.length === 0 && !rawData.trim()}
+   304→              className="gap-2"
+   305→            >
+   306→              <TrendingUp className="h-4 w-4" />
+   307→              Calculate Parameters
+   308→            </Button>
+   309→          </div>
+   310→
+   311→          {/* Error Display */}
+   312→          {error && (
+   313→            <motion.div
+   314→              initial={{ opacity: 0, y: -10 }}
+   315→              animate={{ opacity: 1, y: 0 }}
+   316→              className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2"
+   317→            >
+   318→              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+   319→              <span className="text-sm text-destructive">{error}</span>
+   320→            </motion.div>
+   321→          )}
+   322→
+   323→          {/* Parsed Data Preview */}
+   324→          {parsedData.length > 0 && !result && (
+   325→            <motion.div
+   326→              initial={{ opacity: 0 }}
+   327→              animate={{ opacity: 1 }}
+   328→              className="mt-4 p-3 bg-muted/30 rounded-lg"
+   329→            >
+   330→              <p className="text-sm font-medium mb-2">Data Preview:</p>
+   331→              <p className="text-xs text-muted-foreground">
+   332→                {genotypeNames.length} genotypes × {parsedData[0]?.length || 0} replications loaded
+   333→              </p>
+   334→            </motion.div>
+   335→          )}
+   336→        </CardContent>
+   337→      </Card>
+   338→
+   339→      {/* Results Section */}
+   340→      {result && (
+   341→        <motion.div
+   342→          initial={{ opacity: 0, y: 20 }}
+   343→          animate={{ opacity: 1, y: 0 }}
+   344→          transition={{ duration: 0.5 }}
+   345→          className="space-y-6"
+   346→        >
+   347→          {/* Summary Cards */}
+   348→          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+   349→            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+   350→              <CardContent className="pt-4">
+   351→                <div className="flex items-center justify-between">
+   352→                  <div>
+   353→                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Phenotypic Var.</p>
+   354→                    <p className="text-xl font-bold text-blue-900 dark:text-blue-100">{result.phenotypicVariance.toFixed(2)}</p>
+   355→                  </div>
+   356→                  <BarChart3 className="h-8 w-8 text-blue-500/50" />
+   357→                </div>
+   358→              </CardContent>
+   359→            </Card>
+   360→
+   361→            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+   362→              <CardContent className="pt-4">
+   363→                <div className="flex items-center justify-between">
+   364→                  <div>
+   365→                    <p className="text-xs text-green-600 dark:text-green-400 font-medium">Genotypic Var.</p>
+   366→                    <p className="text-xl font-bold text-green-900 dark:text-green-100">{result.genotypicVariance.toFixed(2)}</p>
+   367→                  </div>
+   368→                  <TrendingUp className="h-8 w-8 text-green-500/50" />
+   369→                </div>
+   370→              </CardContent>
+   371→            </Card>
+   372→
+   373→            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+   374→              <CardContent className="pt-4">
+   375→                <div className="flex items-center justify-between">
+   376→                  <div>
+   377→                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Heritability (H²)</p>
+   378→                    <p className="text-xl font-bold text-purple-900 dark:text-purple-100">
+   379→                      {(result.broadSenseHeritability * 100).toFixed(1)}%
+   380→                    </p>
+   381→                  </div>
+   382→                  {renderHeritabilityGauge(result.broadSenseHeritability)}
+   383→                </div>
+   384→              </CardContent>
+   385→            </Card>
+   386→
+   387→            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
+   388→              <CardContent className="pt-4">
+   389→                <div className="flex items-center justify-between">
+   390→                  <div>
+   391→                    <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Genetic Advance</p>
+   392→                    <p className="text-xl font-bold text-orange-900 dark:text-orange-100">
+   393→                      {result.geneticAdvancePercent.toFixed(1)}%
+   394→                    </p>
+   395→                  </div>
+   396→                  <Badge variant={result.geneticAdvancePercent >= 20 ? "default" : "secondary"}>
+   397→                    {result.geneticAdvancePercent >= 20 ? 'Very High' : 
+   398→                     result.geneticAdvancePercent >= 10 ? 'High' :
+   399→                     result.geneticAdvancePercent >= 5 ? 'Moderate' : 'Low'}
+   400→                  </Badge>
+   401→                </div>
+   402→              </CardContent>
+   403→            </Card>
+   404→          </div>
+   405→
+   406→          {/* Detailed Results Table */}
+   407→          <Card>
+   408→            <CardHeader className="flex flex-row items-center justify-between">
+   409→              <div>
+   410→                <CardTitle className="text-lg">Detailed Results</CardTitle>
+   411→                <CardDescription>Complete genetic parameter estimates</CardDescription>
+   412→              </div>
+   413→              <Button onClick={exportResults} variant="outline" size="sm" className="gap-2">
+   414→                <Download className="h-4 w-4" />
+   415→                Export CSV
+   416→              </Button>
+   417→            </CardHeader>
+   418→            <CardContent>
+   419→              <div className="overflow-x-auto">
+   420→                <table className="w-full text-sm">
+   421→                  <thead>
+   422→                    <tr className="border-b bg-muted/50">
+   423→                      <th className="text-left py-3 px-4 font-medium">Parameter</th>
+   424→                      <th className="text-right py-3 px-4 font-medium">Value</th>
+   425→                      <th className="text-left py-3 px-4 font-medium">Formula / Description</th>
+   426→                      <th className="text-left py-3 px-4 font-medium">Interpretation</th>
+   427→                    </tr>
+   428→                  </thead>
+   429→                  <tbody>
+   430→                    <tr className="border-b hover:bg-muted/30">
+   431→                      <td className="py-3 px-4 font-mono text-xs">σ²P</td>
+   432→                      <td className="py-3 px-4 text-right font-mono">{result.phenotypicVariance.toFixed(4)}</td>
+   433→                      <td className="py-3 px-4 text-xs text-muted-foreground">σ²g + σ²e</td>
+   434→                      <td className="py-3 px-4">Total phenotypic variation</td>
+   435→                    </tr>
+   436→                    <tr className="border-b hover:bg-muted/30">
+   437→                      <td className="py-3 px-4 font-mono text-xs">σ²g</td>
+   438→                      <td className="py-3 px-4 text-right font-mono">{result.genotypicVariance.toFixed(4)}</td>
+   439→                      <td className="py-3 px-4 text-xs text-muted-foreground">(MSg - MSe) / r</td>
+   440→                      <td className="py-3 px-4">Genetic component of variation</td>
+   441→                    </tr>
+   442→                    <tr className="border-b hover:bg-muted/30">
+   443→                      <td className="py-3 px-4 font-mono text-xs">σ²e</td>
+   444→                      <td className="py-3 px-4 text-right font-mono">{result.environmentalVariance.toFixed(4)}</td>
+   445→                      <td className="py-3 px-4 text-xs text-muted-foreground">MSE</td>
+   446→                      <td className="py-3 px-4">Environmental/error variation</td>
+   447→                    </tr>
+   448→                    <tr className="border-b hover:bg-muted/30 bg-primary/5">
+   449→                      <td className="py-3 px-4 font-mono text-xs font-semibold">GCV (%)</td>
+   450→                      <td className="py-3 px-4 text-right font-mono font-semibold">{result.gcv.toFixed(2)}</td>
+   451→                      <td className="py-3 px-4 text-xs text-muted-foreground">(σg / μ) × 100</td>
+   452→                      <td className="py-3 px-4">
+   453→                        <Badge variant={result.gcv > 20 ? "default" : "secondary"}>
+   454→                          {result.gcv > 20 ? 'High' : result.gcv > 10 ? 'Moderate' : 'Low'} variability
+   455→                        </Badge>
+   456→                      </td>
+   457→                    </tr>
+   458→                    <tr className="border-b hover:bg-muted/30 bg-primary/5">
+   459→                      <td className="py-3 px-4 font-mono text-xs font-semibold">PCV (%)</td>
+   460→                      <td className="py-3 px-4 text-right font-mono font-semibold">{result.pcv.toFixed(2)}</td>
+   461→                      <td className="py-3 px-4 text-xs text-muted-foreground">(σp / μ) × 100</td>
+   462→                      <td className="py-3 px-4">Phenotypic coefficient of variation</td>
+   463→                    </tr>
+   464→                    <tr className="border-b hover:bg-muted/30 bg-primary/5">
+   465→                      <td className="py-3 px-4 font-mono text-xs font-semibold">H² (Broad-sense)</td>
+   466→                      <td className="py-3 px-4 text-right font-mono font-semibold">{(result.broadSenseHeritability * 100).toFixed(2)}%</td>
+   467→                      <td className="py-3 px-4 text-xs text-muted-foreground">σ²g / σ²P</td>
+   468→                      <td className="py-3 px-4">
+   469→                        <Badge variant={
+   470→                          result.broadSenseHeritability >= 0.8 ? "default" : 
+   471→                          result.broadSenseHeritability >= 0.6 ? "secondary" : "outline"
+   472→                        }>
+   473→                          {result.broadSenseHeritability >= 0.8 ? 'Very High' : 
+   474→                           result.broadSenseHeritability >= 0.6 ? 'High' :
+   475→                           result.broadSenseHeritability >= 0.4 ? 'Moderate' : 'Low'}
+   476→                        </Badge>
+   477→                      </td>
+   478→                    </tr>
+   479→                    <tr className="border-b hover:bg-muted/30">
+   480→                      <td className="py-3 px-4 font-mono text-xs">SE(H²)</td>
+   481→                      <td className="py-3 px-4 text-right font-mono">{result.heritabilitySE.toFixed(4)}</td>
+   482→                      <td className="py-3 px-4 text-xs text-muted-foreground">Approximate formula</td>
+   483→                      <td className="py-3 px-4">Standard error of heritability</td>
+   484→                    </tr>
+   485→                    <tr className="border-b hover:bg-muted/30 bg-primary/5">
+   486→                      <td className="py-3 px-4 font-mono text-xs font-semibold">GA</td>
+   487→                      <td className="py-3 px-4 text-right font-mono font-semibold">{result.geneticAdvance.toFixed(4)}</td>
+   488→                      <td className="py-3 px-4 text-xs text-muted-foreground">K × H × σp</td>
+   489→                      <td className="py-3 px-4">Expected gain from selection</td>
+   490→                    </tr>
+   491→                    <tr className="border-b hover:bg-muted/30 bg-primary/5">
+   492→                      <td className="py-3 px-4 font-mono text-xs font-semibold">GA%</td>
+   493→                      <td className="py-3 px-4 text-right font-mono font-semibold">{result.geneticAdvancePercent.toFixed(2)}%</td>
+   494→                      <td className="py-3 px-4 text-xs text-muted-foreground">(GA / μ) × 100</td>
+   495→                      <td className="py-3 px-4">
+   496→                        <Badge variant={
+   497→                          result.geneticAdvancePercent >= 20 ? "default" : 
+   498→                          result.geneticAdvancePercent >= 10 ? "secondary" : "outline"
+   499→                        }>
+   500→                          {result.geneticAdvancePercent >= 20 ? 'Very High' : 
+   501→                           result.geneticAdvancePercent >= 10 ? 'High' :
+   502→                           result.geneticAdvancePercent >= 5 ? 'Moderate' : 'Low'}
+   503→                        </Badge>
+   504→                      </td>
+   505→                    </tr>
+   506→                    <tr className="hover:bg-muted/30">
+   507→                      <td className="py-3 px-4 font-mono text-xs">Mean (μ)</td>
+   508→                      <td className="py-3 px-4 text-right font-mono">{result.traitMean.toFixed(4)}</td>
+   509→                      <td className="py-3 px-4 text-xs text-muted-foreground">Σx / N</td>
+   510→                      <td className="py-3 px-4">Grand mean of all observations</td>
+   511→                    </tr>
+   512→                    <tr className="hover:bg-muted/30">
+   513→                      <td className="py-3 px-4 font-mono text-xs">SD (σ)</td>
+   514→                      <td className="py-3 px-4 text-right font-mono">{result.traitSD.toFixed(4)}</td>
+   515→                      <td className="py-3 px-4 text-xs text-muted-foreground">√σ²P</td>
+   516→                      <td className="py-3 px-4">Phenotypic standard deviation</td>
+   517→                    </tr>
+   518→                  </tbody>
+   519→                </table>
+   520→              </div>
+   521→
+   522→              {/* GCV vs PCV Bar Chart */}
+   523→              <div className="mt-6 pt-6 border-t">
+   524→                <h4 className="font-medium mb-4 flex items-center gap-2">
+   525→                  <BarChart3 className="h-4 w-4" />
+   526→                  GCV vs PCV Comparison
+   527→                </h4>
+   528→                <div className="flex items-end gap-8 h-48 justify-center">
+   529→                  <div className="flex flex-col items-center gap-2">
+   530→                    <div 
+   531→                      className="w-24 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg flex items-end justify-center pb-2 text-white font-bold text-sm"
+   532→                      style={{ height: `${Math.min(result.gcv / 50 * 100, 100)}%`, minHeight: '20px' }}
+   533→                    >
+   534→                      {result.gcv.toFixed(1)}%
+   535→                    </div>
+   536→                    <span className="text-xs font-medium">GCV</span>
+   537→                  </div>
+   538→                  <div className="flex flex-col items-center gap-2">
+   539→                    <div 
+   540→                      className="w-24 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg flex items-end justify-center pb-2 text-white font-bold text-sm"
+   541→                      style={{ height: `${Math.min(result.pcv / 50 * 100, 100)}%`, minHeight: '20px' }}
+   542→                    >
+   543→                      {result.pcv.toFixed(1)}%
+   544→                    </div>
+   545→                    <span className="text-xs font-medium">PCV</span>
+   546→                  </div>
+   547→                </div>
+   548→                <p className="text-xs text-muted-foreground mt-4 text-center">
+   549→                  The difference between PCV and GCV indicates environmental influence on the trait.
+   550→                  {result.pcv - result.gcv > 5 && ' Large difference suggests significant environmental effect.'}
+   551→                </p>
+   552→              </div>
+   553→            </CardContent>
+   554→          </Card>
+   555→
+   556→          {/* Interpretation Card */}
+   557→          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+   558→            <CardContent className="pt-6">
+   559→              <div className="flex items-start gap-3">
+   560→                <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+   561→                <div>
+   562→                  <h4 className="font-semibold text-primary mb-2">Interpretation</h4>
+   563→                  <p className="text-sm leading-relaxed">{result.interpretation}</p>
+   564→                  
+   565→                  <div className="mt-4 p-3 bg-background rounded-lg">
+   566→                    <p className="text-xs font-medium mb-2">Study Information:</p>
+   567→                    <div className="flex gap-4 text-xs text-muted-foreground">
+   568→                      <span><strong>Genotypes:</strong> {result.genotypeCount}</span>
+   569→                      <span><strong>Replications:</strong> {result.replicationCount}</span>
+   570→                      <span><strong>Total obs:</strong> {result.genotypeCount * result.replicationCount}</span>
+   571→                      <span><strong>K value:</strong> {selectionIntensity}</span>
+   572→                    </div>
+   573→                  </div>
+   574→                </div>
+   575→              </div>
+   576→            </CardContent>
+   577→          </Card>
+   578→        </motion.div>
+   579→      )}
+   580→
+   581→      {/* Loading State */}
+   582→      {isLoading && (
+   583→        <Card>
+   584→          <CardContent className="py-12">
+   585→            <div className="flex flex-col items-center gap-4">
+   586→              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+   587→              <p className="text-sm text-muted-foreground">Calculating genetic parameters...</p>
+   588→            </div>
+   589→          </CardContent>
+   590→        </Card>
+   591→      )}
+   592→    </div>
+   593→  )
+   594→}
+   595→

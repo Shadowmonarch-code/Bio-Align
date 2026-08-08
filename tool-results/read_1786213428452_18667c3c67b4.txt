@@ -40,8 +40,8 @@
     40→  ss: number;
     41→  df: number;
     42→  ms: number;
-    43→  f: number;
-    44→  pValue: number;
+    43→  f?: number;
+    44→  pValue?: number;
     45→}
     46→
     47→/**
@@ -1999,4 +1999,4 @@
   1999→        distMatrix[i][j] = distMatrix[j][i]; // Symmetric
   2000→      } else {
 
-[showing lines 1-2000 of 3426; use offset=2001 with limit to continue reading]
+[showing lines 1-2000 of 3429; use offset=2001 with limit to continue reading]

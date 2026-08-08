@@ -116,6 +116,28 @@ function getNavigationTarget(href: string): { view: string; toolId?: string } {
     return { view: "analysis", toolId }
   }
 
+  // Plant Breeding section - all map to plant-breeding view
+  if (href.startsWith("/plant-breeding")) {
+    return { view: "plant-breeding" }
+  }
+
+  // Bioinformatics section - map to analysis view with toolId
+  if (href.startsWith("/bioinformatics")) {
+    const toolId = href.replace("/bioinformatics/", "")
+    return { view: "analysis", toolId }
+  }
+
+  // Thesis Studio section - map to thesis view
+  if (href.startsWith("/thesis")) {
+    return { view: "thesis" }
+  }
+
+  // Visualization section - could map to a visualization view or tools
+  if (href.startsWith("/visualization")) {
+    const toolId = href.replace("/visualization/", "")
+    return { view: "analysis", toolId: `viz-${toolId}` }
+  }
+
   // Main navigation items
   switch (href) {
     case "/dashboard":
@@ -123,6 +145,7 @@ function getNavigationTarget(href: string): { view: string; toolId?: string } {
     case "/analyze-data":
       return { view: "analyze-data" }
     case "/dashboard/workspaces":
+    case "/dashboard/projects":
       return { view: "workspaces" }
     case "/dashboard/databases":
       return { view: "databases" }
@@ -130,9 +153,16 @@ function getNavigationTarget(href: string): { view: string; toolId?: string } {
       return { view: "documentation" }
     case "/dashboard/settings":
       return { view: "settings" }
+    case "/dashboard/workflows":
+      return { view: "workspaces" }
     default:
-      // Fallback: use the path as view name
-      return { view: href.replace(/^\//, "") }
+      // Fallback: try to extract meaningful view name
+      const path = href.replace(/^\//, "")
+      // Map common patterns
+      if (path.startsWith("plant-breeding")) return { view: "plant-breeding" }
+      if (path.startsWith("bioinformatics")) return { view: "analysis", toolId: path.replace("bioinformatics/", "") }
+      if (path.startsWith("thesis")) return { view: "thesis" }
+      return { view: "dashboard" }
   }
 }
 

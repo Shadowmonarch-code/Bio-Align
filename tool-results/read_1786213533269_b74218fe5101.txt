@@ -397,358 +397,363 @@
    397→                className="w-full justify-center h-10 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
    398→                onClick={() => toggleSection(section.id)}
    399→              >
-   400→                <section.icon className="size-4" style={{ color: section.color }} />
-   401→              </Button>
-   402→            </TooltipTrigger>
-   403→            <TooltipContent side="right">
-   404→              <span className="flex items-center gap-2">
-   405→                <span>{section.emoji}</span>
-   406→                <span>{section.title}</span>
-   407→              </span>
-   408→            </TooltipContent>
-   409→          </Tooltip>
-   410→        </div>
-   411→      )
-   412→    }
-   413→
-   414→    return (
-   415→      <Collapsible key={section.id} open={isOpen} onOpenChange={() => toggleSection(section.id)}>
-   416→        <CollapsibleTrigger asChild>
-   417→          <Button
-   418→            variant="ghost"
-   419→            size="default"
-   420→            className="w-full justify-between h-10 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
-   421→          >
-   422→            <div className="flex items-center gap-3">
-   423→              <section.icon 
-   424→                className="size-4 shrink-0 transition-colors group-hover:opacity-80" 
-   425→                style={{ color: section.color }} 
-   426→              />
-   427→              <span className="font-medium">{section.emoji} {section.title}</span>
-   428→            </div>
-   429→            <motion.div
-   430→              animate={{ rotate: isOpen ? 90 : 0 }}
-   431→              transition={{ duration: 0.2 }}
-   432→            >
-   433→              <ChevronRight className="size-4 opacity-50" />
-   434→            </motion.div>
-   435→          </Button>
-   436→        </CollapsibleTrigger>
-   437→        <CollapsibleContent>
-   438→          <motion.div
-   439→            initial={{ height: 0, opacity: 0 }}
-   440→            animate={{ height: "auto", opacity: 1 }}
-   441→            exit={{ height: 0, opacity: 0 }}
-   442→            transition={{ duration: 0.25, ease: "easeInOut" }}
-   443→            className="overflow-hidden"
-   444→          >
-   445→            <div className="mt-1 space-y-0.5 pl-2">
-   446→              {section.items.map((item) => {
-   447→                // Check if this item has a nested group
-   448→                const nestedKey = Object.keys(section.nestedGroups || {}).find(
-   449→                  key => item.href.includes(key.toLowerCase().replace(/\s+/g, "-"))
-   450→                )
-   451→                
-   452→                if (nestedKey && section.nestedGroups) {
-   453→                  const nestedItems = section.nestedGroups[nestedKey]
-   454→                  const isNestedOpen = openSections[`${section.id}-${nestedKey}`] ?? false
-   455→                  
-   456→                  return (
-   457→                    <Collapsible key={item.title} open={isNestedOpen} onOpenChange={() => 
-   458→                      setOpenSections(prev => ({ ...prev, [`${section.id}-${nestedKey}`]: !isNestedOpen }))
-   459→                    }>
-   460→                      <CollapsibleTrigger asChild>
-   461→                        <Button
-   462→                          variant="ghost"
-   463→                          size="sm"
-   464→                          className="w-full justify-between h-8 pl-6 pr-3 text-sm hover:bg-sidebar-accent/50"
-   465→                        >
-   466→                          <div className="flex items-center gap-2">
-   467→                            <item.icon className="size-3.5" style={{ color: section.color }} />
-   468→                            <span>{item.title}</span>
-   469→                          </div>
-   470→                          <motion.div
-   471→                            animate={{ rotate: isNestedOpen ? 90 : 0 }}
-   472→                            transition={{ duration: 0.15 }}
-   473→                          >
-   474→                            <ChevronRight className="size-3 opacity-50" />
-   475→                          </motion.div>
-   476→                        </Button>
-   477→                      </CollapsibleTrigger>
-   478→                      <CollapsibleContent>
-   479→                        <motion.div
-   480→                          initial={{ height: 0, opacity: 0 }}
-   481→                          animate={{ height: "auto", opacity: 1 }}
-   482→                          exit={{ height: 0, opacity: 0 }}
-   483→                          transition={{ duration: 0.2 }}
-   484→                          className="overflow-hidden"
-   485→                        >
-   486→                          <div className="py-1 space-y-0.5 pl-4">
-   487→                            {nestedItems.map((nestedItem) => 
-   488→                              renderNavItem(nestedItem, true, section.color)
-   489→                            )}
-   490→                          </div>
-   491→                        </motion.div>
-   492→                      </CollapsibleContent>
-   493→                    </Collapsible>
-   494→                  )
-   495→                }
-   496→                
-   497→                return renderNavItem(item, true, section.color)
-   498→              })}
-   499→            </div>
-   500→          </motion.div>
-   501→        </CollapsibleContent>
-   502→      </Collapsible>
-   503→    )
-   504→  }
-   505→
-   506→  return (
-   507→    <div className="flex flex-col h-full">
-   508→      {/* Logo Section */}
-   509→      <div className={cn(
-   510→        "flex items-center h-16 border-b border-sidebar-border px-4",
-   511→        collapsed ? "justify-center" : "gap-3"
-   512→      )}>
-   513→        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-biored to-biored-dark shadow-lg shadow-biored/25">
-   514→          <Dna className="size-5 text-white" />
-   515→        </div>
-   516→        <AnimatePresence mode="wait">
-   517→          {!collapsed && (
-   518→            <motion.div
-   519→              initial={{ opacity: 0, width: 0 }}
-   520→              animate={{ opacity: 1, width: "auto" }}
-   521→              exit={{ opacity: 0, width: 0 }}
-   522→              transition={{ duration: 0.2, ease: "easeInOut" }}
-   523→              className="overflow-hidden whitespace-nowrap"
-   524→            >
-   525→              <span className="text-lg font-bold tracking-tight gradient-text">BioAlign</span>
-   526→            </motion.div>
-   527→          )}
-   528→        </AnimatePresence>
-   529→      </div>
-   530→
-   531→      {/* Navigation */}
-   532→      <ScrollArea className="flex-1 py-4">
-   533→        <div className="px-3 space-y-4">
-   534→          {/* Main Navigation */}
-   535→          <div className="space-y-1">
-   536→            {!collapsed && (
-   537→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2">
-   538→                Main
-   539→              </p>
-   540→            )}
-   541→            {mainNavItems.map((item) => renderNavItem(item))}
-   542→          </div>
-   543→
-   544→          {/* Separator after main */}
-   545→          <Separator className="bg-sidebar-border/50" />
-   546→
-   547→          {/* Collapsible Sections */}
-   548→          {collapsibleSections.map((section) => (
-   549→            <div key={section.id} className="space-y-1">
-   550→              {renderCollapsibleSection(section)}
-   551→            </div>
-   552→          ))}
-   553→
-   554→          {/* Separator before other */}
-   555→          <Separator className="bg-sidebar-border/50" />
-   556→
-   557→          {/* AI Assistant - Special standalone item */}
-   558→          <div className="space-y-1">
-   559→            {renderNavItem(
-   560→              { 
-   561→                title: "AI Assistant", 
-   562→                href: "/ai-assistant", 
-   563→                icon: Brain 
-   564→              }, 
-   565→              false, 
-   566→              "#A855F7"
-   567→            )}
-   568→          </div>
-   569→
-   570→          {/* Other Navigation */}
-   571→          <div className="space-y-1">
-   572→            {!collapsed && (
-   573→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2 mt-4">
-   574→                System
-   575→              </p>
-   576→            )}
-   577→            {otherNavItems.map((item) => renderNavItem(item))}
-   578→          </div>
-   579→        </div>
-   580→      </ScrollArea>
-   581→
-   582→      {/* User Profile Section - Only show when authenticated */}
-   583→      <Separator className="bg-sidebar-border" />
-   584→      {isAuthenticated ? (
-   585→        <div className={cn(
-   586→          "flex items-center h-16 px-4 border-t border-sidebar-border",
-   587→          collapsed ? "justify-center" : "gap-3"
-   588→        )}>
-   589→          <Avatar className="size-9 ring-2 ring-biored/20">
-   590→            <AvatarImage src={undefined} alt={userDisplayName} />
-   591→            <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
-   592→              {userInitials}
-   593→            </AvatarFallback>
-   594→          </Avatar>
-   595→          <AnimatePresence mode="wait">
-   596→            {!collapsed && (
-   597→              <motion.div
-   598→                initial={{ opacity: 0, width: 0 }}
-   599→                animate={{ opacity: 1, width: "auto" }}
-   600→                exit={{ opacity: 0, width: 0 }}
-   601→                transition={{ duration: 0.2, ease: "easeInOut" }}
-   602→                className="overflow-hidden whitespace-nowrap"
-   603→              >
-   604→                <div className="flex flex-col">
-   605→                  <span className="text-sm font-medium leading-none">{userDisplayName}</span>
-   606→                  <span className="text-xs text-muted-foreground mt-0.5 truncate max-w-[150px]">
-   607→                    {userEmail}
-   608→                  </span>
-   609→                </div>
-   610→              </motion.div>
-   611→            )}
-   612→          </AnimatePresence>
-   613→        </div>
-   614→      ) : (
-   615→        <div className={cn(
-   616→          "flex items-center h-16 px-4 border-t border-sidebar-border justify-center",
-   617→        )}>
-   618→          <span className="text-xs text-muted-foreground">Not signed in</span>
-   619→        </div>
-   620→      )}
-   621→    </div>
-   622→  )
-   623→}
-   624→
-   625→// ==================== DESKTOP SIDEBAR COMPONENT ====================
-   626→
-   627→export function DashboardSidebar({
-   628→  collapsed = false,
-   629→  onToggle,
-   630→  activeItem = "/dashboard",
-   631→  onNavigate,
-   632→}: {
-   633→  collapsed?: boolean
-   634→  onToggle?: () => void
-   635→  activeItem?: string
-   636→  onNavigate?: (view: string, toolId?: string) => void
-   637→}) {
-   638→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-   639→    bioinformatics: false,
-   640→    "plant-breeding": false,
-   641→    "thesis-studio": false,
-   642→    visualization: false,
-   643→  })
-   644→
-   645→  return (
-   646→    <TooltipProvider delayDuration={0}>
-   647→      <motion.aside
-   648→        initial={false}
-   649→        animate={{ width: collapsed ? 64 : 300 }}
-   650→        transition={{
-   651→          type: "spring",
-   652→          stiffness: 350,
-   653→          damping: 30,
-   654→        }}
-   655→        className="fixed left-0 top-0 z-40 h-screen glass border-r border-border/50 flex flex-col overflow-hidden"
-   656→      >
-   657→        <SidebarContent
-   658→          collapsed={collapsed}
-   659→          activeItem={activeItem}
-   660→          openSections={openSections}
-   661→          setOpenSections={setOpenSections}
-   662→          onNavigate={onNavigate}
-   663→        />
-   664→
-   665→        {/* Collapse Toggle Button */}
-   666→        <div className="absolute -right-3 top-20 z-50">
-   667→          <Button
-   668→            onClick={onToggle}
-   669→            size="icon"
-   670→            variant="outline"
-   671→            className="size-6 rounded-full bg-background border shadow-md hover:bg-accent"
-   672→          >
-   673→            <motion.div
-   674→              animate={{ rotate: collapsed ? 180 : 0 }}
-   675→              transition={{ duration: 0.2 }}
-   676→            >
-   677→              {collapsed ? (
-   678→                <ChevronLeft className="size-3" />
-   679→              ) : (
-   680→                <ChevronRight className="size-3" />
-   681→              )}
-   682→            </motion.div>
-   683→          </Button>
-   684→        </div>
-   685→      </motion.aside>
-   686→    </TooltipProvider>
-   687→  )
-   688→}
-   689→
-   690→// ==================== MOBILE SIDEBAR COMPONENT ====================
-   691→
-   692→export function MobileSidebar({
-   693→  open,
-   694→  onClose,
-   695→  activeItem = "/dashboard",
-   696→  onNavigate,
-   697→}: {
-   698→  open: boolean
-   699→  onClose: () => void
-   700→  activeItem?: string
-   701→  onNavigate?: (view: string, toolId?: string) => void
-   702→}) {
-   703→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-   704→    bioinformatics: false,
-   705→    "plant-breeding": false,
-   706→    "thesis-studio": false,
-   707→    visualization: false,
-   708→  })
-   709→
-   710→  return (
-   711→    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-   712→      <SheetContent side="left" className="w-80 p-0 glass">
-   713→        <SheetHeader className="sr-only">
-   714→          <SheetTitle>Navigation Menu</SheetTitle>
-   715→        </SheetHeader>
-   716→        <SidebarContent
-   717→          collapsed={false}
-   718→          activeItem={activeItem}
-   719→          openSections={openSections}
-   720→          setOpenSections={setOpenSections}
-   721→          onNavigate={onNavigate}
-   722→        />
-   723→      </SheetContent>
-   724→    </Sheet>
-   725→  )
-   726→}
-   727→
-   728→// ==================== SIDEBAR STATE HOOK ====================
-   729→
-   730→export function useSidebarState() {
-   731→  const [collapsed, setCollapsed] = React.useState(false)
-   732→  const [mobileOpen, setMobileOpen] = React.useState(false)
-   733→  const isMobile = useIsMobile()
+   400→                <span style={{ color: section.color }} className="size-4 flex items-center justify-center">
+   401→                  <section.icon className="size-4" />
+   402→                </span>
+   403→              </Button>
+   404→            </TooltipTrigger>
+   405→            <TooltipContent side="right">
+   406→              <span className="flex items-center gap-2">
+   407→                <span>{section.emoji}</span>
+   408→                <span>{section.title}</span>
+   409→              </span>
+   410→            </TooltipContent>
+   411→          </Tooltip>
+   412→        </div>
+   413→      )
+   414→    }
+   415→
+   416→    return (
+   417→      <Collapsible key={section.id} open={isOpen} onOpenChange={() => toggleSection(section.id)}>
+   418→        <CollapsibleTrigger asChild>
+   419→          <Button
+   420→            variant="ghost"
+   421→            size="default"
+   422→            className="w-full justify-between h-10 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
+   423→          >
+   424→            <div className="flex items-center gap-3">
+   425→              <span style={{ color: section.color }} className="size-4 shrink-0 flex items-center justify-center transition-colors group-hover:opacity-80">
+   426→                <section.icon 
+   427→                  className="size-4" 
+   428→                />
+   429→              </span>
+   430→              <span className="font-medium">{section.emoji} {section.title}</span>
+   431→            </div>
+   432→            <motion.div
+   433→              animate={{ rotate: isOpen ? 90 : 0 }}
+   434→              transition={{ duration: 0.2 }}
+   435→            >
+   436→              <ChevronRight className="size-4 opacity-50" />
+   437→            </motion.div>
+   438→          </Button>
+   439→        </CollapsibleTrigger>
+   440→        <CollapsibleContent>
+   441→          <motion.div
+   442→            initial={{ height: 0, opacity: 0 }}
+   443→            animate={{ height: "auto", opacity: 1 }}
+   444→            exit={{ height: 0, opacity: 0 }}
+   445→            transition={{ duration: 0.25, ease: "easeInOut" }}
+   446→            className="overflow-hidden"
+   447→          >
+   448→            <div className="mt-1 space-y-0.5 pl-2">
+   449→              {section.items.map((item) => {
+   450→                // Check if this item has a nested group
+   451→                const nestedKey = Object.keys(section.nestedGroups || {}).find(
+   452→                  key => item.href.includes(key.toLowerCase().replace(/\s+/g, "-"))
+   453→                )
+   454→                
+   455→                if (nestedKey && section.nestedGroups) {
+   456→                  const nestedItems = section.nestedGroups[nestedKey]
+   457→                  const isNestedOpen = openSections[`${section.id}-${nestedKey}`] ?? false
+   458→                  
+   459→                  return (
+   460→                    <Collapsible key={item.title} open={isNestedOpen} onOpenChange={() => 
+   461→                      setOpenSections(prev => ({ ...prev, [`${section.id}-${nestedKey}`]: !isNestedOpen }))
+   462→                    }>
+   463→                      <CollapsibleTrigger asChild>
+   464→                        <Button
+   465→                          variant="ghost"
+   466→                          size="sm"
+   467→                          className="w-full justify-between h-8 pl-6 pr-3 text-sm hover:bg-sidebar-accent/50"
+   468→                        >
+   469→                          <div className="flex items-center gap-2">
+   470→                            <span style={{ color: section.color }} className="size-3.5 flex items-center justify-center">
+   471→                              <item.icon className="size-3.5" />
+   472→                            </span>
+   473→                            <span>{item.title}</span>
+   474→                          </div>
+   475→                          <motion.div
+   476→                            animate={{ rotate: isNestedOpen ? 90 : 0 }}
+   477→                            transition={{ duration: 0.15 }}
+   478→                          >
+   479→                            <ChevronRight className="size-3 opacity-50" />
+   480→                          </motion.div>
+   481→                        </Button>
+   482→                      </CollapsibleTrigger>
+   483→                      <CollapsibleContent>
+   484→                        <motion.div
+   485→                          initial={{ height: 0, opacity: 0 }}
+   486→                          animate={{ height: "auto", opacity: 1 }}
+   487→                          exit={{ height: 0, opacity: 0 }}
+   488→                          transition={{ duration: 0.2 }}
+   489→                          className="overflow-hidden"
+   490→                        >
+   491→                          <div className="py-1 space-y-0.5 pl-4">
+   492→                            {nestedItems.map((nestedItem) => 
+   493→                              renderNavItem(nestedItem, true, section.color)
+   494→                            )}
+   495→                          </div>
+   496→                        </motion.div>
+   497→                      </CollapsibleContent>
+   498→                    </Collapsible>
+   499→                  )
+   500→                }
+   501→                
+   502→                return renderNavItem(item, true, section.color)
+   503→              })}
+   504→            </div>
+   505→          </motion.div>
+   506→        </CollapsibleContent>
+   507→      </Collapsible>
+   508→    )
+   509→  }
+   510→
+   511→  return (
+   512→    <div className="flex flex-col h-full">
+   513→      {/* Logo Section */}
+   514→      <div className={cn(
+   515→        "flex items-center h-16 border-b border-sidebar-border px-4",
+   516→        collapsed ? "justify-center" : "gap-3"
+   517→      )}>
+   518→        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-biored to-biored-dark shadow-lg shadow-biored/25">
+   519→          <Dna className="size-5 text-white" />
+   520→        </div>
+   521→        <AnimatePresence mode="wait">
+   522→          {!collapsed && (
+   523→            <motion.div
+   524→              initial={{ opacity: 0, width: 0 }}
+   525→              animate={{ opacity: 1, width: "auto" }}
+   526→              exit={{ opacity: 0, width: 0 }}
+   527→              transition={{ duration: 0.2, ease: "easeInOut" }}
+   528→              className="overflow-hidden whitespace-nowrap"
+   529→            >
+   530→              <span className="text-lg font-bold tracking-tight gradient-text">BioAlign</span>
+   531→            </motion.div>
+   532→          )}
+   533→        </AnimatePresence>
+   534→      </div>
+   535→
+   536→      {/* Navigation */}
+   537→      <ScrollArea className="flex-1 py-4">
+   538→        <div className="px-3 space-y-4">
+   539→          {/* Main Navigation */}
+   540→          <div className="space-y-1">
+   541→            {!collapsed && (
+   542→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2">
+   543→                Main
+   544→              </p>
+   545→            )}
+   546→            {mainNavItems.map((item) => renderNavItem(item))}
+   547→          </div>
+   548→
+   549→          {/* Separator after main */}
+   550→          <Separator className="bg-sidebar-border/50" />
+   551→
+   552→          {/* Collapsible Sections */}
+   553→          {collapsibleSections.map((section) => (
+   554→            <div key={section.id} className="space-y-1">
+   555→              {renderCollapsibleSection(section)}
+   556→            </div>
+   557→          ))}
+   558→
+   559→          {/* Separator before other */}
+   560→          <Separator className="bg-sidebar-border/50" />
+   561→
+   562→          {/* AI Assistant - Special standalone item */}
+   563→          <div className="space-y-1">
+   564→            {renderNavItem(
+   565→              { 
+   566→                title: "AI Assistant", 
+   567→                href: "/ai-assistant", 
+   568→                icon: Brain 
+   569→              }, 
+   570→              false, 
+   571→              "#A855F7"
+   572→            )}
+   573→          </div>
+   574→
+   575→          {/* Other Navigation */}
+   576→          <div className="space-y-1">
+   577→            {!collapsed && (
+   578→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2 mt-4">
+   579→                System
+   580→              </p>
+   581→            )}
+   582→            {otherNavItems.map((item) => renderNavItem(item))}
+   583→          </div>
+   584→        </div>
+   585→      </ScrollArea>
+   586→
+   587→      {/* User Profile Section - Only show when authenticated */}
+   588→      <Separator className="bg-sidebar-border" />
+   589→      {isAuthenticated ? (
+   590→        <div className={cn(
+   591→          "flex items-center h-16 px-4 border-t border-sidebar-border",
+   592→          collapsed ? "justify-center" : "gap-3"
+   593→        )}>
+   594→          <Avatar className="size-9 ring-2 ring-biored/20">
+   595→            <AvatarImage src={undefined} alt={userDisplayName} />
+   596→            <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
+   597→              {userInitials}
+   598→            </AvatarFallback>
+   599→          </Avatar>
+   600→          <AnimatePresence mode="wait">
+   601→            {!collapsed && (
+   602→              <motion.div
+   603→                initial={{ opacity: 0, width: 0 }}
+   604→                animate={{ opacity: 1, width: "auto" }}
+   605→                exit={{ opacity: 0, width: 0 }}
+   606→                transition={{ duration: 0.2, ease: "easeInOut" }}
+   607→                className="overflow-hidden whitespace-nowrap"
+   608→              >
+   609→                <div className="flex flex-col">
+   610→                  <span className="text-sm font-medium leading-none">{userDisplayName}</span>
+   611→                  <span className="text-xs text-muted-foreground mt-0.5 truncate max-w-[150px]">
+   612→                    {userEmail}
+   613→                  </span>
+   614→                </div>
+   615→              </motion.div>
+   616→            )}
+   617→          </AnimatePresence>
+   618→        </div>
+   619→      ) : (
+   620→        <div className={cn(
+   621→          "flex items-center h-16 px-4 border-t border-sidebar-border justify-center",
+   622→        )}>
+   623→          <span className="text-xs text-muted-foreground">Not signed in</span>
+   624→        </div>
+   625→      )}
+   626→    </div>
+   627→  )
+   628→}
+   629→
+   630→// ==================== DESKTOP SIDEBAR COMPONENT ====================
+   631→
+   632→export function DashboardSidebar({
+   633→  collapsed = false,
+   634→  onToggle,
+   635→  activeItem = "/dashboard",
+   636→  onNavigate,
+   637→}: {
+   638→  collapsed?: boolean
+   639→  onToggle?: () => void
+   640→  activeItem?: string
+   641→  onNavigate?: (view: string, toolId?: string) => void
+   642→}) {
+   643→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+   644→    bioinformatics: false,
+   645→    "plant-breeding": false,
+   646→    "thesis-studio": false,
+   647→    visualization: false,
+   648→  })
+   649→
+   650→  return (
+   651→    <TooltipProvider delayDuration={0}>
+   652→      <motion.aside
+   653→        initial={false}
+   654→        animate={{ width: collapsed ? 64 : 300 }}
+   655→        transition={{
+   656→          type: "spring",
+   657→          stiffness: 350,
+   658→          damping: 30,
+   659→        }}
+   660→        className="fixed left-0 top-0 z-40 h-screen glass border-r border-border/50 flex flex-col overflow-hidden"
+   661→      >
+   662→        <SidebarContent
+   663→          collapsed={collapsed}
+   664→          activeItem={activeItem}
+   665→          openSections={openSections}
+   666→          setOpenSections={setOpenSections}
+   667→          onNavigate={onNavigate}
+   668→        />
+   669→
+   670→        {/* Collapse Toggle Button */}
+   671→        <div className="absolute -right-3 top-20 z-50">
+   672→          <Button
+   673→            onClick={onToggle}
+   674→            size="icon"
+   675→            variant="outline"
+   676→            className="size-6 rounded-full bg-background border shadow-md hover:bg-accent"
+   677→          >
+   678→            <motion.div
+   679→              animate={{ rotate: collapsed ? 180 : 0 }}
+   680→              transition={{ duration: 0.2 }}
+   681→            >
+   682→              {collapsed ? (
+   683→                <ChevronLeft className="size-3" />
+   684→              ) : (
+   685→                <ChevronRight className="size-3" />
+   686→              )}
+   687→            </motion.div>
+   688→          </Button>
+   689→        </div>
+   690→      </motion.aside>
+   691→    </TooltipProvider>
+   692→  )
+   693→}
+   694→
+   695→// ==================== MOBILE SIDEBAR COMPONENT ====================
+   696→
+   697→export function MobileSidebar({
+   698→  open,
+   699→  onClose,
+   700→  activeItem = "/dashboard",
+   701→  onNavigate,
+   702→}: {
+   703→  open: boolean
+   704→  onClose: () => void
+   705→  activeItem?: string
+   706→  onNavigate?: (view: string, toolId?: string) => void
+   707→}) {
+   708→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+   709→    bioinformatics: false,
+   710→    "plant-breeding": false,
+   711→    "thesis-studio": false,
+   712→    visualization: false,
+   713→  })
+   714→
+   715→  return (
+   716→    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+   717→      <SheetContent side="left" className="w-80 p-0 glass">
+   718→        <SheetHeader className="sr-only">
+   719→          <SheetTitle>Navigation Menu</SheetTitle>
+   720→        </SheetHeader>
+   721→        <SidebarContent
+   722→          collapsed={false}
+   723→          activeItem={activeItem}
+   724→          openSections={openSections}
+   725→          setOpenSections={setOpenSections}
+   726→          onNavigate={onNavigate}
+   727→        />
+   728→      </SheetContent>
+   729→    </Sheet>
+   730→  )
+   731→}
+   732→
+   733→// ==================== SIDEBAR STATE HOOK ====================
    734→
-   735→  const toggle = React.useCallback(() => {
-   736→    if (isMobile) {
-   737→      setMobileOpen((prev) => !prev)
-   738→    } else {
-   739→      setCollapsed((prev) => !prev)
-   740→    }
-   741→  }, [isMobile])
-   742→
-   743→  return {
-   744→    collapsed,
-   745→    setCollapsed,
-   746→    mobileOpen,
-   747→    setMobileOpen,
-   748→    isMobile,
-   749→    toggle,
-   750→  }
-   751→}
-   752→
-   753→export default DashboardSidebar
-   754→
+   735→export function useSidebarState() {
+   736→  const [collapsed, setCollapsed] = React.useState(false)
+   737→  const [mobileOpen, setMobileOpen] = React.useState(false)
+   738→  const isMobile = useIsMobile()
+   739→
+   740→  const toggle = React.useCallback(() => {
+   741→    if (isMobile) {
+   742→      setMobileOpen((prev) => !prev)
+   743→    } else {
+   744→      setCollapsed((prev) => !prev)
+   745→    }
+   746→  }, [isMobile])
+   747→
+   748→  return {
+   749→    collapsed,
+   750→    setCollapsed,
+   751→    mobileOpen,
+   752→    setMobileOpen,
+   753→    isMobile,
+   754→    toggle,
+   755→  }
+   756→}
+   757→
+   758→export default DashboardSidebar
+   759→
