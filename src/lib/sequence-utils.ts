@@ -743,7 +743,7 @@ export function parseFASTA(fastaString: string): { name: string; sequence: strin
  * Format as FASTA
  */
 export function formatFASTA(name: string, sequence: string, lineLength: number = 60): string {
-  const lines = [];
+  const lines: string[] = [];
   lines.push(`>${name}`);
   
   for (let i = 0; i < sequence.length; i += lineLength) {

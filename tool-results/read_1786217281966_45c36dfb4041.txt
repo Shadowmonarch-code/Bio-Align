@@ -1,0 +1,1172 @@
+     1→// BioAlign Tools Catalog Data
+     2→// Comprehensive bioinformatics tool definitions organized by category
+     3→
+     4→import {
+     5→  Dna,
+     6→  Microscope,
+     7→  TreePine,
+     8→  CircleDot,
+     9→  FlaskConical,
+    10→  Box,
+    11→  Atom,
+    12→  Scissors,
+    13→  TestTube,
+    14→  Settings,
+    15→  AlignCenter,
+    16→  Search,
+    17→  GitCompare,
+    18→  BarChart3,
+    19→  Eye,
+    20→  Target,
+    21→  Zap,
+    22→  Waves,
+    23→  Layers,
+    24→  Globe,
+    25→  Cpu,
+    26→  ScanLine,
+    27→  Network,
+    28→  FileText,
+    29→  Calculator,
+    30→  Thermometer,
+    31→  Shuffle,
+    32→  CheckCircle2,
+    33→  Clock,
+    34→  Star,
+    35→} from "lucide-react"
+    36→import type { LucideIcon } from "lucide-react"
+    37→
+    38→// Tool status types
+    39→export type ToolStatus = "available" | "coming-soon" | "beta" | "deprecated"
+    40→
+    41→// Tool interface
+    42→export interface BioTool {
+    43→  id: string
+    44→  name: string
+    45→  description: string
+    46→  category: ToolCategoryType
+    47→  icon: LucideIcon
+    48→  status: ToolStatus
+    49→  tags: string[]
+    50→  version?: string
+    51→  lastUpdated?: string
+    52→}
+    53→
+    54→// Category types
+    55→export type ToolCategoryType =
+    56→  | "sequence-analysis"
+    57→  | "multiple-alignment"
+    58→  | "protein-analysis"
+    59→  | "phylogenetics"
+    60→  | "genomics"
+    61→  | "transcriptomics"
+    62→  | "structural-biology"
+    63→  | "molecular-docking"
+    64→  | "crispr"
+    65→  | "primer-tools"
+    66→  | "utilities"
+    67→
+    68→// Category interface
+    69→export interface ToolCategory {
+    70→  id: ToolCategoryType
+    71→  name: string
+    72→  description: string
+    73→  icon: LucideIcon
+    74→  color: string
+    75→  tools: BioTool[]
+    76→}
+    77→
+    78→// ==================== SEQUENCE ANALYSIS TOOLS ====================
+    79→const sequenceAnalysisTools: BioTool[] = [
+    80→  // BLAST Family
+    81→  {
+    82→    id: "blast",
+    83→    name: "BLAST",
+    84→    description: "Basic Local Alignment Search Tool - find regions of similarity between sequences",
+    85→    category: "sequence-analysis",
+    86→    icon: Search,
+    87→    status: "available",
+    88→    tags: ["alignment", "search", "similarity"],
+    89→    version: "2.15.0",
+    90→  },
+    91→  {
+    92→    id: "blastn",
+    93→    name: "BLASTN",
+    94→    description: "Nucleotide-nucleotide BLAST for comparing nucleotide query sequences",
+    95→    category: "sequence-analysis",
+    96→    icon: Dna,
+    97→    status: "available",
+    98→    tags: ["nucleotide", "alignment", "search"],
+    99→    version: "2.15.0",
+   100→  },
+   101→  {
+   102→    id: "blastp",
+   103→    name: "BLASTP",
+   104→    description: "Protein-protein BLAST for finding similar protein sequences",
+   105→    category: "sequence-analysis",
+   106→    icon: Microscope,
+   107→    status: "available",
+   108→    tags: ["protein", "alignment", "search"],
+   109→    version: "2.15.0",
+   110→  },
+   111→  {
+   112→    id: "blastx",
+   113→    name: "BLASTX",
+   114→    description: "Translated nucleotide-protein BLAST for searching protein databases",
+   115→    category: "sequence-analysis",
+   116→    icon: AlignCenter,
+   117→    status: "available",
+   118→    tags: ["translation", "protein", "search"],
+   119→    version: "2.15.0",
+   120→  },
+   121→  {
+   122→    id: "tblastn",
+   123→    name: "TBLASTN",
+   124→    description: "Protein-translated nucleotide BLAST for six-frame translations",
+   125→    category: "sequence-analysis",
+   126→    icon: GitCompare,
+   127→    status: "available",
+   128→    tags: ["nucleotide", "translation", "search"],
+   129→    version: "2.15.0",
+   130→  },
+   131→  {
+   132→    id: "tblastx",
+   133→    name: "TBLASTX",
+   134→    description: "Translated nucleotide-translated nucleotide BLAST for distant homologs",
+   135→    category: "sequence-analysis",
+   136→    icon: Layers,
+   137→    status: "available",
+   138→    tags: ["nucleotide", "translation", "distant-homologs"],
+   139→    version: "2.15.0",
+   140→  },
+   141→  {
+   142→    id: "psi-blast",
+   143→    name: "PSI-BLAST",
+   144→    description: "Position-Specific Iterated BLAST for finding distant relationships",
+   145→    category: "sequence-analysis",
+   146→    icon: Zap,
+   147→    status: "available",
+   148→    tags: ["iterative", "position-specific", "profile"],
+   149→    version: "2.15.0",
+   150→  },
+   151→  {
+   152→    id: "megablast",
+   153→    name: "MegaBLAST",
+   154→    description: "Optimized for very similar sequences, faster than standard BLAST",
+   155→    category: "sequence-analysis",
+   156→    icon: Waves,
+   157→    status: "available",
+   158→    tags: ["fast", "similar-sequences", "large-datasets"],
+   159→    version: "2.15.0",
+   160→  },
+   161→  // Alignment Tools
+   162→  {
+   163→    id: "needleman-wunsch",
+   164→    name: "Needleman-Wunsch",
+   165→    description: "Global pairwise sequence alignment algorithm for optimal alignment",
+   166→    category: "sequence-analysis",
+   167→    icon: AlignCenter,
+   168→    status: "available",
+   169→    tags: ["global-alignment", "optimal", "pairwise"],
+   170→    version: "1.0.0",
+   171→  },
+   172→  {
+   173→    id: "smith-waterman",
+   174→    name: "Smith-Waterman",
+   175→    description: "Local pairwise sequence alignment algorithm for best local matches",
+   176→    category: "sequence-analysis",
+   177→    icon: Target,
+   178→    status: "available",
+   179→    tags: ["local-alignment", "optimal", "pairwise"],
+   180→    version: "1.0.0",
+   181→  },
+   182→  // Sequence Utilities
+   183→  {
+   184→    id: "fasta-search",
+   185→    name: "FASTA Search",
+   186→    description: "Search and query FASTA format sequence databases efficiently",
+   187→    category: "sequence-analysis",
+   188→    icon: Search,
+   189→    status: "available",
+   190→    tags: ["fasta", "database", "search"],
+   191→    version: "36.3.8",
+   192→  },
+   193→  {
+   194→    id: "dot-plot",
+   195→    name: "Dot Plot",
+   196→    description: "Visualize sequence similarities using dot matrix representation",
+   197→    category: "sequence-analysis",
+   198→    icon: BarChart3,
+   199→    status: "available",
+   200→    tags: ["visualization", "similarity", "matrix"],
+   201→    version: "1.0.0",
+   202→  },
+   203→  // Analysis Tools
+   204→  {
+   205→    id: "sequence-viewer",
+   206→    name: "Sequence Viewer",
+   207→    description: "Interactive viewer for exploring DNA, RNA, and protein sequences",
+   208→    category: "sequence-analysis",
+   209→    icon: Eye,
+   210→    status: "available",
+   211→    tags: ["viewer", "interactive", "visualization"],
+   212→    version: "2.1.0",
+   213→  },
+   214→  {
+   215→    id: "orf-finder",
+   216→    name: "ORF Finder",
+   217→    description: "Identify open reading frames in nucleotide sequences",
+   218→    category: "sequence-analysis",
+   219→    icon: Target,
+   220→    status: "available",
+   221→    tags: ["orf", "coding-region", "prediction"],
+   222→    version: "1.2.0",
+   223→  },
+   224→  {
+   225→    id: "reverse-complement",
+   226→    name: "Reverse Complement",
+   227→    description: "Generate reverse complement of DNA/RNA sequences",
+   228→    category: "sequence-analysis",
+   229→    icon: GitCompare,
+   230→    status: "available",
+   231→    tags: ["reverse", "complement", "dna"],
+   232→    version: "1.0.0",
+   233→  },
+   234→  {
+   235→    id: "translation",
+   236→    name: "Translation",
+   237→    description: "Translate nucleotide sequences to protein sequences",
+   238→    category: "sequence-analysis",
+   239→    icon: Layers,
+   240→    status: "available",
+   241→    tags: ["translation", "codon", "protein"],
+   242→    version: "1.1.0",
+   243→  },
+   244→  {
+   245→    id: "codon-optimization",
+   246→    name: "Codon Optimization",
+   247→    description: "Optimize codon usage for expression in different organisms",
+   248→    category: "sequence-analysis",
+   249→    icon: Zap,
+   250→    status: "beta",
+   251→    tags: ["optimization", "expression", "codon-usage"],
+   252→    version: "1.0.0-beta",
+   253→  },
+   254→  {
+   255→    id: "gc-content",
+   256→    name: "GC Content",
+   257→    description: "Calculate GC content and composition analysis of sequences",
+   258→    category: "sequence-analysis",
+   259→    icon: BarChart3,
+   260→    status: "available",
+   261→    tags: ["gc-content", "composition", "statistics"],
+   262→    version: "1.0.0",
+   263→  },
+   264→  {
+   265→    id: "sequence-statistics",
+   266→    name: "Sequence Statistics",
+   267→    description: "Comprehensive statistical analysis of sequence properties",
+   268→    category: "sequence-analysis",
+   269→    icon: Calculator,
+   270→    status: "available",
+   271→    tags: ["statistics", "composition", "analysis"],
+   272→    version: "1.2.0",
+   273→  },
+   274→  {
+   275→    id: "restriction-enzyme",
+   276→    name: "Restriction Enzyme Mapping",
+   277→    description: "Find restriction enzyme cut sites in DNA sequences",
+   278→    category: "sequence-analysis",
+   279→    icon: Scissors,
+   280→    status: "available",
+   281→    tags: ["restriction-enzyme", "cut-sites", "cloning"],
+   282→    version: "2.0.0",
+   283→  },
+   284→  {
+   285→    id: "primer-design",
+   286→    name: "Primer Design",
+   287→    description: "Design PCR primers with melting temperature optimization",
+   288→    category: "sequence-analysis",
+   289→    icon: TestTube,
+   290→    status: "available",
+   291→    tags: ["primer", "pcr", "design"],
+   292→    version: "3.0.0",
+   293→  },
+   294→  {
+   295→    id: "motif-search",
+   296→    name: "Motif Search",
+   297→    description: "Search for sequence motifs and patterns in your data",
+   298→    category: "sequence-analysis",
+   299→    icon: Search,
+   300→    status: "available",
+   301→    tags: ["motif", "pattern", "search"],
+   302→    version: "1.5.0",
+   303→  },
+   304→  {
+   305→    id: "kmer-analysis",
+   306→    name: "K-mer Analysis",
+   307→    description: "Analyze k-mer frequency and distribution in sequences",
+   308→    category: "sequence-analysis",
+   309→    icon: BarChart3,
+   310→    status: "beta",
+   311→    tags: ["kmer", "frequency", "assembly"],
+   312→    version: "1.0.0-beta",
+   313→  },
+   314→]
+   315→
+   316→// ==================== MULTIPLE SEQUENCE ALIGNMENT TOOLS ====================
+   317→const multipleAlignmentTools: BioTool[] = [
+   318→  {
+   319→    id: "clustal-omega",
+   320→    name: "Clustal Omega",
+   321→    description: "Fast and scalable multiple sequence alignment for large datasets",
+   322→    category: "multiple-alignment",
+   323→    icon: AlignCenter,
+   324→    status: "available",
+   325→    tags: ["msa", "fast", "scalable"],
+   326→    version: "1.2.4",
+   327→  },
+   328→  {
+   329→    id: "muscle",
+   330→    name: "MUSCLE",
+   331→    description: "Multiple Sequence Comparison by Log-Expectation - accurate alignments",
+   332→    category: "multiple-alignment",
+   333→    icon: Layers,
+   334→    status: "available",
+   335→    tags: ["msa", "accurate", "refinement"],
+   336→    version: "5.1",
+   337→  },
+   338→  {
+   339→    id: "mafft",
+   340→    name: "MAFFT",
+   341→    description: "Multiple alignment with fast Fourier transform for speed and accuracy",
+   342→    category: "multiple-alignment",
+   343→    icon: Waves,
+   344→    status: "available",
+   345→    tags: ["msa", "fft", "accurate"],
+   346→    version: "7.550",
+   347→  },
+   348→  {
+   349→    id: "t-coffee",
+   350→    name: "T-Coffee",
+   351→    description: "Tree-based Consistency Objective Function For alignmEnt evaluation",
+   352→    category: "multiple-alignment",
+   353→    icon: TreePine,
+   354→    status: "available",
+   355→    tags: ["msa", "consistency", "accuracy"],
+   356→    version: "13.45.0",
+   357→  },
+   358→  {
+   359→    id: "kalign",
+   360→    name: "Kalign",
+   361→    description: "Fast and accurate multiple sequence alignment algorithm",
+   362→    category: "multiple-alignment",
+   363→    icon: AlignCenter,
+   364→    status: "available",
+   365→    tags: ["msa", "fast", "efficient"],
+   366→    version: "3.4.0",
+   367→  },
+   368→  {
+   369→    id: "cobalt",
+   370→    name: "COBALT",
+   371→    description: "Constraint-based multiple protein alignment tool from NCBI",
+   372→    category: "multiple-alignment",
+   373→    icon: Box,
+   374→    status: "available",
+   375→    tags: ["msa", "constraint-based", "protein"],
+   376→    version: "1.0.0",
+   377→  },
+   378→]
+   379→
+   380→// ==================== PROTEIN ANALYSIS TOOLS ====================
+   381→const proteinAnalysisTools: BioTool[] = [
+   382→  {
+   383→    id: "protparam",
+   384→    name: "ProtParam",
+   385→    description: "Compute physical and chemical parameters for protein sequences",
+   386→    category: "protein-analysis",
+   387→    icon: Microscope,
+   388→    status: "available",
+   389→    tags: ["parameters", "physicochemical", "properties"],
+   390→    version: "1.0.0",
+   391→  },
+   392→  {
+   393→    id: "molecular-weight",
+   394→    name: "Molecular Weight",
+   395→    description: "Calculate molecular weight of proteins and peptides",
+   396→    category: "protein-analysis",
+   397→    icon: Calculator,
+   398→    status: "available",
+   399→    tags: ["weight", "mass", "calculation"],
+   400→    version: "1.0.0",
+   401→  },
+   402→  {
+   403→    id: "isoelectric-point",
+   404→    name: "Isoelectric Point",
+   405→    description: "Predict isoelectric point (pI) of protein sequences",
+   406→    category: "protein-analysis",
+   407→    icon: Target,
+   408→    status: "available",
+   409→    tags: ["pi", "charge", "ph"],
+   410→    version: "1.0.0",
+   411→  },
+   412→  {
+   413→    id: "hydrophobicity",
+   414→    name: "Hydrophobicity",
+   415→    description: "Analyze hydrophobicity profiles and scales of proteins",
+   416→    category: "protein-analysis",
+   417→    icon: Waves,
+   418→    status: "available",
+   419→    tags: ["hydrophobicity", "kyte-doolittle", "profile"],
+   420→    version: "1.0.0",
+   421→  },
+   422→  {
+   423→    id: "signal-peptide",
+   424→    name: "Signal Peptide",
+   425→    description: "Predict signal peptide cleavage sites in proteins",
+   426→    category: "protein-analysis",
+   427→    icon: Zap,
+   428→    status: "available",
+   429→    tags: ["signal-peptide", "secretion", "prediction"],
+   430→    version: "6.0",
+   431→  },
+   432→  {
+   433→    id: "transmembrane",
+   434→    name: "Transmembrane Prediction",
+   435→    description: "Predict transmembrane helices and topology in proteins",
+   436→    category: "protein-analysis",
+   437→    icon: Layers,
+   438→    status: "available",
+   439→    tags: ["transmembrane", "tmhmm", "topology"],
+   440→    version: "2.0",
+   441→  },
+   442→  {
+   443→    id: "protein-domains",
+   444→    name: "Protein Domains",
+   445→    description: "Identify conserved domains and functional sites in proteins",
+   446→    category: "protein-analysis",
+   447→    icon: Box,
+   448→    status: "available",
+   449→    tags: ["domains", "conserved", "functional"],
+   450→    version: "3.19",
+   451→  },
+   452→  {
+   453→    id: "secondary-structure",
+   454→    name: "Secondary Structure",
+   455→    description: "Predict secondary structure elements (alpha helices, beta sheets)",
+   456→    category: "protein-analysis",
+   457→    icon: BarChart3,
+   458→    status: "available",
+   459→    tags: ["secondary-structure", "prediction", "psipred"],
+   460→    version: "4.0",
+   461→  },
+   462→  {
+   463→    id: "tertiary-structure",
+   464→    name: "Tertiary Structure Prediction",
+   465→    description: "Predict 3D structure of proteins using AI/ML methods",
+   466→    category: "protein-analysis",
+   467→    icon: Globe,
+   468→    status: "beta",
+   469→    tags: ["tertiary", "3d-structure", "folding"],
+   470→    version: "1.0.0-beta",
+   471→  },
+   472→  {
+   473→    id: "ramachandran",
+   474→    name: "Ramachandran Plot",
+   475→    description: "Analyze backbone dihedral angles psi vs phi in protein structures",
+   476→    category: "protein-analysis",
+   477→    icon: ScatterPlotIcon,
+   478→    status: "available",
+   479→    tags: ["ramachandran", "angles", "validation"],
+   480→    version: "1.0.0",
+   481→  },
+   482→  {
+   483→    id: "disulfide-bonds",
+   484→    name: "Disulfide Bonds",
+   485→    description: "Predict disulfide bond patterns in protein structures",
+   486→    category: "protein-analysis",
+   487→    icon: Atom,
+   488→    status: "available",
+   489→    tags: ["disulfide", "bonds", "cysteine"],
+   490→    version: "1.0.0",
+   491→  },
+   492→  {
+   493→    id: "protein-solubility",
+   494→    name: "Protein Solubility",
+   495→    description: "Predict protein solubility and aggregation propensity",
+   496→    category: "protein-analysis",
+   497→    icon: FlaskConical,
+   498→    status: "beta",
+   499→    tags: ["solubility", "aggregation", "expression"],
+   500→    version: "1.0.0-beta",
+   501→  },
+   502→]
+   503→
+   504→// ==================== PHYLOGENETICS TOOLS ====================
+   505→const phylogeneticsTools: BioTool[] = [
+   506→  {
+   507→    id: "neighbor-joining",
+   508→    name: "Neighbor Joining",
+   509→    description: "Construct phylogenetic trees using neighbor-joining algorithm",
+   510→    category: "phylogenetics",
+   511→    icon: TreePine,
+   512→    status: "available",
+   513→    tags: ["tree-building", "distance-method", "fast"],
+   514→    version: "1.0.0",
+   515→  },
+   516→  {
+   517→    id: "maximum-likelihood",
+   518→    name: "Maximum Likelihood",
+   519→    description: "Build phylogenetic trees using maximum likelihood inference",
+   520→    category: "phylogenetics",
+   521→    icon: BarChart3,
+   522→    status: "available",
+   523→    tags: ["ml", "statistical", "accurate"],
+   524→    version: "1.0.0",
+   525→  },
+   526→  {
+   527→    id: "upgma",
+   528→    name: "UPGMA",
+   529→    description: "Unweighted Pair Group Method with Arithmetic Mean clustering",
+   530→    category: "phylogenetics",
+   531→    icon: Network,
+   532→    status: "available",
+   533→    tags: ["upgma", "clustering", "hierarchical"],
+   534→    version: "1.0.0",
+   535→  },
+   536→  {
+   537→    id: "parsimony",
+   538→    name: "Parsimony",
+   539→    description: "Maximum parsimony method for phylogenetic tree reconstruction",
+   540→    category: "phylogenetics",
+   541→    icon: Scissors,
+   542→    status: "available",
+   543→    tags: ["parsimony", "character-based", "cladistics"],
+   544→    version: "1.0.0",
+   545→  },
+   546→  {
+   547→    id: "bootstrap",
+   548→    name: "Bootstrap Analysis",
+   549→    description: "Assess statistical support for tree nodes via bootstrapping",
+   550→    category: "phylogenetics",
+   551→    icon: Calculator,
+   552→    status: "available",
+   553→    tags: ["bootstrap", "statistics", "support"],
+   554→    version: "1.0.0",
+   555→  },
+   556→  {
+   557→    id: "tree-viewer",
+   558→    name: "Tree Viewer",
+   559→    description: "Interactive visualization and exploration of phylogenetic trees",
+   560→    category: "phylogenetics",
+   561→    icon: Eye,
+   562→    status: "available",
+   563→    tags: ["visualization", "interactive", "trees"],
+   564→    version: "2.0.0",
+   565→  },
+   566→  {
+   567→    id: "tree-export",
+   568→    name: "Tree Export",
+   569→    description: "Export phylogenetic trees in various formats (Newick, Nexus)",
+   570→    category: "phylogenetics",
+   571→    icon: FileText,
+   572→    status: "available",
+   573→    tags: ["export", "formats", "newick"],
+   574→    version: "1.0.0",
+   575→  },
+   576→]
+   577→
+   578→// ==================== GENOMICS TOOLS ====================
+   579→const genomicsTools: BioTool[] = [
+   580→  {
+   581→    id: "genome-browser",
+   582→    name: "Genome Browser",
+   583→    description: "Visualize and explore genome annotations and features",
+   584→    category: "genomics",
+   585→    icon: Globe,
+   586→    status: "available",
+   587→    tags: ["browser", "visualization", "genome"],
+   588→    version: "2.5.0",
+   589→  },
+   590→  {
+   591→    id: "genome-annotation",
+   592→    name: "Genome Annotation",
+   593→    description: "Annotate genomes with genes, regulatory elements, and features",
+   594→    category: "genomics",
+   595→    icon: Box,
+   596→    status: "available",
+   597→    tags: ["annotation", "genes", "features"],
+   598→    version: "1.5.0",
+   599→  },
+   600→  {
+   601→    id: "variant-calling",
+   602→    name: "Variant Calling",
+   603→    description: "Identify genetic variants from sequencing data",
+   604→    category: "genomics",
+   605→    icon: ScanLine,
+   606→    status: "available",
+   607→    tags: ["variants", "snps", "indels"],
+   608→    version: "2.0.0",
+   609→  },
+   610→  {
+   611→    id: "snp-analysis",
+   612→    name: "SNP Analysis",
+   613→    description: "Analyze single nucleotide polymorphisms and their effects",
+   614→    category: "genomics",
+   615→    icon: Target,
+   616→    status: "available",
+   617→    tags: ["snp", "polymorphism", "genotyping"],
+   618→    version: "1.8.0",
+   619→  },
+   620→  {
+   621→    id: "cnv-analysis",
+   622→    name: "CNV Analysis",
+   623→    description: "Detect and analyze copy number variations in genomes",
+   624→    category: "genomics",
+   625→    icon: BarChart3,
+   626→    status: "beta",
+   627→    tags: ["cnv", "copy-number", "variation"],
+   628→    version: "1.0.0-beta",
+   629→  },
+   630→  {
+   631→    id: "gene-prediction",
+   632→    name: "Gene Prediction",
+   633→    description: "Predict gene locations and structures in genomic sequences",
+   634→    category: "genomics",
+   635→    icon: Cpu,
+   636→    status: "available",
+   637→    tags: ["gene-prediction", "ab-initio", "annotation"],
+   638→    version: "2.0.0",
+   639→  },
+   640→  {
+   641→    id: "repeatmasker",
+   642→    name: "RepeatMasker",
+   643→    description: "Screen DNA sequences for interspersed repeats and low complexity",
+   644→    category: "genomics",
+   645→    icon: Layers,
+   646→    status: "available",
+   647→    tags: ["repeats", "masking", "transposons"],
+   648→    version: "4.1.6",
+   649→  },
+   650→]
+   651→
+   652→// ==================== TRANSCRIPTOMICS TOOLS ====================
+   653→const transcriptomicsTools: BioTool[] = [
+   654→  {
+   655→    id: "rnaseq-pipeline",
+   656→    name: "RNA-seq Pipeline",
+   657→    description: "Complete RNA-seq analysis workflow from raw reads to results",
+   658→    category: "transcriptomics",
+   659→    icon: FlaskConical,
+   660→    status: "available",
+   661→    tags: ["rna-seq", "pipeline", "workflow"],
+   662→    version: "3.0.0",
+   663→  },
+   664→  {
+   665→    id: "differential-expression",
+   666→    name: "Differential Expression",
+   667→    description: "Identify differentially expressed genes between conditions",
+   668→    category: "transcriptomics",
+   669→    icon: BarChart3,
+   670→    status: "available",
+   671→    tags: ["de", "expression", "statistics"],
+   672→    version: "2.5.0",
+   673→  },
+   674→  {
+   675→    id: "heatmaps",
+   676→    name: "Heatmaps",
+   677→    description: "Create publication-quality heatmaps for expression data",
+   678→    category: "transcriptomics",
+   679→    icon: HeatmapIcon,
+   680→    status: "available",
+   681→    tags: ["heatmap", "visualization", "expression"],
+   682→    version: "2.0.0",
+   683→  },
+   684→  {
+   685→    id: "volcano-plot",
+   686→    name: "Volcano Plot",
+   687→    description: "Visualize differential expression results with volcano plots",
+   688→    category: "transcriptomics",
+   689→    icon: VolcanoIcon,
+   690→    status: "available",
+   691→    tags: ["volcano", "de", "visualization"],
+   692→    version: "1.5.0",
+   693→  },
+   694→  {
+   695→    id: "pca",
+   696→    name: "PCA",
+   697→    description: "Principal Component Analysis for dimensionality reduction",
+   698→    category: "transcriptomics",
+   699→    icon: ScatterPlotIcon,
+   700→    status: "available",
+   701→    tags: ["pca", "dimensionality", "clustering"],
+   702→    version: "2.0.0",
+   703→  },
+   704→  {
+   705→    id: "gene-clustering",
+   706→    name: "Gene Clustering",
+   707→    description: "Cluster genes based on expression patterns",
+   708→    category: "transcriptomics",
+   709→    icon: Network,
+   710→    status: "available",
+   711→    tags: ["clustering", "hierarchical", "kmeans"],
+   712→    version: "1.8.0",
+   713→  },
+   714→  {
+   715→    id: "normalization",
+   716→    name: "Normalization",
+   717→    description: "Normalize expression data using various methods",
+   718→    category: "transcriptomics",
+   719→    icon: Settings,
+   720→    status: "available",
+   721→    tags: ["normalization", "tpm", "rpkm"],
+   722→    version: "2.0.0",
+   723→  },
+   724→]
+   725→
+   726→// ==================== STRUCTURAL BIOLOGY TOOLS ====================
+   727→const structuralBiologyTools: BioTool[] = [
+   728→  {
+   729→    id: "pdb-viewer",
+   730→    name: "PDB Viewer",
+   731→    description: "View and analyze PDB format molecular structures",
+   732→    category: "structural-biology",
+   733→    icon: Box,
+   734→    status: "available",
+   735→    tags: ["pdb", "viewer", "3d"],
+   736→    version: "2.0.0",
+   737→  },
+   738→  {
+   739→    id: "molstar-viewer",
+   740→    name: "Mol* Viewer",
+   741→    description: "Modern web-based 3D molecular structure viewer",
+   742→    category: "structural-biology",
+   743→    icon: Globe,
+   744→    status: "available",
+   745→    tags: ["molstar", "3d", "webgl"],
+   746→    version: "4.0.0",
+   747→  },
+   748→  {
+   749→    id: "ngl-viewer",
+   750→    name: "NGL Viewer",
+   751→    description: "WebGL-based molecular structure viewer with advanced rendering",
+   752→    category: "structural-biology",
+   753→    icon: Eye,
+   754→    status: "available",
+   755→    tags: ["ngl", "webgl", "rendering"],
+   756→    version: "2.0.0",
+   757→  },
+   758→  {
+   759→    id: "alphafold-viewer",
+   760→    name: "AlphaFold Viewer",
+   761→    description: "Explore AlphaFold predicted protein structures",
+   762→    category: "structural-biology",
+   763→    icon: Atom,
+   764→    status: "available",
+   765→    tags: ["alphafold", "prediction", "deepmind"],
+   766→    version: "1.5.0",
+   767→  },
+   768→  {
+   769→    id: "surface-rendering",
+   770→    name: "Surface Rendering",
+   771→    description: "Render molecular surfaces (SES, SAS, VDW) for visualization",
+   772→    category: "structural-biology",
+   773→    icon: Globe,
+   774→    status: "available",
+   775→    tags: ["surface", "rendering", "visualization"],
+   776→    version: "1.0.0",
+   777→  },
+   778→  {
+   779→    id: "electrostatic",
+   780→    name: "Electrostatic Surface",
+   781→    description: "Calculate and visualize electrostatic potential surfaces",
+   782→    category: "structural-biology",
+   783→    icon: Zap,
+   784→    status: "beta",
+   785→    tags: ["electrostatics", "potential", "apbs"],
+   786→    version: "1.0.0-beta",
+   787→  },
+   788→]
+   789→
+   790→// ==================== MOLECULAR DOCKING TOOLS ====================
+   791→const molecularDockingTools: BioTool[] = [
+   792→  {
+   793→    id: "autodock-vina",
+   794→    name: "AutoDock Vina",
+   795→    description: "Molecular docking and virtual screening tool",
+   796→    category: "molecular-docking",
+   797→    icon: Atom,
+   798→    status: "available",
+   799→    tags: ["docking", "virtual-screening", "binding"],
+   800→    version: "1.2.5",
+   801→  },
+   802→  {
+   803→    id: "pyrx",
+   804→    name: "PyRx",
+   805→    description: "Virtual screening toolkit for computational drug discovery",
+   806→    category: "molecular-docking",
+   807→    icon: FlaskConical,
+   808→    status: "available",
+   809→    tags: ["virtual-screening", "drug-discovery", "python"],
+   810→    version: "0.9.8",
+   811→  },
+   812→  {
+   813→    id: "swissdock",
+   814→    name: "SwissDock",
+   815→    description: "Web service for protein-ligand docking",
+   816→    category: "molecular-docking",
+   817→    icon: Globe,
+   818→    status: "available",
+   819→    tags: ["docking", "ewald", "flexible"],
+   820→    version: "1.0.0",
+   821→  },
+   822→  {
+   823→    id: "binding-energy",
+   824→    name: "Binding Energy Calculator",
+   825→    description: "Calculate binding free energies for molecular complexes",
+   826→    category: "molecular-docking",
+   827→    icon: Calculator,
+   828→    status: "available",
+   829→    tags: ["binding-energy", "mm-pbsa", "scoring"],
+   830→    version: "1.5.0",
+   831→  },
+   832→]
+   833→
+   834→// ==================== CRISPR TOOLS ====================
+   835→const crisprTools: BioTool[] = [
+   836→  {
+   837→    id: "grna-design",
+   838→    name: "Guide RNA Design",
+   839→    description: "Design optimal guide RNAs for CRISPR/Cas9 experiments",
+   840→    category: "crispr",
+   841→    icon: Scissors,
+   842→    status: "available",
+   843→    tags: ["grna", "design", "crispr"],
+   844→    version: "2.0.0",
+   845→  },
+   846→  {
+   847→    id: "offtarget-prediction",
+   848→    name: "Off-target Prediction",
+   849→    description: "Predict potential off-target effects of CRISPR guides",
+   850→    category: "crispr",
+   851→    icon: Target,
+   852→    status: "available",
+   853→    tags: ["off-target", "specificity", "safety"],
+   854→    version: "1.5.0",
+   855→  },
+   856→  {
+   857→    id: "cas9-analysis",
+   858→    name: "Cas9 Analysis",
+   859→    description: "Analyze Cas9 cutting efficiency and outcomes",
+   860→    category: "crispr",
+   861→    icon: Microscope,
+   862→    status: "beta",
+   863→    tags: ["cas9", "efficiency", "editing"],
+   864→    version: "1.0.0-beta",
+   865→  },
+   866→]
+   867→
+   868→// ==================== PRIMER TOOLS ====================
+   869→const primerTools: BioTool[] = [
+   870→  {
+   871→    id: "primer3",
+   872→    name: "Primer3 Integration",
+   873→    description: "Comprehensive primer design using Primer3 engine",
+   874→    category: "primer-tools",
+   875→    icon: TestTube,
+   876→    status: "available",
+   877→    tags: ["primer3", "design", "pcr"],
+   878→    version: "2.6.1",
+   879→  },
+   880→  {
+   881→    id: "primer-blast",
+   882→    name: "Primer-BLAST",
+   883→    description: "Design primers with specificity checking against NCBI databases",
+   884→    category: "primer-tools",
+   885→    icon: Search,
+   886→    status: "available",
+   887→    tags: ["primer-blast", "specificity", "ncbi"],
+   888→    version: "1.0.0",
+   889→  },
+   890→  {
+   891→    id: "pcr-simulation",
+   892→    name: "PCR Simulation",
+   893→    description: "Simulate PCR amplification and predict products",
+   894→    category: "primer-tools",
+   895→    icon: FlaskConical,
+   896→    status: "available",
+   897→    tags: ["pcr", "simulation", "amplification"],
+   898→    version: "1.2.0",
+   899→  },
+   900→  {
+   901→    id: "primer-validation",
+   902→    name: "Primer Validation",
+   903→    description: "Validate primer pairs for secondary structures and dimers",
+   904→    category: "primer-tools",
+   905→    icon: CheckCircle2,
+   906→    status: "available",
+   907→    tags: ["validation", "dimers", "quality"],
+   908→    version: "1.5.0",
+   909→  },
+   910→]
+   911→
+   912→// ==================== UTILITY TOOLS ====================
+   913→const utilityTools: BioTool[] = [
+   914→  {
+   915→    id: "file-converter",
+   916→    name: "File Converter",
+   917→    description: "Convert between biological file formats (FASTA, GenBank, etc.)",
+   918→    category: "utilities",
+   919→    icon: FileText,
+   920→    status: "available",
+   921→    tags: ["conversion", "format", "file"],
+   922→    version: "2.0.0",
+   923→  },
+   924→  {
+   925→    id: "format-validator",
+   926→    name: "Format Validator",
+   927→    description: "Validate and check integrity of biological data files",
+   928→    category: "utilities",
+   929→    icon: CheckCircle2,
+   930→    status: "available",
+   931→    tags: ["validation", "integrity", "format"],
+   932→    version: "1.5.0",
+   933→  },
+   934→  {
+   935→    id: "random-sequence",
+   936→    name: "Random Sequence Generator",
+   937→    description: "Generate random DNA, RNA, or protein sequences",
+   938→    category: "utilities",
+   939→    icon: Shuffle,
+   940→    status: "available",
+   941→    tags: ["random", "generation", "test-data"],
+   942→    version: "1.0.0",
+   943→  },
+   944→  {
+   945→    id: "mw-calculator",
+   946→    name: "Molecular Weight Calculator",
+   947→    description: "Calculate molecular weight of molecules and sequences",
+   948→    category: "utilities",
+   949→    icon: Calculator,
+   950→    status: "available",
+   951→    tags: ["molecular-weight", "calculator", "mass"],
+   952→    version: "1.2.0",
+   953→  },
+   954→  {
+   955→    id: "tm-calculator",
+   956→    name: "Melting Temperature Calculator",
+   957→    description: "Calculate Tm for oligonucleotides using multiple algorithms",
+   958→    category: "utilities",
+   959→    icon: Thermometer,
+   960→    status: "available",
+   961→    tags: ["tm", "melting-temperature", "oligo"],
+   962→    version: "2.0.0",
+   963→  },
+   964→]
+   965→
+   966→// ==================== ALL CATEGORIES DEFINITION ====================
+   967→export const toolCategories: ToolCategory[] = [
+   968→  {
+   969→    id: "sequence-analysis",
+   970→    name: "Sequence Analysis",
+   971→    description: "Tools for analyzing DNA, RNA, and protein sequences including BLAST searches, alignments, and sequence utilities",
+   972→    icon: Dna,
+   973→    color: "#C1121F",
+   974→    tools: sequenceAnalysisTools,
+   975→  },
+   976→  {
+   977→    id: "multiple-alignment",
+   978→    name: "Multiple Sequence Alignment",
+   979→    description: "Align multiple sequences simultaneously to identify conserved regions and evolutionary relationships",
+   980→    icon: AlignCenter,
+   981→    color: "#2563EB",
+   982→    tools: multipleAlignmentTools,
+   983→  },
+   984→  {
+   985→    id: "protein-analysis",
+   986→    name: "Protein Analysis",
+   987→    description: "Analyze protein properties, structure prediction, domains, and physicochemical characteristics",
+   988→    icon: Microscope,
+   989→    color: "#059669",
+   990→    tools: proteinAnalysisTools,
+   991→  },
+   992→  {
+   993→    id: "phylogenetics",
+   994→    name: "Phylogenetics",
+   995→    description: "Build and analyze evolutionary trees using various tree-building methods and statistical support",
+   996→    icon: TreePine,
+   997→    color: "#7C3AED",
+   998→    tools: phylogeneticsTools,
+   999→  },
+  1000→  {
+  1001→    id: "genomics",
+  1002→    name: "Genomics",
+  1003→    description: "Genome analysis tools including browsers, annotation, variant calling, and gene prediction",
+  1004→    icon: CircleDot,
+  1005→    color: "#DC2626",
+  1006→    tools: genomicsTools,
+  1007→  },
+  1008→  {
+  1009→    id: "transcriptomics",
+  1010→    name: "Transcriptomics",
+  1011→    description: "RNA-seq analysis pipeline, differential expression, and gene expression visualization",
+  1012→    icon: FlaskConical,
+  1013→    color: "#EA580C",
+  1014→    tools: transcriptomicsTools,
+  1015→  },
+  1016→  {
+  1017→    id: "structural-biology",
+  1018→    name: "Structural Biology",
+  1019→    description: "3D structure visualization, molecular viewers, and structural analysis tools",
+  1020→    icon: Box,
+  1021→    color: "#0891B2",
+  1022→    tools: structuralBiologyTools,
+  1023→  },
+  1024→  {
+  1025→    id: "molecular-docking",
+  1026→    name: "Molecular Docking",
+  1027→    description: "Molecular docking simulations, binding energy calculations, and virtual screening",
+  1028→    icon: Atom,
+  1029→    color: "#4F46E5",
+  1030→    tools: molecularDockingTools,
+  1031→  },
+  1032→  {
+  1033→    id: "crispr",
+  1034→    name: "CRISPR Tools",
+  1035→    description: "CRISPR/Cas9 guide design, off-target prediction, and editing analysis tools",
+  1036→    icon: Scissors,
+  1037→    color: "#BE185D",
+  1038→    tools: crisprTools,
+  1039→  },
+  1040→  {
+  1041→    id: "primer-tools",
+  1042→    name: "Primer Tools",
+  1043→    description: "PCR primer design, validation, simulation, and specificity checking",
+  1044→    icon: TestTube,
+  1045→    color: "#CA8A04",
+  1046→    tools: primerTools,
+  1047→  },
+  1048→  {
+  1049→    id: "utilities",
+  1050→    name: "Utilities",
+  1051→    description: "General-purpose tools for file conversion, validation, and common calculations",
+  1052→    icon: Settings,
+  1053→    color: "#64748B",
+  1054→    tools: utilityTools,
+  1055→  },
+  1056→]
+  1057→
+  1058→// Helper functions
+  1059→export function getAllTools(): BioTool[] {
+  1060→  return toolCategories.flatMap((category) => category.tools)
+  1061→}
+  1062→
+  1063→export function getToolById(id: string): BioTool | undefined {
+  1064→  return getAllTools().find((tool) => tool.id === id)
+  1065→}
+  1066→
+  1067→export function getToolsByCategory(categoryId: ToolCategoryType): BioTool[] {
+  1068→  const category = toolCategories.find((cat) => cat.id === categoryId)
+  1069→  return category?.tools || []
+  1070→}
+  1071→
+  1072→export function searchTools(query: string): BioTool[] {
+  1073→  const lowerQuery = query.toLowerCase()
+  1074→  return getAllTools().filter(
+  1075→    (tool) =>
+  1076→      tool.name.toLowerCase().includes(lowerQuery) ||
+  1077→      tool.description.toLowerCase().includes(lowerQuery) ||
+  1078→      tool.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
+  1079→  )
+  1080→}
+  1081→
+  1082→// Custom icons for specific tools
+  1083→function ScatterPlotIcon(props: { className?: string }) {
+  1084→  return (
+  1085→    <svg
+  1086→      xmlns="http://www.w3.org/2000/svg"
+  1087→      width="24"
+  1088→      height="24"
+  1089→      viewBox="0 0 24 24"
+  1090→      fill="none"
+  1091→      stroke="currentColor"
+  1092→      strokeWidth="2"
+  1093→      strokeLinecap="round"
+  1094→      strokeLinejoin="round"
+  1095→      {...props}
+  1096→    >
+  1097→      <circle cx="7" cy="14" r="1" />
+  1098→      <circle cx="17" cy="6" r="1" />
+  1099→      <circle cx="12" cy="10" r="1" />
+  1100→      <circle cx="18" cy="14" r="1" />
+  1101→      <circle cx="5" cy="6" r="1" />
+  1102→      <circle cx="14" cy="16" r="1" />
+  1103→      <circle cx="9" cy="4" r="1" />
+  1104→    </svg>
+  1105→  )
+  1106→}
+  1107→
+  1108→function HeatmapIcon(props: { className?: string }) {
+  1109→  return (
+  1110→    <svg
+  1111→      xmlns="http://www.w3.org/2000/svg"
+  1112→      width="24"
+  1113→      height="24"
+  1114→      viewBox="0 0 24 24"
+  1115→      fill="none"
+  1116→      stroke="currentColor"
+  1117→      strokeWidth="2"
+  1118→      strokeLinecap="round"
+  1119→      strokeLinejoin="round"
+  1120→      {...props}
+  1121→    >
+  1122→      <rect x="3" y="3" width="7" height="7" fill="currentColor" opacity="0.2" />
+  1123→      <rect x="11" y="3" width="7" height="7" fill="currentColor" opacity="0.6" />
+  1124→      <rect x="3" y="11" width="7" height="7" fill="currentColor" opacity="0.8" />
+  1125→      <rect x="11" y="11" width="7" height="7" fill="currentColor" opacity="0.4" />
+  1126→    </svg>
+  1127→  )
+  1128→}
+  1129→
+  1130→function VolcanoIcon(props: { className?: string }) {
+  1131→  return (
+  1132→    <svg
+  1133→      xmlns="http://www.w3.org/2000/svg"
+  1134→      width="24"
+  1135→      height="24"
+  1136→      viewBox="0 0 24 24"
+  1137→      fill="none"
+  1138→      stroke="currentColor"
+  1139→      strokeWidth="2"
+  1140→      strokeLinecap="round"
+  1141→      strokeLinejoin="round"
+  1142→      {...props}
+  1143→    >
+  1144→      <path d="M3 20h18" />
+  1145→      <path d="M7 20c0-4 2-8 5-12s5-4 5-4" />
+  1146→      <circle cx="12" cy="8" r="1.5" fill="currentColor" />
+  1147→      <circle cx="8" cy="14" r="1.5" fill="currentColor" />
+  1148→      <circle cx="16" cy="13" r="1.5" fill="currentColor" />
+  1149→    </svg>
+  1150→  )
+  1151→}
+  1152→
+  1153→// Recently used tools (mock data)
+  1154→export const recentlyUsedTools: BioTool[] = [
+  1155→  getToolById("blast")!,
+  1156→  getToolById("clustal-omega")!,
+  1157→  getToolById("protparam")!,
+  1158→  getToolById("autodock-vina")!,
+  1159→].filter(Boolean)
+  1160→
+  1161→// Popular/favorite tools (mock data)
+  1162→export const popularTools: BioTool[] = [
+  1163→  getToolById("blast")!,
+  1164→  getToolById("blastp")!,
+  1165→  getToolById("clustal-omega")!,
+  1166→  getToolById("muscle")!,
+  1167→  getToolById("protparam")!,
+  1168→  getToolById("primer3")!,
+  1169→  getToolById("autodock-vina")!,
+  1170→  getToolById("grna-design")!,
+  1171→].filter(Boolean)
+  1172→

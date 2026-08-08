@@ -3,12 +3,27 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 
+// Extend the SessionUser type to include id and role
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      role?: string
+    }
+  }
+}
+
 // GET /api/user - Get current authenticated user's data
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id
+    
+    if (!userId) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -17,7 +32,7 @@ export async function GET() {
 
     // Fetch full user data from database
     const user = await db.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
@@ -66,7 +81,9 @@ export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id
+    
+    if (!userId) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -84,7 +101,7 @@ export async function PUT(request: Request) {
 
     // Update user in database
     const updatedUser = await db.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: updateData,
       select: {
         id: true,

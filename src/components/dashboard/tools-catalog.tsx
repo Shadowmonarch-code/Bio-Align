@@ -62,6 +62,12 @@ import {
   Upload,
   Play,
   Info,
+  Percent,
+  Languages,
+  Crosshair,
+  RefreshCw,
+  Scissors,
+  CircleDot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -215,6 +221,13 @@ function DynamicIcon({ name, className }: { name: string; className?: string }) 
     case 'CheckCircle2': return <CheckCircle2 {...props} />
     case 'Circle': return <Circle {...props} />
     case 'Loader2': return <Loader2 {...props} />
+    case 'Percent': return <Percent {...props} />
+    case 'Languages': return <Languages {...props} />
+    case 'Crosshair': return <Crosshair {...props} />
+    case 'RefreshCw': return <RefreshCw {...props} />
+    case 'Scissors': return <Scissors {...props} />
+    case 'CircleDot': return <CircleDot {...props} />
+    case 'Download': return <Download {...props} />
     default: return <Circle {...props} />
   }
 }

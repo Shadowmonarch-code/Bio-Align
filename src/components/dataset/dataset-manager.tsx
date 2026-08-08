@@ -289,7 +289,6 @@ function calculateNumericStats(values: number[]): Omit<ColumnInfo, 'name' | 'typ
     : 0
   
   return {
-    missingCount: 0,
     uniqueCount: new Set(values.map(String)).size,
     mean,
     median,

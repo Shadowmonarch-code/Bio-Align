@@ -132,7 +132,7 @@ export function useUser(): UseUserReturn {
     session,
     status,
     userProfile,
-    isLoadingProfile: refreshUser,
+    isLoadingProfile,
     updateUser,
     isAuthenticated,
     userDisplayName,
