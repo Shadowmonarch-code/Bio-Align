@@ -17,10 +17,14 @@ import {
   Microscope,
   Leaf,
   ChevronRight,
-  Info
+  Info,
+  LineChart,
+  ScatterChart,
+  Activity,
+  TrendingUp
 } from 'lucide-react'
 
-// Import sub-components
+// Import sub-components - All 12 tools
 import GeneticParametersCalculator from './genetic-parameters'
 import ExperimentalDesignAnalyzer from './experimental-design'
 import CorrelationRegressionAnalysis from './correlation-regression'
@@ -28,6 +32,11 @@ import PathAnalysisComponent from './path-analysis'
 import SelectionIndexCalculator from './selection-index'
 import DiversityAnalysisComponent from './diversity-analysis'
 import PopulationGeneticsAnalyzer from './population-genetics'
+import AMMIAnalysisComponent from './ammi-analysis'
+import GGEBiplotComponent from './gge-biplot'
+import GxEInteractionComponent from './gxe-interaction'
+import QuantitativeGeneticsComponent from './quantitative-genetics'
+import MolecularBreedingComponent from './molecular-breeding'
 
 // Sample data for testing
 export const SAMPLE_YIELD_DATA = [
@@ -68,6 +77,7 @@ interface PlantBreedingModuleProps {
   className?: string
 }
 
+// Complete list of all 12 analysis tools
 const analysisTabs = [
   {
     id: 'genetic-params',
@@ -82,6 +92,13 @@ const analysisTabs = [
     icon: FlaskConical,
     description: 'CRD, RCBD & Factorial ANOVA analysis',
     color: 'from-orange-500 to-amber-500'
+  },
+  {
+    id: 'quantitative-genetics',
+    label: 'Quantitative Genetics',
+    icon: TrendingUp,
+    description: 'Generation means, gene effects & heritability',
+    color: 'from-amber-500 to-yellow-500'
   },
   {
     id: 'correlation-regression',
@@ -105,18 +122,46 @@ const analysisTabs = [
     color: 'from-purple-500 to-violet-500'
   },
   {
+    id: 'gxe-interaction',
+    label: 'G×E Interaction',
+    icon: Activity,
+    description: 'Stability analysis (Eberhart-Russell, Shukla)',
+    color: 'from-teal-500 to-emerald-500'
+  },
+  {
+    id: 'ammi-analysis',
+    label: 'AMMI Analysis',
+    icon: LineChart,
+    description: 'Additive Main Effects & Multiplicative Interaction model',
+    color: 'from-indigo-500 to-blue-500'
+  },
+  {
+    id: 'gge-biplot',
+    label: 'GGE Biplot',
+    icon: ScatterChart,
+    description: 'Genotype + G×E biplot for mega-environment analysis',
+    color: 'from-cyan-500 to-teal-500'
+  },
+  {
     id: 'diversity-analysis',
     label: 'Diversity Analysis',
     icon: Users,
     description: 'Distance matrix, clustering & PCA biplot',
-    color: 'from-teal-500 to-cyan-500'
+    color: 'from-pink-500 to-rose-500'
+  },
+  {
+    id: 'molecular-breeding',
+    label: 'Molecular Breeding',
+    icon: Dna,
+    description: 'Marker stats, LD analysis & QTL mapping',
+    color: 'from-violet-500 to-purple-500'
   },
   {
     id: 'population-genetics',
     label: 'Population Genetics',
     icon: Microscope,
     description: 'Allele frequencies, HWE test & diversity indices',
-    color: 'from-pink-500 to-rose-500'
+    color: 'from-fuchsia-500 to-pink-500'
   }
 ]
 
@@ -164,6 +209,14 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
             <Users className="h-3 w-3" />
             Diversity Indices
           </Badge>
+          <Badge variant="secondary" className="gap-1">
+            <LineChart className="h-3 w-3" />
+            AMMI Model
+          </Badge>
+          <Badge variant="secondary" className="gap-1">
+            <ScatterChart className="h-3 w-3" />
+            GGE Biplot
+          </Badge>
         </div>
       </motion.div>
 
@@ -171,14 +224,26 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tab Navigation - Responsive */}
         <div className="mb-6">
-          {/* Desktop horizontal tabs */}
+          {/* Desktop horizontal tabs - 2 rows for better fit */}
           <div className="hidden md:block">
-            <TabsList className="grid grid-cols-7 w-full h-auto gap-1 p-1 bg-muted/50">
-              {analysisTabs.map((tab) => (
+            <TabsList className="grid grid-cols-6 w-full h-auto gap-1 p-1 bg-muted/50 mb-2">
+              {analysisTabs.slice(0, 6).map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-medium data-[state=active]:shadow-md transition-all"
+                  className="flex flex-col items-center gap-1 py-2.5 px-2 text-xs font-medium data-[state=active]:shadow-md transition-all"
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span className="truncate max-w-full">{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsList className="grid grid-cols-6 w-full h-auto gap-1 p-1 bg-muted/50">
+              {analysisTabs.slice(6, 12).map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex flex-col items-center gap-1 py-2.5 px-2 text-xs font-medium data-[state=active]:shadow-md transition-all"
                 >
                   <tab.icon className="h-4 w-4" />
                   <span className="truncate max-w-full">{tab.label}</span>
@@ -188,7 +253,7 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
           </div>
           
           {/* Mobile vertical cards */}
-          <div className="md:hidden space-y-2">
+          <div className="md:hidden space-y-2 max-h-[60vh] overflow-y-auto pr-2">
             {analysisTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -199,14 +264,14 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
                     : 'border-border hover:bg-muted/50'
                 }`}
               >
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${tab.color}`}>
+                <div className={`p-2 rounded-lg bg-gradient-to-br ${tab.color} shrink-0`}>
                   <tab.icon className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1 text-left">
+                <div className="flex-1 text-left min-w-0">
                   <div className="font-medium text-sm">{tab.label}</div>
-                  <div className="text-xs text-muted-foreground">{tab.description}</div>
+                  <div className="text-xs text-muted-foreground truncate">{tab.description}</div>
                 </div>
-                <ChevronRight className={`h-4 w-4 transition-transform ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                <ChevronRight className={`h-4 w-4 shrink-0 transition-transform ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'}`} />
               </button>
             ))}
           </div>
@@ -220,13 +285,19 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
+            className="min-h-[400px]"
           >
+            {/* Row 1 Tools */}
             <TabsContent value="genetic-params" className="mt-0">
               <GeneticParametersCalculator />
             </TabsContent>
             
             <TabsContent value="experimental-design" className="mt-0">
               <ExperimentalDesignAnalyzer />
+            </TabsContent>
+            
+            <TabsContent value="quantitative-genetics" className="mt-0">
+              <QuantitativeGeneticsComponent />
             </TabsContent>
             
             <TabsContent value="correlation-regression" className="mt-0">
@@ -240,9 +311,26 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
             <TabsContent value="selection-index" className="mt-0">
               <SelectionIndexCalculator />
             </TabsContent>
+
+            {/* Row 2 Tools */}
+            <TabsContent value="gxe-interaction" className="mt-0">
+              <GxEInteractionComponent />
+            </TabsContent>
+            
+            <TabsContent value="ammi-analysis" className="mt-0">
+              <AMMIAnalysisComponent />
+            </TabsContent>
+            
+            <TabsContent value="gge-biplot" className="mt-0">
+              <GGEBiplotComponent />
+            </TabsContent>
             
             <TabsContent value="diversity-analysis" className="mt-0">
               <DiversityAnalysisComponent />
+            </TabsContent>
+            
+            <TabsContent value="molecular-breeding" className="mt-0">
+              <MolecularBreedingComponent />
             </TabsContent>
             
             <TabsContent value="population-genetics" className="mt-0">
@@ -265,8 +353,8 @@ export default function PlantBreedingModule({ className }: PlantBreedingModulePr
             <p className="font-medium mb-1">About this module</p>
             <p>
               All calculations follow standard methodologies from Snedecor & Cochran (Statistical Methods), 
-              Gomez & Gomez (Statistical Procedures for Agricultural Research), and Falconer & Mackay 
-              (Introduction to Quantitative Genetics). Results are for research purposes.
+              Gomez & Gomez (Statistical Procedures for Agricultural Research), Falconer & Mackay 
+              (Introduction to Quantitative Genetics), and Yan & Kang (GGE Biplot). Results are for research purposes.
             </p>
           </div>
         </div>
