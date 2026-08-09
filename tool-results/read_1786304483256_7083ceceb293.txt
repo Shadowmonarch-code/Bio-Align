@@ -1,0 +1,851 @@
+     1→     1→'use client'
+     2→     2→
+     3→     3→import React, { useState, useCallback } from 'react'
+     4→     4→import Navbar from '@/components/landing/navbar'
+     5→     5→import HeroSection from '@/components/landing/hero'
+     6→     6→import FeaturesSection from '@/components/landing/features'
+     7→     7→import ToolsShowcase from '@/components/landing/tools-showcase'
+     8→     8→import WorkflowSection from '@/components/landing/workflow'
+     9→     9→import StatisticsSection from '@/components/landing/statistics'
+    10→    10→import TestimonialsSection from '@/components/landing/testimonials'
+    11→    11→import PartnersSection from '@/components/landing/partners'
+    12→    12→import FAQSection from '@/components/landing/faq'
+    13→    13→import FooterSection from '@/components/landing/footer'
+    14→    14→import DocumentationSection from '@/components/landing/documentation'
+    15→    15→import TutorialsSection from '@/components/landing/tutorials'
+    16→    16→import SupportPage from '@/components/landing/support-coffee'
+    17→    17→import AboutCreator from '@/components/landing/about-creator'
+    18→    18→import DashboardLayout from '@/components/dashboard/dashboard-layout'
+    19→    19→import SettingsSection from '@/components/dashboard/settings'
+    20→    20→import ToolsCatalog from '@/components/dashboard/tools-catalog'
+    21→    21→import FileUpload from '@/components/dashboard/file-upload'
+    22→    22→import { Button } from '@/components/ui/button'
+    23→    23→import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
+    24→    24→import DatasetManager from '@/components/dataset/dataset-manager'
+    25→    25→import PlantBreedingModule from '@/components/plant-breeding/plant-breeding-module'
+    26→    26→import ThesisStudio from '@/components/thesis/thesis-studio'
+    27→    27→import AnalyzeMyData from '@/components/ai/analyze-my-data'
+    28→    28→import { ErrorBoundary } from '@/components/error-boundary'
+    29→    29→
+    30→    30→// View types for the application - extended with new views
+    31→    31→type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'workspaces' | 'dataset' | 'plant-breeding' | 'thesis' | 'analyze-data'
+    32→    32→
+    33→    33→export default function Home() {
+    34→    34→  const [currentView, setCurrentView] = useState<ViewType>('landing')
+    35→    35→  const [selectedTool, setSelectedTool] = useState<string | null>(null)
+    36→    36→  // Main navigation handler - switches between views
+    37→    37→  const handleNavigate = useCallback((view: string) => {
+    38→    38→    setCurrentView(view as ViewType)
+    39→    39→    window.scrollTo(0, 0)
+    40→    40→  }, [])
+    41→    41→
+    42→    42→  // Tool selection handler - opens analysis view with specific tool
+    43→    43→  const handleToolSelect = useCallback((toolId: string) => {
+    44→    44→    if (toolId === 'all') {
+    45→    45→      setCurrentView('tools')
+    46→    46→    } else {
+    47→    47→      setSelectedTool(toolId)
+    48→    48→      setCurrentView('analysis')
+    49→    49→    }
+    50→    50→    window.scrollTo(0, 0)
+    51→    51→  }, [])
+    52→    52→
+    53→    53→  // Sidebar navigation handler - handles both view and tool navigation
+    54→    54→  const handleSidebarNavigate = useCallback((view: string, toolId?: string) => {
+    55→    55→    if (toolId) {
+    56→    56→      setSelectedTool(toolId)
+    57→    57→      setCurrentView('analysis')
+    58→    58→    } else {
+    59→    59→      setCurrentView(view as ViewType)
+    60→    60→    }
+    61→    61→    window.scrollTo(0, 0)
+    62→    62→  }, [])
+    63→    63→
+    64→    64→  // Go back to landing page
+    65→    65→  const handleGoHome = useCallback(() => {
+    66→    66→    setCurrentView('landing')
+    67→    67→    window.scrollTo(0, 0)
+    68→    68→  }, [])
+    69→    69→
+    70→    70→  // Render Landing Page
+    71→    71→  if (currentView === 'landing') {
+    72→    72→    return (
+    73→    73→      <main className="min-h-screen flex flex-col">
+    74→    74→        <Navbar onNavigate={handleNavigate} />
+    75→    75→        
+    76→    76→        {/* Hero Section */}
+    77→    77→        <section id="hero">
+    78→    78→          <HeroSection 
+    79→    79→            onStartClick={() => handleNavigate('dashboard')}
+    80→    80→            onExploreClick={() => handleNavigate('tools')}
+    81→    81→          />
+    82→    82→        </section>
+    83→    83→
+    84→    84→        {/* Partners/Trusted By */}
+    85→    85→        <section id="partners" className="py-16 border-b border-border/50">
+    86→    86→          <PartnersSection />
+    87→    87→        </section>
+    88→    88→
+    89→    89→        {/* Features Section */}
+    90→    90→        <section id="features" className="py-24 relative overflow-hidden">
+    91→    91→          <FeaturesSection onExploreClick={() => handleNavigate('tools')} />
+    92→    92→        </section>
+    93→    93→
+    94→    94→        {/* Popular Tools Showcase */}
+    95→    95→        <section id="tools" className="py-24 bg-muted/30">
+    96→    96→          <ToolsShowcase onLaunchTool={handleToolSelect} />
+    97→    97→        </section>
+    98→    98→
+    99→    99→        {/* Research Workflow */}
+   100→   100→        <section id="workflow" className="py-24 relative">
+   101→   101→          <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
+   102→   102→        </section>
+   103→   103→
+   104→   104→        {/* About Creator Section */}
+   105→   105→        <section id="about" className="py-24 bg-muted/30">
+   106→   106→          <AboutCreator onBack={handleGoHome} />
+   107→   107→        </section>
+   108→   108→
+   109→   109→        {/* Statistics */}
+   110→   110→        <section id="statistics" className="py-24 bg-muted/30">
+   111→   111→          <StatisticsSection />
+   112→   112→        </section>
+   113→   113→
+   114→   114→        {/* Testimonials */}
+   115→   115→        <section id="testimonials" className="py-24">
+   116→   116→          <TestimonialsSection />
+   117→   117→        </section>
+   118→   118→
+   119→   119→        {/* FAQ */}
+   120→   120→        <section id="faq" className="py-24 bg-muted/30">
+   121→   121→          <FAQSection />
+   122→   122→        </section>
+   123→   123→
+   124→   124→        {/* CTA Section */}
+   125→   125→        <section id="cta" className="py-24 relative overflow-hidden">
+   126→   126→          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   127→   127→            <div className="relative rounded-3xl bg-gradient-to-br from-primary via-biored-dark to-biored p-12 md:p-20 text-center text-white overflow-hidden">
+   128→   128→              {/* Background decoration */}
+   129→   129→              <div className="absolute inset-0 opacity-10">
+   130→   130→                <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+   131→   131→                <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl"></div>
+   132→   132→              </div>
+   133→   133→              
+   134→   134→              <div className="relative z-10 space-y-6">
+   135→   135→                <h2 className="text-3xl md:text-5xl font-bold">
+   136→   136→                  Ready to Transform Your Research?
+   137→   137→                </h2>
+   138→   138→                <p className="text-xl text-white/80 max-w-2xl mx-auto">
+   139→   139→                  Join thousands of researchers who are already using BioAlign to accelerate their discoveries.
+   140→   140→                </p>
+   141→   141→                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+   142→   142→                  <Button 
+   143→   143→                    size="lg"
+   144→   144→                    className="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg cursor-pointer"
+   145→   145→                    onClick={() => handleNavigate('dashboard')}
+   146→   146→                  >
+   147→   147→                    Get Started Free
+   148→   148→                  </Button>
+   149→   149→                  <Button 
+   150→   150→                    size="lg"
+   151→   151→                    variant="outline"
+   152→   152→                    className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+   153→   153→                    onClick={() => handleNavigate('tools')}
+   154→   154→                  >
+   155→   155→                    Explore All Tools
+   156→   156→                  </Button>
+   157→   157→                </div>
+   158→   158→                <p className="text-sm text-white/60 pt-2">
+   159→   159→                  No credit card required · Free tier available · Setup in 2 minutes
+   160→   160→                </p>
+   161→   161→              </div>
+   162→   162→            </div>
+   163→   163→          </div>
+   164→   164→        </section>
+   165→   165→
+   166→   166→        {/* Footer */}
+   167→   167→        <FooterSection />
+   168→   168→      </main>
+   169→   169→    )
+   170→   170→  }
+   171→   171→
+   172→   172→  // Render Dashboard View
+   173→   173→  if (currentView === 'dashboard') {
+   174→   174→    return (
+   175→   175→      <main className="min-h-screen flex flex-col">
+   176→   176→        <DashboardLayout
+   177→   177→          title="Dashboard"
+   178→   178→          subtitle="Welcome back! Here's your research overview."
+   179→   179→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard' }]}
+   180→   180→          actions={
+   181→   181→            <div className="flex gap-2">
+   182→   182→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   183→   183→                ← Back to Home
+   184→   184→              </Button>
+   185→   185→              <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
+   186→   186→                Upload Files
+   187→   187→              </Button>
+   188→   188→              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+   189→   189→                Browse Tools
+   190→   190→              </Button>
+   191→   191→            </div>
+   192→   192→          }
+   193→   193→          onSidebarNavigate={handleSidebarNavigate}
+   194→   194→        >
+   195→   195→          <div className="space-y-8">
+   196→   196→            {/* Quick Stats */}
+   197→   197→            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+   198→   198→              {[
+   199→   199→                { title: 'Recent Analyses', value: '12', change: '+3 this week', icon: '📊' },
+   200→   200→                { title: 'Saved Projects', value: '5', change: '2 active', icon: '📁' },
+   201→   201→                { title: 'Storage Used', value: '2.4 GB', change: 'of 10 GB', icon: '💾' },
+   202→   202→                { title: 'API Calls', value: '1,234', change: '-12% vs last week', icon: '🔌' },
+   203→   203→              ].map((stat, i) => (
+   204→   204→                <div key={i} className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow cursor-pointer hover:border-primary/30">
+   205→   205→                  <div className="flex items-start justify-between">
+   206→   206→                    <div>
+   207→   207→                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+   208→   208→                      <p className="text-2xl font-bold mt-1">{stat.value}</p>
+   209→   209→                      <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+   210→   210→                    </div>
+   211→   211→                    <span className="text-2xl">{stat.icon}</span>
+   212→   212→                  </div>
+   213→   213→                </div>
+   214→   214→              ))}
+   215→   215→            </div>
+   216→   216→
+   217→   217→            {/* Quick Actions */}
+   218→   218→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+   219→   219→              {/* Recent Activity */}
+   220→   220→              <div className="p-6 rounded-xl border bg-card">
+   221→   221→                <h3 className="font-semibold mb-4">Recent Activity</h3>
+   222→   222→                <div className="space-y-4">
+   223→   223→                  {[
+   224→   224→                    { action: 'BLAST Analysis completed', time: '2 hours ago', type: 'success' },
+   225→   225→                    { action: 'Sequence uploaded: sample.fasta', time: '5 hours ago', type: 'info' },
+   226→   226→                    { action: 'Multiple alignment started', time: '1 day ago', type: 'pending' },
+   227→   227→                    { action: 'GC Content analysis', time: '2 days ago', type: 'success' },
+   228→   228→                  ].map((activity, i) => (
+   229→   229→                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
+   230→   230→                      <div className={`w-2 h-2 rounded-full ${
+   231→   231→                        activity.type === 'success' ? 'bg-green-500' :
+   232→   232→                        activity.type === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
+   233→   233→                      }`} />
+   234→   234→                      <div className="flex-1 min-w-0">
+   235→   235→                        <p className="text-sm truncate">{activity.action}</p>
+   236→   236→                        <p className="text-xs text-muted-foreground">{activity.time}</p>
+   237→   237→                      </div>
+   238→   238→                    </div>
+   239→   239→                  ))}
+   240→   240→                </div>
+   241→   241→              </div>
+   242→   242→
+   243→   243→              {/* Quick Launch Tools */}
+   244→   244→              <div className="p-6 rounded-xl border bg-card">
+   245→   245→                <h3 className="font-semibold mb-4">Quick Launch Tools</h3>
+   246→   246→                <div className="grid grid-cols-2 gap-3">
+   247→   247→                  {[
+   248→   248→                    { name: 'BLAST Search', icon: '🔍', tool: 'blast' },
+   249→   249→                    { name: 'Sequence Align', icon: '🧬', tool: 'align' },
+   250→   250→                    { name: 'ORF Finder', icon: '🔎', tool: 'orf' },
+   251→   251→                    { name: 'Translate', icon: '🔄', tool: 'translate' },
+   252→   252→                    { name: 'GC Content', icon: '📈', tool: 'gc' },
+   253→   253→                    { name: 'Primer Design', icon: '🧪', tool: 'primer' },
+   254→   254→                  ].map((tool, i) => (
+   255→   255→                    <button
+   256→   256→                      key={i}
+   257→   257→                      onClick={() => handleToolSelect(tool.tool)}
+   258→   258→                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-primary/5 hover:border-primary/30 transition-colors text-left cursor-pointer"
+   259→   259→                    >
+   260→   260→                      <span>{tool.icon}</span>
+   261→   261→                      <span className="text-sm font-medium">{tool.name}</span>
+   262→   262→                    </button>
+   263→   263→                  ))}
+   264→   264→                </div>
+   265→   265→              </div>
+   266→   266→            </div>
+   267→   267→
+   268→   268→            {/* File Upload Area */}
+   269→   269→            <div className="p-6 rounded-xl border bg-card">
+   270→   270→              <h3 className="font-semibold mb-4">Upload New Data</h3>
+   271→   271→              <FileUpload />
+   272→   272→            </div>
+   273→   273→          </div>
+   274→   274→        </DashboardLayout>
+   275→   275→
+   276→   276→        
+   277→   277→        {/* Sticky Footer */}
+   278→   278→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   279→   279→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   280→   280→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   281→   281→        </footer>
+   282→   282→      </main>
+   283→   283→    )
+   284→   284→  }
+   285→   285→
+   286→   286→  // Render Workspaces View
+   287→   287→  if (currentView === 'workspaces') {
+   288→   288→    return (
+   289→   289→      <main className="min-h-screen flex flex-col">
+   290→   290→        <DashboardLayout
+   291→   291→          title="Workspaces"
+   292→   292→          subtitle="Manage your analysis projects and collaborations"
+   293→   293→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Workspaces' }]}
+   294→   294→          actions={
+   295→   295→            <div className="flex gap-2">
+   296→   296→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   297→   297→                ← Back to Home
+   298→   298→              </Button>
+   299→   299→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   300→   300→                Dashboard
+   301→   301→              </Button>
+   302→   302→              <Button className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+   303→   303→                + New Workspace
+   304→   304→              </Button>
+   305→   305→            </div>
+   306→   306→          }
+   307→   307→          onSidebarNavigate={handleSidebarNavigate}
+   308→   308→        >
+   309→   309→          <div className="space-y-6">
+   310→   310→            {/* Workspace Stats */}
+   311→   311→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+   312→   312→              {[
+   313→   313→                { title: 'Total Workspaces', value: '5', icon: '📁', color: 'text-blue-500' },
+   314→   314→                { title: 'Shared with Me', value: '3', icon: '👥', color: 'text-green-500' },
+   315→   315→                { title: 'Recent Activity', value: '12', icon: '⚡', color: 'text-orange-500' },
+   316→   316→              ].map((stat, i) => (
+   317→   317→                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+   318→   318→                  <div className="flex items-center gap-3">
+   319→   319→                    <span className="text-2xl">{stat.icon}</span>
+   320→   320→                    <div>
+   321→   321→                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+   322→   322→                      <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+   323→   323→                    </div>
+   324→   324→                  </div>
+   325→   325→                </div>
+   326→   326→              ))}
+   327→   327→            </div>
+   328→   328→
+   329→   329→            {/* Workspaces Grid */}
+   330→   330→            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+   331→   331→              {[
+   332→   332→                { 
+   333→   333→                  name: 'BLAST Analysis Project', 
+   334→   334→                  desc: 'Comparative genomics study',
+   335→   335→                  updated: '2 hours ago',
+   336→   336→                  tools: ['BLAST', 'ClustalW'],
+   337→   337→                  members: 2,
+   338→   338→                  status: 'active'
+   339→   339→                },
+   340→   340→                { 
+   341→   341→                  name: 'RNA-seq Pipeline', 
+   342→   342→                  desc: 'Differential expression analysis',
+   343→   343→                  updated: '1 day ago',
+   344→   344→                  tools: ['STAR', 'DESeq2'],
+   345→   345→                  members: 1,
+   346→   346→                  status: 'active'
+   347→   347→                },
+   348→   348→                { 
+   349→   349→                  name: 'Primer Design Set', 
+   350→   350→                  desc: 'PCR primer collection for experiments',
+   351→   351→                  updated: '3 days ago',
+   352→   352→                  tools: ['Primer3'],
+   353→   353→                  members: 3,
+   354→   354→                  status: 'shared'
+   355→   355→                },
+   356→   356→                { 
+   357→   357→                  name: 'Variant Calling Study', 
+   358→   358→                  desc: 'SNP analysis from WGS data',
+   359→   359→                  updated: '1 week ago',
+   360→   360→                  tools: ['GATK', 'VCFtools'],
+   361→   361→                  members: 1,
+   362→   362→                  status: 'completed'
+   363→   363→                },
+   364→   364→                { 
+   365→   365→                  name: 'Protein Structure Analysis', 
+   366→   366→                  desc: 'AlphaFold predictions and docking',
+   367→   367→                  updated: '2 weeks ago',
+   368→   368→                  tools: ['AlphaFold', 'AutoDock'],
+   369→   369→                  members: 2,
+   370→   370→                  status: 'active'
+   371→   371→                },
+   372→   372→              ].map((workspace, i) => (
+   373→   373→                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all cursor-pointer group">
+   374→   374→                  <div className="flex items-start justify-between mb-3">
+   375→   375→                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-biored/10 to-biored/20 flex items-center justify-center group-hover:from-biored/20 group-hover:to-biored/30 transition-colors">
+   376→   376→                      <span className="text-lg">🧬</span>
+   377→   377→                    </div>
+   378→   378→                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+   379→   379→                      workspace.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+   380→   380→                      workspace.status === 'shared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+   381→   381→                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+   382→   382→                    }`}>
+   383→   383→                      {workspace.status}
+   384→   384→                    </span>
+   385→   385→                  </div>
+   386→   386→                  <h3 className="font-semibold mb-1 group-hover:text-biored transition-colors">{workspace.name}</h3>
+   387→   387→                  <p className="text-sm text-muted-foreground mb-3">{workspace.desc}</p>
+   388→   388→                  
+   389→   389→                  <div className="flex flex-wrap gap-1.5 mb-3">
+   390→   390→                    {workspace.tools.map((tool, j) => (
+   391→   391→                      <span key={j} className="px-2 py-0.5 rounded-md bg-muted text-xs font-medium">{tool}</span>
+   392→   392→                    ))}
+   393→   393→                  </div>
+   394→   394→                  
+   395→   395→                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+   396→   396→                    <span className="flex items-center gap-1">
+   397→   397→                      👥 {workspace.members} member{workspace.members > 1 ? 's' : ''}
+   398→   398→                    </span>
+   399→   399→                    <span>{workspace.updated}</span>
+   400→   400→                  </div>
+   401→   401→                </div>
+   402→   402→              ))}
+   403→   403→
+   404→   404→              {/* Add new workspace card */}
+   405→   405→              <button 
+   406→   406→                onClick={() => handleNavigate('dashboard')}
+   407→   407→                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-biored/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
+   408→   408→              >
+   409→   409→                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-biored/10 flex items-center justify-center mb-3 transition-colors">
+   410→   410→                  <span className="text-2xl group-hover:text-biored transition-colors">+</span>
+   411→   411→                </div>
+   412→   412→                <p className="font-medium group-hover:text-biored transition-colors">Create New Workspace</p>
+   413→   413→                <p className="text-sm text-muted-foreground mt-1">Start a new project</p>
+   414→   414→              </button>
+   415→   415→            </div>
+   416→   416→          </div>
+   417→   417→        </DashboardLayout>
+   418→   418→
+   419→   419→        {/* Sticky Footer */}
+   420→   420→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   421→   421→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   422→   422→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   423→   423→        </footer>
+   424→   424→      </main>
+   425→   425→    )
+   426→   426→  }
+   427→   427→
+   428→   428→  // Render Tools Catalog
+   429→   429→  if (currentView === 'tools') {
+   430→   430→    return (
+   431→   431→      <ErrorBoundary>
+   432→   432→        <main className="min-h-screen flex flex-col">
+   433→   433→          <DashboardLayout
+   434→   434→            title="Tools Catalog"
+   435→   435→            subtitle="Browse and launch 84+ bioinformatics tools"
+   436→   436→            breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Tools' }]}
+   437→   437→            actions={
+   438→   438→              <div className="flex gap-2">
+   439→   439→                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   440→   440→                  ← Back to Home
+   441→   441→                </Button>
+   442→   442→                <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   443→   443→                  Dashboard
+   444→   444→                </Button>
+   445→   445→              </div>
+   446→   446→            }
+   447→   447→            onSidebarNavigate={handleSidebarNavigate}
+   448→   448→          >
+   449→   449→            <ToolsCatalog onToolSelect={handleToolSelect} />
+   450→   450→          </DashboardLayout>
+   451→   451→
+   452→   452→          
+   453→   453→          {/* Sticky Footer */}
+   454→   454→          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   455→   455→            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   456→   456→            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   457→   457→          </footer>
+   458→   458→        </main>
+   459→   459→      </ErrorBoundary>
+   460→   460→    )
+   461→   461→  }
+   462→   462→
+   463→   463→  // Render Tool Analysis Page
+   464→   464→  if (currentView === 'analysis') {
+   465→   465→    return (
+   466→   466→      <ErrorBoundary>
+   467→   467→        <main className="min-h-screen flex flex-col">
+   468→   468→          <DashboardLayout
+   469→   469→            title={selectedTool ? `${selectedTool} Analysis` : 'Sequence Analysis'}
+   470→   470→            subtitle="Perform comprehensive sequence analysis"
+   471→   471→            breadcrumbs={[
+   472→   472→              { label: 'Home', href: '#', onClick: handleGoHome },
+   473→   473→              { label: 'Tools', href: '#', onClick: () => handleNavigate('tools') },
+   474→   474→              { label: selectedTool || 'Analysis', href: '#' }
+   475→   475→            ]}
+   476→   476→            actions={
+   477→   477→              <div className="flex gap-2">
+   478→   478→                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   479→   479→                  ← Back to Home
+   480→   480→                </Button>
+   481→   481→                <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+   482→   482→                  All Tools
+   483→   483→                </Button>
+   484→   484→                <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   485→   485→                  Dashboard
+   486→   486→                </Button>
+   487→   487→              </div>
+   488→   488→            }
+   489→   489→            onSidebarNavigate={handleSidebarNavigate}
+   490→   490→          >
+   491→   491→            <SequenceAnalysisTool selectedTool={selectedTool} />
+   492→   492→          </DashboardLayout>
+   493→   493→
+   494→   494→          
+   495→   495→          {/* Sticky Footer */}
+   496→   496→          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   497→   497→            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   498→   498→            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   499→   499→          </footer>
+   500→   500→        </main>
+   501→   501→      </ErrorBoundary>
+   502→   502→    )
+   503→   503→  }
+   504→   504→
+   505→   505→  // Render File Upload Page
+   506→   506→  if (currentView === 'upload') {
+   507→   507→    return (
+   508→   508→      <main className="min-h-screen flex flex-col">
+   509→   509→        <DashboardLayout
+   510→   510→          title="File Upload"
+   511→   511→          subtitle="Upload your bioinformatics data files"
+   512→   512→          breadcrumbs={[
+   513→   513→            { label: 'Home', href: '#', onClick: handleGoHome },
+   514→   514→            { label: 'Upload', href: '#' }
+   515→   515→          ]}
+   516→   516→          actions={
+   517→   517→            <div className="flex gap-2">
+   518→   518→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   519→   519→                ← Back to Home
+   520→   520→              </Button>
+   521→   521→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   522→   522→                Dashboard
+   523→   523→              </Button>
+   524→   524→              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
+   525→   525→                Tools
+   526→   526→              </Button>
+   527→   527→            </div>
+   528→   528→          }
+   529→   529→          onSidebarNavigate={handleSidebarNavigate}
+   530→   530→        >
+   531→   531→          <div className="max-w-4xl mx-auto space-y-6">
+   532→   532→            <FileUpload />
+   533→   533→            
+   534→   534→            {/* Supported Formats Info */}
+   535→   535→            <div className="p-6 rounded-xl border bg-card">
+   536→   536→              <h3 className="font-semibold mb-4">Supported File Formats</h3>
+   537→   537→              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+   538→   538→                {[
+   539→   539→                  { category: 'Sequence', formats: ['FASTA', 'FASTQ', 'GenBank', 'EMBL'] },
+   540→   540→                  { category: 'Structure', formats: ['PDB', 'CIF', 'MOL', 'SDF'] },
+   541→   541→                  { category: 'Alignment', formats: ['SAM', 'BAM', 'CRAM'] },
+   542→   542→                  { category: 'Variant', formats: ['VCF', 'BED', 'GFF', 'GTF'] },
+   543→   543→                  { category: 'Data', formats: ['CSV', 'TSV', 'XLSX', 'JSON'] },
+   544→   544→                  { category: 'Archive', formats: ['ZIP', 'GZ', 'TAR', 'BZ2'] },
+   545→   545→                ].map((group, i) => (
+   546→   546→                  <div key={i} className="p-3 rounded-lg bg-muted/50">
+   547→   547→                    <p className="text-xs font-medium text-biored mb-2">{group.category}</p>
+   548→   548→                    <div className="flex flex-wrap gap-1">
+   549→   549→                      {group.formats.map((fmt, j) => (
+   550→   550→                        <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-background border">
+   551→   551→                          {fmt}
+   552→   552→                        </span>
+   553→   553→                      ))}
+   554→   554→                    </div>
+   555→   555→                  </div>
+   556→   556→                ))}
+   557→   557→              </div>
+   558→   558→            </div>
+   559→   559→          </div>
+   560→   560→        </DashboardLayout>
+   561→   561→
+   562→   562→        
+   563→   563→        {/* Sticky Footer */}
+   564→   564→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   565→   565→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   566→   566→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   567→   567→        </footer>
+   568→   568→      </main>
+   569→   569→    )
+   570→   570→  }
+   571→   571→
+   572→   572→  // Render Databases View
+   573→   573→  if (currentView === 'databases') {
+   574→   574→    return (
+   575→   575→      <main className="min-h-screen flex flex-col">
+   576→   576→        <DashboardLayout
+   577→   577→          title="Databases"
+   578→   578→          subtitle="Search and connect to biological databases worldwide"
+   579→   579→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Databases' }]}
+   580→   580→          actions={
+   581→   581→            <div className="flex gap-2">
+   582→   582→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   583→   583→                ← Back to Home
+   584→   584→              </Button>
+   585→   585→              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   586→   586→                Dashboard
+   587→   587→              </Button>
+   588→   588→            </div>
+   589→   589→          }
+   590→   590→          onSidebarNavigate={handleSidebarNavigate}
+   591→   591→        >
+   592→   592→          <div className="space-y-6">
+   593→   593→            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+   594→   594→              <h3 className="font-semibold mb-2">🔍 Quick Database Access</h3>
+   595→   595→              <p className="text-sm text-muted-foreground">
+   596→   596→                Click on any database below to search directly. You can also use the search button in the navbar for quick access to NCBI, UniProt, PDB, and more!
+   597→   597→              </p>
+   598→   598→            </div>
+   599→   599→            
+   600→   600→            {/* Database Cards Grid */}
+   601→   601→            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+   602→   602→              {[
+   603→   603→                { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', url: 'https://www.ncbi.nlm.nih.gov/', color: 'bg-blue-500' },
+   604→   604→                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', url: 'https://www.uniprot.org/', color: 'bg-green-500' },
+   605→   605→                { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', url: 'https://www.rcsb.org/', color: 'bg-purple-500' },
+   606→   606→                { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', url: 'https://ensembl.org/', color: 'bg-orange-500' },
+   607→   607→                { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', url: 'https://www.genome.jp/kegg/', color: 'bg-teal-500' },
+   608→   608→                { name: 'PubMed', desc: 'Biomedical literature', icon: '📚', url: 'https://pubmed.ncbi.nlm.nih.gov/', color: 'bg-red-500' },
+   609→   609→                { name: 'ClinVar', desc: 'Clinical variants database', icon: '🏥', url: 'https://www.ncbi.nlm.nih.gov/clinvar/', color: 'bg-pink-500' },
+   610→   610→                { name: 'dbSNP', desc: 'Single nucleotide polymorphisms', icon: '🧪', url: 'https://www.ncbi.nlm.nih.gov/snp/', color: 'bg-indigo-500' },
+   611→   611→                { name: 'AlphaFold DB', desc: 'Predicted protein structures', icon: '🤖', url: 'https://alphafold.ebi.ac.uk/', color: 'bg-cyan-500' },
+   612→   612→              ].map((db, i) => (
+   613→   613→                <a
+   614→   614→                  key={i}
+   615→   615→                  href={db.url}
+   616→   616→                  target="_blank"
+   617→   617→                  rel="noopener noreferrer"
+   618→   618→                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all group no-underline"
+   619→   619→                >
+   620→   620→                  <div className="flex items-start justify-between mb-4">
+   621→   621→                    <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
+   622→   622→                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${db.color} text-white`}>
+   623→   623→                      External
+   624→   624→                    </span>
+   625→   625→                  </div>
+   626→   626→                  <h3 className="font-semibold text-lg mb-1 group-hover:text-biored transition-colors">{db.name}</h3>
+   627→   627→                  <p className="text-sm text-muted-foreground">{db.desc}</p>
+   628→   628→                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+   629→   629→                    Open Database →
+   630→   630→                  </button>
+   631→   631→                </a>
+   632→   632→              ))}
+   633→   633→            </div>
+   634→   634→          </div>
+   635→   635→        </DashboardLayout>
+   636→   636→
+   637→   637→        
+   638→   638→        {/* Sticky Footer */}
+   639→   639→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   640→   640→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   641→   641→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   642→   642→        </footer>
+   643→   643→      </main>
+   644→   644→    )
+   645→   645→  }
+   646→   646→
+   647→   647→  // Render Documentation Page
+   648→   648→  if (currentView === 'documentation') {
+   649→   649→    return (
+   650→   650→      <>
+   651→   651→        <DocumentationSection onBack={handleGoHome} />
+   652→   652→      </>
+   653→   653→    )
+   654→   654→  }
+   655→   655→
+   656→   656→  // Render Tutorials Page
+   657→   657→  if (currentView === 'tutorials') {
+   658→   658→    return (
+   659→   659→      <>
+   660→   660→        <TutorialsSection onBack={handleGoHome} />
+   661→   661→      </>
+   662→   662→    )
+   663→   663→  }
+   664→   664→
+   665→   665→  // Render Support/Buy Me Coffee Page
+   666→   666→  if (currentView === 'coffee') {
+   667→   667→    return (
+   668→   668→      <>
+   669→   669→        <SupportPage onBack={handleGoHome} />
+   670→   670→      </>
+   671→   671→    )
+   672→   672→  }
+   673→   673→
+   674→   674→  // Render About Creator Page
+   675→   675→  if (currentView === 'about') {
+   676→   676→    return (
+   677→   677→      <>
+   678→   678→        <AboutCreator onBack={handleGoHome} />
+   679→   679→      </>
+   680→   680→    )
+   681→   681→  }
+   682→   682→
+   683→   683→  // Render Settings Page
+   684→   684→  if (currentView === 'settings') {
+   685→   685→    return (
+   686→   686→      <>
+   687→   687→        <SettingsSection onBack={() => handleNavigate('dashboard')} />
+   688→   688→      </>
+   689→   689→    )
+   690→   690→  }
+   691→   691→
+   692→   692→  // Render Plant Breeding Module Page
+   693→   693→  if (currentView === 'plant-breeding') {
+   694→   694→    return (
+   695→   695→      <ErrorBoundary>
+   696→   696→        <main className="min-h-screen flex flex-col bg-background">
+   697→   697→          <DashboardLayout
+   698→   698→            title="Plant Breeding Analysis"
+   699→   699→            subtitle="Professional quantitative genetics tools for crop improvement research"
+   700→   700→            breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Plant Breeding' }]}
+   701→   701→            actions={
+   702→   702→              <div className="flex gap-2">
+   703→   703→                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   704→   704→                  ← Back to Home
+   705→   705→                </Button>
+   706→   706→                <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   707→   707→                  Dashboard
+   708→   708→                </Button>
+   709→   709→                <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+   710→   710→                  Tools
+   711→   711→                </Button>
+   712→   712→              </div>
+   713→   713→            }
+   714→   714→            onSidebarNavigate={handleSidebarNavigate}
+   715→   715→          >
+   716→   716→            <PlantBreedingModule />
+   717→   717→          </DashboardLayout>
+   718→   718→
+   719→   719→          {/* Sticky Footer */}
+   720→   720→          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   721→   721→            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   722→   722→            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   723→   723→          </footer>
+   724→   724→        </main>
+   725→   725→      </ErrorBoundary>
+   726→   726→    )
+   727→   727→  }
+   728→   728→
+   729→   729→  // Render Dataset Manager Page
+   730→   730→  if (currentView === 'dataset') {
+   731→   731→    return (
+   732→   732→      <main className="min-h-screen flex flex-col bg-background">
+   733→   733→        <DashboardLayout
+   734→   734→          title="Dataset Manager"
+   735→   735→          subtitle="Upload, explore, clean, and transform your datasets"
+   736→   736→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Dataset Manager' }]}
+   737→   737→          actions={
+   738→   738→            <div className="flex gap-2">
+   739→   739→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   740→   740→                ← Back to Home
+   741→   741→              </Button>
+   742→   742→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   743→   743→                Dashboard
+   744→   744→              </Button>
+   745→   745→            </div>
+   746→   746→          }
+   747→   747→          onSidebarNavigate={handleSidebarNavigate}
+   748→   748→        >
+   749→   749→          <DatasetManager 
+   750→   750→            onDatasetLoaded={(ds) => console.log('Dataset loaded:', ds.name)}
+   751→   751→            onAnalyzeClick={(ds) => {
+   752→   752→              console.log('Analyze clicked:', ds.name)
+   753→   753→              // Navigate to analysis with this dataset
+   754→   754→              handleNavigate('analysis')
+   755→   755→            }}
+   756→   756→          />
+   757→   757→        </DashboardLayout>
+   758→   758→
+   759→   759→        {/* Sticky Footer */}
+   760→   760→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   761→   761→          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+   762→   762→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   763→   763→        </footer>
+   764→   764→      </main>
+   765→   765→    )
+   766→   766→  }
+   767→   767→
+   768→   768→  // Render Thesis Studio Page
+   769→   769→  if (currentView === 'thesis') {
+   770→   770→    return (
+   771→   771→      <main className="min-h-screen flex flex-col bg-background">
+   772→   772→        <DashboardLayout
+   773→   773→          title="Thesis Studio"
+   774→   774→          subtitle="AI-powered thesis writing and analysis assistant"
+   775→   775→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Thesis Studio' }]}
+   776→   776→          actions={
+   777→   777→            <div className="flex gap-2">
+   778→   778→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   779→   779→                ← Back to Home
+   780→   780→              </Button>
+   781→   781→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   782→   782→                Dashboard
+   783→   783→              </Button>
+   784→   784→            </div>
+   785→   785→          }
+   786→   786→          onSidebarNavigate={handleSidebarNavigate}
+   787→   787→        >
+   788→   788→          <ThesisStudio />
+   789→   789→        </DashboardLayout>
+   790→   790→
+   791→   791→        {/* Sticky Footer */}
+   792→   792→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   793→   793→          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+   794→   794→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   795→   795→        </footer>
+   796→   796→      </main>
+   797→   797→    )
+   798→   798→  }
+   799→   799→
+   800→   800→  // Render Analyze My Data Page (Prominent Feature)
+   801→   801→  if (currentView === 'analyze-data') {
+   802→   802→    return (
+   803→   803→      <main className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
+   804→   804→        <DashboardLayout
+   805→   805→          title="✨ Analyze My Data"
+   806→   806→          subtitle="AI-powered intelligent analysis recommendations for your research data"
+   807→   807→          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Analyze My Data' }]}
+   808→   808→          actions={
+   809→   809→            <div className="flex gap-2">
+   810→   810→              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+   811→   811→                ← Back to Home
+   812→   812→              </Button>
+   813→   813→              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+   814→   814→                Dashboard
+   815→   815→              </Button>
+   816→   816→            </div>
+   817→   817→          }
+   818→   818→          onSidebarNavigate={handleSidebarNavigate}
+   819→   819→        >
+   820→   820→          <div className="py-6">
+   821→   821→            <AnalyzeMyData />
+   822→   822→          </div>
+   823→   823→        </DashboardLayout>
+   824→   824→
+   825→   825→        {/* Sticky Footer */}
+   826→   826→        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+   827→   827→          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+   828→   828→          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+   829→   829→        </footer>
+   830→   830→      </main>
+   831→   831→    )
+   832→   832→  }
+   833→   833→
+   834→   834→  // Fallback - return landing if view not recognized
+   835→   835→  return (
+   836→   836→    <main className="min-h-screen flex flex-col">
+   837→   837→      <Navbar onNavigate={handleNavigate} />
+   838→   838→      <div className="flex-1 flex items-center justify-center">
+   839→   839→        <div className="text-center space-y-4">
+   840→   840→          <h1 className="text-2xl font-bold">Page Not Found</h1>
+   841→   841→          <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+   842→   842→          <Button onClick={handleGoHome} className="bg-biored hover:bg-biored-dark text-white cursor-pointer">
+   843→   843→            Go Home
+   844→   844→          </Button>
+   845→   845→        </div>
+   846→   846→      </div>
+   847→   847→      <FooterSection />
+   848→   848→    </main>
+   849→   849→  )
+   850→   850→}
+   851→   851→

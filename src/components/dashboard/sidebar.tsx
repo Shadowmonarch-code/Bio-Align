@@ -68,8 +68,7 @@ import {
   LineChart,
   PieChart,
   ScatterChart,
-  // AI & Thesis icons
-  Brain,
+  // Thesis icons
   GraduationCap,
   FileText,
   PenTool,
@@ -539,7 +538,7 @@ function SidebarContent({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Logo Section */}
       <div className={cn(
         "flex items-center h-16 border-b border-sidebar-border px-4",
@@ -563,8 +562,8 @@ function SidebarContent({
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <ScrollArea className="flex-1 py-4">
+      {/* Navigation - Scrollable */}
+      <ScrollArea className="flex-1 py-4 overflow-y-auto">
         <div className="px-3 space-y-4">
           {/* Main Navigation */}
           <div className="space-y-1">
@@ -589,18 +588,7 @@ function SidebarContent({
           {/* Separator before other */}
           <Separator className="bg-sidebar-border/50" />
 
-          {/* AI Assistant - Special standalone item */}
-          <div className="space-y-1">
-            {renderNavItem(
-              { 
-                title: "AI Assistant", 
-                href: "/ai-assistant", 
-                icon: Brain 
-              }, 
-              false, 
-              "#A855F7"
-            )}
-          </div>
+
 
           {/* Other Navigation */}
           <div className="space-y-1">

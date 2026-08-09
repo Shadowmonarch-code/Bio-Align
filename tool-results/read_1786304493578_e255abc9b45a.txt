@@ -1,0 +1,789 @@
+     1→     1→"use client"
+     2→     2→
+     3→     3→import * as React from "react"
+     4→     4→import { ChevronRight, ChevronLeft } from "lucide-react"
+     5→     5→import { motion, AnimatePresence } from "framer-motion"
+     6→     6→import { useIsMobile } from "@/hooks/use-mobile"
+     7→     7→import { useUser } from "@/hooks/use-user"
+     8→     8→import { cn } from "@/lib/utils"
+     9→     9→import { Button } from "@/components/ui/button"
+    10→    10→import { ScrollArea } from "@/components/ui/scroll-area"
+    11→    11→import { Separator } from "@/components/ui/separator"
+    12→    12→import {
+    13→    13→  Tooltip,
+    14→    14→  TooltipContent,
+    15→    15→  TooltipProvider,
+    16→    16→  TooltipTrigger,
+    17→    17→} from "@/components/ui/tooltip"
+    18→    18→import {
+    19→    19→  Collapsible,
+    20→    20→  CollapsibleContent,
+    21→    21→  CollapsibleTrigger,
+    22→    22→} from "@/components/ui/collapsible"
+    23→    23→import {
+    24→    24→  Sheet,
+    25→    25→  SheetContent,
+    26→    26→  SheetHeader,
+    27→    27→  SheetTitle,
+    28→    28→} from "@/components/ui/sheet"
+    29→    29→import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+    30→    30→
+    31→    31→// Navigation icons - Existing + New
+    32→    32→import {
+    33→    33→  LayoutDashboard,
+    34→    34→  Wrench,
+    35→    35→  FolderKanban,
+    36→    36→  Database,
+    37→    37→  Dna,
+    38→    38→  Microscope,
+    39→    39→  CircleDot,
+    40→    40→  FlaskConical,
+    41→    41→  TreePine,
+    42→    42→  Atom,
+    43→    43→  Scissors,
+    44→    44→  TestTube,
+    45→    45→  Settings,
+    46→    46→  BookOpen,
+    47→    47→  PanelLeftClose,
+    48→    48→  PanelLeft,
+    49→    49→  // Bioinformatics icons
+    50→    50→  Search,
+    51→    51→  Layers,
+    52→    52→  Target,
+    53→    53→  // Plant Breeding icons
+    54→    54→  Leaf,
+    55→    55→  Sprout,
+    56→    56→  Wheat,
+    57→    57→  Flower2,
+    58→    58→  Beaker,
+    59→    59→  Calculator,
+    60→    60→  GitBranch,
+    61→    61→  Network,
+    62→    62→  Grid3X3,
+    63→    63→  ListChecks,
+    64→    64→  Activity,
+    65→    65→  TrendingUp,
+    66→    66→  // Visualization icons
+    67→    67→  BarChart3,
+    68→    68→  LineChart,
+    69→    69→  PieChart,
+    70→    70→  ScatterChart,
+    71→    71→  // AI & Thesis icons
+    72→    72→  Brain,
+    73→    73→  GraduationCap,
+    74→    74→  FileText,
+    75→    75→  PenTool,
+    76→    76→  Table2,
+    77→    77→  Lightbulb,
+    78→    78→  ClipboardList,
+    79→    79→  Presentation,
+    80→    80→  Globe,
+    81→    81→  ImagePlus,
+    82→    82→  Workflow,
+    83→    83→  Zap,
+    84→    84→  Sparkles,
+    85→    85→} from "lucide-react"
+    86→    86→
+    87→    87→// Types
+    88→    88→interface NavItem {
+    89→    89→  title: string
+    90→    90→  href: string
+    91→    91→  icon: React.ComponentType<{ className?: string }>
+    92→    92→  isActive?: boolean
+    93→    93→}
+    94→    94→
+    95→    95→interface NavGroup {
+    96→    96→  title: string
+    97→    97→  items: NavItem[]
+    98→    98→  icon: React.ComponentType<{ className?: string }>
+    99→    99→  color?: string
+   100→   100→  emoji?: string
+   101→   101→}
+   102→   102→
+   103→   103→interface NestedNavGroup {
+   104→   104→  title: string
+   105→   105→  items: NavItem[]
+   106→   106→}
+   107→   107→
+   108→   108→/**
+   109→   109→ * Extracts view name and optional toolId from an href
+   110→   110→ * Maps URL paths to internal view names for navigation
+   111→   111→ */
+   112→   112→function getNavigationTarget(href: string): { view: string; toolId?: string } {
+   113→   113→  // Tool items - map to analysis view with toolId
+   114→   114→  if (href.startsWith("/dashboard/tools/")) {
+   115→   115→    const toolId = href.replace("/dashboard/tools/", "")
+   116→   116→    return { view: "analysis", toolId }
+   117→   117→  }
+   118→   118→
+   119→   119→  // Plant Breeding section - all map to plant-breeding view
+   120→   120→  if (href.startsWith("/plant-breeding")) {
+   121→   121→    return { view: "plant-breeding" }
+   122→   122→  }
+   123→   123→
+   124→   124→  // Bioinformatics section - map to analysis view with toolId
+   125→   125→  if (href.startsWith("/bioinformatics")) {
+   126→   126→    const toolId = href.replace("/bioinformatics/", "")
+   127→   127→    return { view: "analysis", toolId }
+   128→   128→  }
+   129→   129→
+   130→   130→  // Thesis Studio section - map to thesis view
+   131→   131→  if (href.startsWith("/thesis")) {
+   132→   132→    return { view: "thesis" }
+   133→   133→  }
+   134→   134→
+   135→   135→  // Visualization section - could map to a visualization view or tools
+   136→   136→  if (href.startsWith("/visualization")) {
+   137→   137→    const toolId = href.replace("/visualization/", "")
+   138→   138→    return { view: "analysis", toolId: `viz-${toolId}` }
+   139→   139→  }
+   140→   140→
+   141→   141→  // Main navigation items
+   142→   142→  switch (href) {
+   143→   143→    case "/dashboard":
+   144→   144→      return { view: "dashboard" }
+   145→   145→    case "/analyze-data":
+   146→   146→      return { view: "analyze-data" }
+   147→   147→    case "/dashboard/workspaces":
+   148→   148→    case "/dashboard/projects":
+   149→   149→      return { view: "workspaces" }
+   150→   150→    case "/dashboard/databases":
+   151→   151→      return { view: "databases" }
+   152→   152→    case "/docs":
+   153→   153→      return { view: "documentation" }
+   154→   154→    case "/dashboard/settings":
+   155→   155→      return { view: "settings" }
+   156→   156→    case "/dashboard/workflows":
+   157→   157→      return { view: "workspaces" }
+   158→   158→    default:
+   159→   159→      // Fallback: try to extract meaningful view name
+   160→   160→      const path = href.replace(/^\//, "")
+   161→   161→      // Map common patterns
+   162→   162→      if (path.startsWith("plant-breeding")) return { view: "plant-breeding" }
+   163→   163→      if (path.startsWith("bioinformatics")) return { view: "analysis", toolId: path.replace("bioinformatics/", "") }
+   164→   164→      if (path.startsWith("thesis")) return { view: "thesis" }
+   165→   165→      return { view: "dashboard" }
+   166→   166→  }
+   167→   167→}
+   168→   168→
+   169→   169→// ==================== NAVIGATION DATA ====================
+   170→   170→
+   171→   171→// Main Navigation Items
+   172→   172→const mainNavItems: NavItem[] = [
+   173→   173→  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+   174→   174→  { title: "Analyze My Data", href: "/analyze-data", icon: Sparkles, isActive: true },
+   175→   175→  { title: "Projects", href: "/dashboard/projects", icon: FolderKanban },
+   176→   176→]
+   177→   177→
+   178→   178→// Bioinformatics Tools Section
+   179→   179→const bioinformaticsNavItems: NavItem[] = [
+   180→   180→  { title: "Sequence Analysis", href: "/bioinformatics/sequence", icon: Dna },
+   181→   181→  { title: "Alignment", href: "/bioinformatics/alignment", icon: Layers },
+   182→   182→  { title: "BLAST Search", href: "/bioinformatics/blast", icon: Search },
+   183→   183→  { title: "Phylogenetics", href: "/bioinformatics/phylogenetics", icon: TreePine },
+   184→   184→  { title: "Protein Analysis", href: "/bioinformatics/protein", icon: Microscope },
+   185→   185→  { title: "Structural Biology", href: "/bioinformatics/structure", icon: Atom },
+   186→   186→  { title: "Genomics", href: "/bioinformatics/genomics", icon: CircleDot },
+   187→   187→  { title: "Transcriptomics", href: "/bioinformatics/transcriptomics", icon: FlaskConical },
+   188→   188→  { title: "Proteomics", href: "/bioinformatics/proteomics", icon: TestTube },
+   189→   189→  { title: "Metagenomics", href: "/bioinformatics/metagenomics", icon: Globe },
+   190→   190→  { title: "Molecular Docking", href: "/bioinformatics/docking", icon: Target },
+   191→   191→  { title: "Biological Databases", href: "/bioinformatics/databases", icon: Database },
+   192→   192→]
+   193→   193→
+   194→   194→// Experimental Design Sub-section for Plant Breeding
+   195→   195→const experimentalDesignItems: NavItem[] = [
+   196→   196→  { title: "CRD Analysis", href: "/plant-breeding/experimental-design/crd", icon: Grid3X3 },
+   197→   197→  { title: "RCBD Analysis", href: "/plant-breeding/experimental-design/rcbd", icon: Grid3X3 },
+   198→   198→  { title: "Factorial Design", href: "/plant-breeding/experimental-design/factorial", icon: Network },
+   199→   199→]
+   200→   200→
+   201→   201→// Plant Breeding Tools Section
+   202→   202→const plantBreedingNavItems: (NavItem | NestedNavGroup)[] = [
+   203→   203→  { title: "Genetic Parameters", href: "/plant-breeding/genetic-params", icon: Calculator },
+   204→   204→  { 
+   205→   205→    title: "Experimental Design", 
+   206→   206→    href: "/plant-breeding/experimental-design", 
+   207→   207→    icon: Beaker,
+   208→   208→  } as NavItem,
+   209→   209→  { title: "Quantitative Genetics", href: "/plant-breeding/quantitative-genetics", icon: TrendingUp },
+   210→   210→  { title: "Correlation & Regression", href: "/plant-breeding/correlation", icon: TrendingUp },
+   211→   211→  { title: "Path Analysis", href: "/plant-breeding/path-analysis", icon: GitBranch },
+   212→   212→  { title: "Selection Index", href: "/plant-breeding/selection-index", icon: ListChecks },
+   213→   213→  { title: "G×E Interaction", href: "/plant-breeding/gxe", icon: Activity },
+   214→   214→  { title: "AMMI Analysis", href: "/plant-breeding/ammi", icon: LineChart },
+   215→   215→  { title: "GGE Biplot", href: "/plant-breeding/gge-biplot", icon: ScatterChart },
+   216→   216→  { title: "Diversity Analysis", href: "/plant-breeding/diversity", icon: Network },
+   217→   217→  { title: "Molecular Breeding", href: "/plant-breeding/molecular-breeding", icon: Dna },
+   218→   218→  { title: "Population Genetics", href: "/plant-breeding/population-genetics", icon: Dna },
+   219→   219→]
+   220→   220→
+   221→   221→// Thesis Studio Items
+   222→   222→const thesisNavItems: NavItem[] = [
+   223→   223→  { title: "Dataset Manager", href: "/thesis/datasets", icon: Database },
+   224→   224→  { title: "Statistical Analysis", href: "/thesis/statistics", icon: BarChart3 },
+   225→   225→  { title: "Visualization Studio", href: "/thesis/visualization", icon: PieChart },
+   226→   226→  { title: "Figure Generator", href: "/thesis/figures", icon: ImagePlus },
+   227→   227→  { title: "Table Generator", href: "/thesis/tables", icon: Table2 },
+   228→   228→  { title: "Research Notes", href: "/thesis/notes", icon: PenTool },
+   229→   229→  { title: "Report Builder", href: "/thesis/reports", icon: FileText },
+   230→   230→]
+   231→   231→
+   232→   232→// Visualization Items
+   233→   233→const visualizationNavItems: NavItem[] = [
+   234→   234→  { title: "Scientific Charts", href: "/visualization/charts", icon: BarChart3 },
+   235→   235→  { title: "Biological Diagrams", href: "/visualization/diagrams", icon: Atom },
+   236→   236→  { title: "Networks & Graphs", href: "/visualization/networks", icon: Network },
+   237→   237→  { title: "Genome Browser", href: "/visualization/genome-browser", icon: Globe },
+   238→   238→  { title: "Protein Viewer", href: "/visualization/protein-viewer", icon: Microscope },
+   239→   239→  { title: "Publication Figures", href: "/visualization/publication-figures", icon: Presentation },
+   240→   240→]
+   241→   241→
+   242→   242→// Other Navigation Items
+   243→   243→const otherNavItems: NavItem[] = [
+   244→   244→  { title: "Workflows", href: "/dashboard/workflows", icon: Workflow },
+   245→   245→  { title: "Documentation", href: "/docs", icon: BookOpen },
+   246→   246→  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+   247→   247→]
+   248→   248→
+   249→   249→// ==================== SECTION DEFINITIONS ====================
+   250→   250→
+   251→   251→interface SectionDefinition {
+   252→   252→  id: string
+   253→   253→  title: string
+   254→   254→  emoji: string
+   255→   255→  icon: React.ComponentType<{ className?: string }>
+   256→   256→  color: string
+   257→   257→  items: NavItem[]
+   258→   258→  nestedGroups?: { [key: string]: NavItem[] }
+   259→   259→}
+   260→   260→
+   261→   261→const collapsibleSections: SectionDefinition[] = [
+   262→   262→  {
+   263→   263→    id: "bioinformatics",
+   264→   264→    title: "Bioinformatics",
+   265→   265→    emoji: "🧬",
+   266→   266→    icon: Dna,
+   267→   267→    color: "#10B981",
+   268→   268→    items: bioinformaticsNavItems,
+   269→   269→  },
+   270→   270→  {
+   271→   271→    id: "plant-breeding",
+   272→   272→    title: "Plant Breeding",
+   273→   273→    emoji: "🌱",
+   274→   274→    icon: Leaf,
+   275→   275→    color: "#22C55E",
+   276→   276→    items: plantBreedingNavItems as NavItem[],
+   277→   277→    nestedGroups: {
+   278→   278→      "Experimental Design": experimentalDesignItems,
+   279→   279→    },
+   280→   280→  },
+   281→   281→  {
+   282→   282→    id: "thesis-studio",
+   283→   283→    title: "Thesis Studio",
+   284→   284→    emoji: "📊",
+   285→   285→    icon: GraduationCap,
+   286→   286→    color: "#6366F1",
+   287→   287→    items: thesisNavItems,
+   288→   288→  },
+   289→   289→  {
+   290→   290→    id: "visualization",
+   291→   291→    title: "Visualization",
+   292→   292→    emoji: "📈",
+   293→   293→    icon: BarChart3,
+   294→   294→    color: "#F59E0B",
+   295→   295→    items: visualizationNavItems,
+   296→   296→  },
+   297→   297→]
+   298→   298→
+   299→   299→// ==================== SIDEBAR CONTENT COMPONENT ====================
+   300→   300→
+   301→   301→interface SidebarContentProps {
+   302→   302→  collapsed: boolean
+   303→   303→  activeItem: string
+   304→   304→  openSections: Record<string, boolean>
+   305→   305→  setOpenSections: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+   306→   306→  onNavigate?: (view: string, toolId?: string) => void
+   307→   307→}
+   308→   308→
+   309→   309→function SidebarContent({
+   310→   310→  collapsed,
+   311→   311→  activeItem,
+   312→   312→  openSections,
+   313→   313→  setOpenSections,
+   314→   314→  onNavigate,
+   315→   315→}: SidebarContentProps) {
+   316→   316→  const { 
+   317→   317→    isAuthenticated,
+   318→   318→    userDisplayName, 
+   319→   319→    userEmail, 
+   320→   320→    userInitials,
+   321→   321→  } = useUser()
+   322→   322→
+   323→   323→  // Handle navigation click
+   324→   324→  const handleNavClick = React.useCallback(
+   325→   325→    (href: string) => {
+   326→   326→      if (onNavigate) {
+   327→   327→        const { view, toolId } = getNavigationTarget(href)
+   328→   328→        onNavigate(view, toolId)
+   329→   329→      }
+   330→   330→    },
+   331→   331→    [onNavigate]
+   332→   332→  )
+   333→   333→
+   334→   334→  const toggleSection = (sectionId: string) => {
+   335→   335→    setOpenSections((prev) => ({
+   336→   336→      ...prev,
+   337→   337→      [sectionId]: !prev[sectionId],
+   338→   338→    }))
+   339→   339→  }
+   340→   340→
+   341→   341→  const renderNavItem = (item: NavItem, isSubItem = false, sectionColor?: string) => {
+   342→   342→    const isActive = item.href === activeItem || item.isActive
+   343→   343→    
+   344→   344→    if (collapsed && !isSubItem) {
+   345→   345→      return (
+   346→   346→        <Tooltip key={item.title}>
+   347→   347→          <TooltipTrigger asChild>
+   348→   348→            <Button
+   349→   349→              variant="ghost"
+   350→   350→              size={isSubItem ? "sm" : "default"}
+   351→   351→              className={cn(
+   352→   352→                "w-full justify-center relative",
+   353→   353→                isSubItem ? "h-8 px-2" : "h-10",
+   354→   354→                isActive && sectionColor 
+   355→   355→                  ? `bg-[${sectionColor}]/10 hover:bg-[${sectionColor}]/15` 
+   356→   356→                  : isActive && "bg-biored/10 text-biored hover:bg-biored/15 hover:text-biored",
+   357→   357→                !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+   358→   358→              )}
+   359→   359→              onClick={() => handleNavClick(item.href)}
+   360→   360→            >
+   361→   361→              <item.icon className={cn(
+   362→   362→                "size-4 shrink-0", 
+   363→   363→                isActive && (sectionColor ? `text-[${sectionColor}]` : "text-biored")
+   364→   364→              )} />
+   365→   365→            </Button>
+   366→   366→          </TooltipTrigger>
+   367→   367→          <TooltipContent side="right">
+   368→   368→            {item.title}
+   369→   369→          </TooltipContent>
+   370→   370→        </Tooltip>
+   371→   371→      )
+   372→   372→    }
+   373→   373→
+   374→   374→    return (
+   375→   375→      <Button
+   376→   376→        key={item.title}
+   377→   377→        variant="ghost"
+   378→   378→        size={isSubItem ? "sm" : "default"}
+   379→   379→        className={cn(
+   380→   380→          "w-full justify-start gap-3 relative",
+   381→   381→          isSubItem ? "h-8 pl-7 text-sm" : "h-10 px-3",
+   382→   382→          isActive && sectionColor
+   383→   383→            ? `bg-[${sectionColor}]/10 text-[${sectionColor}] hover:bg-[${sectionColor}]/15 font-medium`
+   384→   384→            : isActive && "bg-biored/10 text-biored hover:bg-biored/15 hover:text-biored font-medium",
+   385→   385→          !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+   386→   386→        )}
+   387→   387→        onClick={() => handleNavClick(item.href)}
+   388→   388→      >
+   389→   389→        {isActive && (
+   390→   390→          <motion.div
+   391→   391→            layoutId={`activeIndicator-${item.title}`}
+   392→   392→            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full"
+   393→   393→            style={{ backgroundColor: sectionColor || 'var(--biored)' }}
+   394→   394→            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+   395→   395→          />
+   396→   396→        )}
+   397→   397→        <item.icon className={cn(
+   398→   398→          "size-4 shrink-0", 
+   399→   399→          isActive && (sectionColor || "text-biored")
+   400→   400→        )} />
+   401→   401→        {!collapsed && (
+   402→   402→          <motion.span
+   403→   403→            initial={{ opacity: 0 }}
+   404→   404→            animate={{ opacity: 1 }}
+   405→   405→            exit={{ opacity: 0 }}
+   406→   406→            transition={{ duration: 0.2 }}
+   407→   407→          >
+   408→   408→            {item.title}
+   409→   409→          </motion.span>
+   410→   410→        )}
+   411→   411→      </Button>
+   412→   412→    )
+   413→   413→  }
+   414→   414→
+   415→   415→  const renderCollapsibleSection = (section: SectionDefinition) => {
+   416→   416→    const isOpen = openSections[section.id] ?? false
+   417→   417→    const hasNestedGroups = section.nestedGroups && Object.keys(section.nestedGroups).length > 0
+   418→   418→
+   419→   419→    if (collapsed) {
+   420→   420→      return (
+   421→   421→        <div key={section.id} className="space-y-1">
+   422→   422→          <Tooltip>
+   423→   423→            <TooltipTrigger asChild>
+   424→   424→              <Button
+   425→   425→                variant="ghost"
+   426→   426→                size="default"
+   427→   427→                className="w-full justify-center h-10 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+   428→   428→                onClick={() => toggleSection(section.id)}
+   429→   429→              >
+   430→   430→                <span style={{ color: section.color }} className="size-4 flex items-center justify-center">
+   431→   431→                  <section.icon className="size-4" />
+   432→   432→                </span>
+   433→   433→              </Button>
+   434→   434→            </TooltipTrigger>
+   435→   435→            <TooltipContent side="right">
+   436→   436→              <span className="flex items-center gap-2">
+   437→   437→                <span>{section.emoji}</span>
+   438→   438→                <span>{section.title}</span>
+   439→   439→              </span>
+   440→   440→            </TooltipContent>
+   441→   441→          </Tooltip>
+   442→   442→        </div>
+   443→   443→      )
+   444→   444→    }
+   445→   445→
+   446→   446→    return (
+   447→   447→      <Collapsible key={section.id} open={isOpen} onOpenChange={() => toggleSection(section.id)}>
+   448→   448→        <CollapsibleTrigger asChild>
+   449→   449→          <Button
+   450→   450→            variant="ghost"
+   451→   451→            size="default"
+   452→   452→            className="w-full justify-between h-10 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
+   453→   453→          >
+   454→   454→            <div className="flex items-center gap-3">
+   455→   455→              <span style={{ color: section.color }} className="size-4 shrink-0 flex items-center justify-center transition-colors group-hover:opacity-80">
+   456→   456→                <section.icon 
+   457→   457→                  className="size-4" 
+   458→   458→                />
+   459→   459→              </span>
+   460→   460→              <span className="font-medium">{section.emoji} {section.title}</span>
+   461→   461→            </div>
+   462→   462→            <motion.div
+   463→   463→              animate={{ rotate: isOpen ? 90 : 0 }}
+   464→   464→              transition={{ duration: 0.2 }}
+   465→   465→            >
+   466→   466→              <ChevronRight className="size-4 opacity-50" />
+   467→   467→            </motion.div>
+   468→   468→          </Button>
+   469→   469→        </CollapsibleTrigger>
+   470→   470→        <CollapsibleContent>
+   471→   471→          <motion.div
+   472→   472→            initial={{ height: 0, opacity: 0 }}
+   473→   473→            animate={{ height: "auto", opacity: 1 }}
+   474→   474→            exit={{ height: 0, opacity: 0 }}
+   475→   475→            transition={{ duration: 0.25, ease: "easeInOut" }}
+   476→   476→            className="overflow-hidden"
+   477→   477→          >
+   478→   478→            <div className="mt-1 space-y-0.5 pl-2">
+   479→   479→              {section.items.map((item) => {
+   480→   480→                // Check if this item has a nested group
+   481→   481→                const nestedKey = Object.keys(section.nestedGroups || {}).find(
+   482→   482→                  key => item.href.includes(key.toLowerCase().replace(/\s+/g, "-"))
+   483→   483→                )
+   484→   484→                
+   485→   485→                if (nestedKey && section.nestedGroups) {
+   486→   486→                  const nestedItems = section.nestedGroups[nestedKey]
+   487→   487→                  const isNestedOpen = openSections[`${section.id}-${nestedKey}`] ?? false
+   488→   488→                  
+   489→   489→                  return (
+   490→   490→                    <Collapsible key={item.title} open={isNestedOpen} onOpenChange={() => 
+   491→   491→                      setOpenSections(prev => ({ ...prev, [`${section.id}-${nestedKey}`]: !isNestedOpen }))
+   492→   492→                    }>
+   493→   493→                      <CollapsibleTrigger asChild>
+   494→   494→                        <Button
+   495→   495→                          variant="ghost"
+   496→   496→                          size="sm"
+   497→   497→                          className="w-full justify-between h-8 pl-6 pr-3 text-sm hover:bg-sidebar-accent/50"
+   498→   498→                        >
+   499→   499→                          <div className="flex items-center gap-2">
+   500→   500→                            <span style={{ color: section.color }} className="size-3.5 flex items-center justify-center">
+   501→   501→                              <item.icon className="size-3.5" />
+   502→   502→                            </span>
+   503→   503→                            <span>{item.title}</span>
+   504→   504→                          </div>
+   505→   505→                          <motion.div
+   506→   506→                            animate={{ rotate: isNestedOpen ? 90 : 0 }}
+   507→   507→                            transition={{ duration: 0.15 }}
+   508→   508→                          >
+   509→   509→                            <ChevronRight className="size-3 opacity-50" />
+   510→   510→                          </motion.div>
+   511→   511→                        </Button>
+   512→   512→                      </CollapsibleTrigger>
+   513→   513→                      <CollapsibleContent>
+   514→   514→                        <motion.div
+   515→   515→                          initial={{ height: 0, opacity: 0 }}
+   516→   516→                          animate={{ height: "auto", opacity: 1 }}
+   517→   517→                          exit={{ height: 0, opacity: 0 }}
+   518→   518→                          transition={{ duration: 0.2 }}
+   519→   519→                          className="overflow-hidden"
+   520→   520→                        >
+   521→   521→                          <div className="py-1 space-y-0.5 pl-4">
+   522→   522→                            {nestedItems.map((nestedItem) => 
+   523→   523→                              renderNavItem(nestedItem, true, section.color)
+   524→   524→                            )}
+   525→   525→                          </div>
+   526→   526→                        </motion.div>
+   527→   527→                      </CollapsibleContent>
+   528→   528→                    </Collapsible>
+   529→   529→                  )
+   530→   530→                }
+   531→   531→                
+   532→   532→                return renderNavItem(item, true, section.color)
+   533→   533→              })}
+   534→   534→            </div>
+   535→   535→          </motion.div>
+   536→   536→        </CollapsibleContent>
+   537→   537→      </Collapsible>
+   538→   538→    )
+   539→   539→  }
+   540→   540→
+   541→   541→  return (
+   542→   542→    <div className="flex flex-col h-full">
+   543→   543→      {/* Logo Section */}
+   544→   544→      <div className={cn(
+   545→   545→        "flex items-center h-16 border-b border-sidebar-border px-4",
+   546→   546→        collapsed ? "justify-center" : "gap-3"
+   547→   547→      )}>
+   548→   548→        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-biored to-biored-dark shadow-lg shadow-biored/25">
+   549→   549→          <Dna className="size-5 text-white" />
+   550→   550→        </div>
+   551→   551→        <AnimatePresence mode="wait">
+   552→   552→          {!collapsed && (
+   553→   553→            <motion.div
+   554→   554→              initial={{ opacity: 0, width: 0 }}
+   555→   555→              animate={{ opacity: 1, width: "auto" }}
+   556→   556→              exit={{ opacity: 0, width: 0 }}
+   557→   557→              transition={{ duration: 0.2, ease: "easeInOut" }}
+   558→   558→              className="overflow-hidden whitespace-nowrap"
+   559→   559→            >
+   560→   560→              <span className="text-lg font-bold tracking-tight gradient-text">BioAlign</span>
+   561→   561→            </motion.div>
+   562→   562→          )}
+   563→   563→        </AnimatePresence>
+   564→   564→      </div>
+   565→   565→
+   566→   566→      {/* Navigation */}
+   567→   567→      <ScrollArea className="flex-1 py-4">
+   568→   568→        <div className="px-3 space-y-4">
+   569→   569→          {/* Main Navigation */}
+   570→   570→          <div className="space-y-1">
+   571→   571→            {!collapsed && (
+   572→   572→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2">
+   573→   573→                Main
+   574→   574→              </p>
+   575→   575→            )}
+   576→   576→            {mainNavItems.map((item) => renderNavItem(item))}
+   577→   577→          </div>
+   578→   578→
+   579→   579→          {/* Separator after main */}
+   580→   580→          <Separator className="bg-sidebar-border/50" />
+   581→   581→
+   582→   582→          {/* Collapsible Sections */}
+   583→   583→          {collapsibleSections.map((section) => (
+   584→   584→            <div key={section.id} className="space-y-1">
+   585→   585→              {renderCollapsibleSection(section)}
+   586→   586→            </div>
+   587→   587→          ))}
+   588→   588→
+   589→   589→          {/* Separator before other */}
+   590→   590→          <Separator className="bg-sidebar-border/50" />
+   591→   591→
+   592→   592→          {/* AI Assistant - Special standalone item */}
+   593→   593→          <div className="space-y-1">
+   594→   594→            {renderNavItem(
+   595→   595→              { 
+   596→   596→                title: "AI Assistant", 
+   597→   597→                href: "/ai-assistant", 
+   598→   598→                icon: Brain 
+   599→   599→              }, 
+   600→   600→              false, 
+   601→   601→              "#A855F7"
+   602→   602→            )}
+   603→   603→          </div>
+   604→   604→
+   605→   605→          {/* Other Navigation */}
+   606→   606→          <div className="space-y-1">
+   607→   607→            {!collapsed && (
+   608→   608→              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 mb-2 mt-4">
+   609→   609→                System
+   610→   610→              </p>
+   611→   611→            )}
+   612→   612→            {otherNavItems.map((item) => renderNavItem(item))}
+   613→   613→          </div>
+   614→   614→        </div>
+   615→   615→      </ScrollArea>
+   616→   616→
+   617→   617→      {/* User Profile Section - Only show when authenticated */}
+   618→   618→      <Separator className="bg-sidebar-border" />
+   619→   619→      {isAuthenticated ? (
+   620→   620→        <div className={cn(
+   621→   621→          "flex items-center h-16 px-4 border-t border-sidebar-border",
+   622→   622→          collapsed ? "justify-center" : "gap-3"
+   623→   623→        )}>
+   624→   624→          <Avatar className="size-9 ring-2 ring-biored/20">
+   625→   625→            <AvatarImage src={undefined} alt={userDisplayName} />
+   626→   626→            <AvatarFallback className="bg-biored/10 text-biored text-sm font-medium">
+   627→   627→              {userInitials}
+   628→   628→            </AvatarFallback>
+   629→   629→          </Avatar>
+   630→   630→          <AnimatePresence mode="wait">
+   631→   631→            {!collapsed && (
+   632→   632→              <motion.div
+   633→   633→                initial={{ opacity: 0, width: 0 }}
+   634→   634→                animate={{ opacity: 1, width: "auto" }}
+   635→   635→                exit={{ opacity: 0, width: 0 }}
+   636→   636→                transition={{ duration: 0.2, ease: "easeInOut" }}
+   637→   637→                className="overflow-hidden whitespace-nowrap"
+   638→   638→              >
+   639→   639→                <div className="flex flex-col">
+   640→   640→                  <span className="text-sm font-medium leading-none">{userDisplayName}</span>
+   641→   641→                  <span className="text-xs text-muted-foreground mt-0.5 truncate max-w-[150px]">
+   642→   642→                    {userEmail}
+   643→   643→                  </span>
+   644→   644→                </div>
+   645→   645→              </motion.div>
+   646→   646→            )}
+   647→   647→          </AnimatePresence>
+   648→   648→        </div>
+   649→   649→      ) : (
+   650→   650→        <div className={cn(
+   651→   651→          "flex items-center h-16 px-4 border-t border-sidebar-border justify-center",
+   652→   652→        )}>
+   653→   653→          <span className="text-xs text-muted-foreground">Not signed in</span>
+   654→   654→        </div>
+   655→   655→      )}
+   656→   656→    </div>
+   657→   657→  )
+   658→   658→}
+   659→   659→
+   660→   660→// ==================== DESKTOP SIDEBAR COMPONENT ====================
+   661→   661→
+   662→   662→export function DashboardSidebar({
+   663→   663→  collapsed = false,
+   664→   664→  onToggle,
+   665→   665→  activeItem = "/dashboard",
+   666→   666→  onNavigate,
+   667→   667→}: {
+   668→   668→  collapsed?: boolean
+   669→   669→  onToggle?: () => void
+   670→   670→  activeItem?: string
+   671→   671→  onNavigate?: (view: string, toolId?: string) => void
+   672→   672→}) {
+   673→   673→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+   674→   674→    bioinformatics: false,
+   675→   675→    "plant-breeding": false,
+   676→   676→    "thesis-studio": false,
+   677→   677→    visualization: false,
+   678→   678→  })
+   679→   679→
+   680→   680→  return (
+   681→   681→    <TooltipProvider delayDuration={0}>
+   682→   682→      <motion.aside
+   683→   683→        initial={false}
+   684→   684→        animate={{ width: collapsed ? 64 : 300 }}
+   685→   685→        transition={{
+   686→   686→          type: "spring",
+   687→   687→          stiffness: 350,
+   688→   688→          damping: 30,
+   689→   689→        }}
+   690→   690→        className="fixed left-0 top-0 z-40 h-screen glass border-r border-border/50 flex flex-col overflow-hidden"
+   691→   691→      >
+   692→   692→        <SidebarContent
+   693→   693→          collapsed={collapsed}
+   694→   694→          activeItem={activeItem}
+   695→   695→          openSections={openSections}
+   696→   696→          setOpenSections={setOpenSections}
+   697→   697→          onNavigate={onNavigate}
+   698→   698→        />
+   699→   699→
+   700→   700→        {/* Collapse Toggle Button */}
+   701→   701→        <div className="absolute -right-3 top-20 z-50">
+   702→   702→          <Button
+   703→   703→            onClick={onToggle}
+   704→   704→            size="icon"
+   705→   705→            variant="outline"
+   706→   706→            className="size-6 rounded-full bg-background border shadow-md hover:bg-accent"
+   707→   707→          >
+   708→   708→            <motion.div
+   709→   709→              animate={{ rotate: collapsed ? 180 : 0 }}
+   710→   710→              transition={{ duration: 0.2 }}
+   711→   711→            >
+   712→   712→              {collapsed ? (
+   713→   713→                <ChevronLeft className="size-3" />
+   714→   714→              ) : (
+   715→   715→                <ChevronRight className="size-3" />
+   716→   716→              )}
+   717→   717→            </motion.div>
+   718→   718→          </Button>
+   719→   719→        </div>
+   720→   720→      </motion.aside>
+   721→   721→    </TooltipProvider>
+   722→   722→  )
+   723→   723→}
+   724→   724→
+   725→   725→// ==================== MOBILE SIDEBAR COMPONENT ====================
+   726→   726→
+   727→   727→export function MobileSidebar({
+   728→   728→  open,
+   729→   729→  onClose,
+   730→   730→  activeItem = "/dashboard",
+   731→   731→  onNavigate,
+   732→   732→}: {
+   733→   733→  open: boolean
+   734→   734→  onClose: () => void
+   735→   735→  activeItem?: string
+   736→   736→  onNavigate?: (view: string, toolId?: string) => void
+   737→   737→}) {
+   738→   738→  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+   739→   739→    bioinformatics: false,
+   740→   740→    "plant-breeding": false,
+   741→   741→    "thesis-studio": false,
+   742→   742→    visualization: false,
+   743→   743→  })
+   744→   744→
+   745→   745→  return (
+   746→   746→    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+   747→   747→      <SheetContent side="left" className="w-80 p-0 glass">
+   748→   748→        <SheetHeader className="sr-only">
+   749→   749→          <SheetTitle>Navigation Menu</SheetTitle>
+   750→   750→        </SheetHeader>
+   751→   751→        <SidebarContent
+   752→   752→          collapsed={false}
+   753→   753→          activeItem={activeItem}
+   754→   754→          openSections={openSections}
+   755→   755→          setOpenSections={setOpenSections}
+   756→   756→          onNavigate={onNavigate}
+   757→   757→        />
+   758→   758→      </SheetContent>
+   759→   759→    </Sheet>
+   760→   760→  )
+   761→   761→}
+   762→   762→
+   763→   763→// ==================== SIDEBAR STATE HOOK ====================
+   764→   764→
+   765→   765→export function useSidebarState() {
+   766→   766→  const [collapsed, setCollapsed] = React.useState(false)
+   767→   767→  const [mobileOpen, setMobileOpen] = React.useState(false)
+   768→   768→  const isMobile = useIsMobile()
+   769→   769→
+   770→   770→  const toggle = React.useCallback(() => {
+   771→   771→    if (isMobile) {
+   772→   772→      setMobileOpen((prev) => !prev)
+   773→   773→    } else {
+   774→   774→      setCollapsed((prev) => !prev)
+   775→   775→    }
+   776→   776→  }, [isMobile])
+   777→   777→
+   778→   778→  return {
+   779→   779→    collapsed,
+   780→   780→    setCollapsed,
+   781→   781→    mobileOpen,
+   782→   782→    setMobileOpen,
+   783→   783→    isMobile,
+   784→   784→    toggle,
+   785→   785→  }
+   786→   786→}
+   787→   787→
+   788→   788→export default DashboardSidebar
+   789→   789→
