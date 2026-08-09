@@ -1,0 +1,751 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback, useMemo } from 'react'
+     4→import { motion } from 'framer-motion'
+     5→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Input } from '@/components/ui/input'
+     8→import { Label } from '@/components/ui/label'
+     9→import { Textarea } from '@/components/ui/textarea'
+    10→import { Badge } from '@/components/ui/badge'
+    11→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    12→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+    13→import { 
+    14→  GitBranch, 
+    15→  Upload, 
+    16→  FileText, 
+    17→  Download,
+    18→  Info,
+    19→  TrendingUp,
+    20→  ScatterChart,
+    21→  AlertCircle
+    22→} from 'lucide-react'
+    23→import { 
+    24→  pearsonCorrelation, 
+    25→  spearmanCorrelation, 
+    26→  CorrelationResult,
+    27→  simpleLinearRegression,
+    28→  multipleRegression,
+    29→  RegressionResult
+    30→} from '@/lib/statistics-engine'
+    31→
+    32→interface CorrelationRegressionProps {
+    33→  className?: string
+    34→}
+    35→
+    36→type AnalysisType = 'correlation' | 'simple-regression' | 'multiple-regression'
+    37→
+    38→// Sample multi-trait data
+    39→const SAMPLE_DATA = `Genotype,PlantHeight,PanicleLength,GrainsPerPanicle,1000GrainWt,Yield
+    40→G1,105,24,145,22.5,4.8
+    41→G2,92,21,128,20.1,3.9
+    42→G3,98,23,138,21.8,4.3
+    43→G4,88,20,122,19.5,3.7
+    44→G5,112,26,155,24.2,5.2
+    45→G6,101,23,140,22.0,4.5
+    46→G7,85,19,115,18.8,3.4
+    47→G8,96,22,135,21.2,4.2
+    48→G9,115,27,160,25.0,5.5
+    49→G10,99,24,142,22.3,4.6`
+    50→
+    51→export default function CorrelationRegressionAnalysis({ className }: CorrelationRegressionProps) {
+    52→  const [analysisType, setAnalysisType] = useState<AnalysisType>('correlation')
+    53→  const [rawData, setRawData] = useState('')
+    54→  const [parsedData, setParsedData] = useState<number[][]>([])
+    55→  const [variableNames, setVariableNames] = useState<string[]>([])
+    56→  const [correlationMethod, setCorrelationMethod] = useState<'pearson' | 'spearman'>('pearson')
+    57→  
+    58→  // For regression
+    59→  const [dependentVar, setDependentVar] = useState('')
+    60→  const [independentVars, setIndependentVars] = useState<string[]>([])
+    61→  
+    62→  // Results
+    63→  const [corrResult, setCorrResult] = useState<CorrelationResult | null>(null)
+    64→  const [regResult, setRegResult] = useState<RegressionResult | null>(null)
+    65→  const [error, setError] = useState<string | null>(null)
+    66→  const [isLoading, setIsLoading] = useState(false)
+    67→
+    68→  // Parse CSV data
+    69→  const parseData = useCallback((text: string): { data: number[][], names: string[] } | null => {
+    70→    try {
+    71→      const lines = text.trim().split('\n').filter(line => line.trim())
+    72→      if (lines.length < 3) throw new Error('Need at least header + 2 observations')
+    73→
+    74→      const headers = lines[0].split(',').map(h => h.trim())
+    75→      const names: string[] = []
+    76→      const data: number[][] = []
+    77→
+    78→      for (let i = 1; i < lines.length; i++) {
+    79→        const values = lines[i].split(',').map(v => v.trim())
+    80→        names.push(values[0])
+    81→        const rowValues = values.slice(1).map(v => parseFloat(v))
+    82→        
+    83→        if (rowValues.some(v => isNaN(v))) {
+    84→          throw new Error(`Invalid number in row ${i + 1}`)
+    85→        }
+    86→        data.push(rowValues)
+    87→      }
+    88→
+    89→      setVariableNames(headers.slice(1))
+    90→      setParsedData(data)
+    91→      
+    92→      if (headers.length > 1 && !dependentVar) {
+    93→        setDependentVar(headers[headers.length - 1]) // Default last variable as dependent
+    94→        setIndependentVars(headers.slice(1, -1))
+    95→      }
+    96→      
+    97→      setError(null)
+    98→      return { data, names: headers.slice(1) }
+    99→    } catch (err) {
+   100→      setError(err instanceof Error ? err.message : 'Failed to parse data')
+   101→      return null
+   102→    }
+   103→  }, [dependentVar])
+   104→
+   105→  // Run correlation analysis
+   106→  const runCorrelation = useCallback(() => {
+   107→    if (parsedData.length === 0) {
+   108→      const parsed = parseData(rawData)
+   109→      if (!parsed) return
+   110→      calculateCorrelation(parsed.data)
+   111→    } else {
+   112→      calculateCorrelation(parsedData)
+   113→    }
+   114→  }, [parsedData, rawData, parseData])
+   115→
+   116→  const calculateCorrelation = (data: number[][]) => {
+   117→    setIsLoading(true)
+   118→    setError(null)
+   119→    
+   120→    setTimeout(() => {
+   121→      try {
+   122→        const result = correlationMethod === 'pearson' 
+   123→          ? pearsonCorrelation(data, variableNames)
+   124→          : spearmanCorrelation(data, variableNames)
+   125→        setCorrResult(result)
+   126→        setRegResult(null)
+   127→      } catch (err) {
+   128→        setError(err instanceof Error ? err.message : 'Correlation analysis failed')
+   129→      }
+   130→      setIsLoading(false)
+   131→    }, 300)
+   132→  }
+   133→
+   134→  // Run regression analysis
+   135→  const runRegression = useCallback(() => {
+   136→    if (parsedData.length === 0) {
+   137→      const parsed = parseData(rawData)
+   138→      if (!parsed) return
+   139→      calculateRegression(parsed.data)
+   140→    } else {
+   141→      calculateRegression(parsedData)
+   142→    }
+   143→  }, [parsedData, rawData, parseData])
+   144→
+   145→  const calculateRegression = (data: number[][]) => {
+   146→    setIsLoading(true)
+   147→    setError(null)
+   148→    
+   149→    setTimeout(() => {
+   150→      try {
+   151→        const depIdx = variableNames.indexOf(dependentVar)
+   152→        if (depIdx === -1) throw new Error('Please select a dependent variable')
+   153→        
+   154→        let result: RegressionResult
+   155→        
+   156→        if (analysisType === 'simple-regression') {
+   157→          // Simple linear regression with first independent variable
+   158→          const indepIdx = independentVars.length > 0 
+   159→            ? variableNames.indexOf(independentVars[0])
+   160→            : 0
+   161→          
+   162→          if (indepIdx === -1 || indepIdx === depIdx) throw new Error('Invalid independent variable')
+   163→          
+   164→          const x = data.map(row => row[indepIdx])
+   165→          const y = data.map(row => row[depIdx])
+   166→          result = simpleLinearRegression(x, y)
+   167→        } else {
+   168→          // Multiple regression
+   169→          const indepIndices = independentVars
+   170→            .map(v => variableNames.indexOf(v))
+   171→            .filter(i => i !== -1 && i !== depIdx)
+   172→          
+   173→          if (indepIndices.length === 0) throw new Error('Select at least one independent variable')
+   174→          
+   175→          const X = data.map(row => indepIndices.map(i => row[i]))
+   176→          const y = data.map(row => row[depIdx])
+   177→          result = multipleRegression(X, y)
+   178→        }
+   179→        
+   180→        setRegResult(result)
+   181→        setCorrResult(null)
+   182→      } catch (err) {
+   183→        setError(err instanceof Error ? err.message : 'Regression analysis failed')
+   184→      }
+   185→      setIsLoading(false)
+   186→    }, 300)
+   187→  }
+   188→
+   189→  // Load sample data
+   190→  const loadSampleData = () => {
+   191→    setRawData(SAMPLE_DATA)
+   192→    parseData(SAMPLE_DATA)
+   193→  }
+   194→
+   195→  // Handle file upload
+   196→  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+   197→    const file = event.target.files?.[0]
+   198→    if (!file) return
+   199→
+   200→    const reader = new FileReader()
+   201→    reader.onload = (e) => {
+   202→      const text = e.target?.result as string
+   203→      setRawData(text)
+   204→      parseData(text)
+   205→    }
+   206→    reader.readAsText(file)
+   207→  }
+   208→
+   209→  // Get significance stars
+   210→  const getSignificanceStars = (p: number): string => {
+   211→    if (p < 0.001) return '***'
+   212→    if (p < 0.01) return '**'
+   213→    if (p < 0.05) return '*'
+   214→    if (p < 0.1) return '.'
+   215→    return ''
+   216→  }
+   217→
+   218→  // Get cell color for heatmap
+   219→  const getHeatmapColor = (value: number): string => {
+   220→    const absValue = Math.abs(value)
+   221→    const intensity = Math.min(absValue, 1)
+   222→    
+   223→    if (value >= 0) {
+   224→      // Positive: white to green
+   225→      const r = Math.round(255 * (1 - intensity))
+   226→      const g = Math.round(200 + 55 * intensity)
+   227→      const b = Math.round(255 * (1 - intensity))
+   228→      return `rgb(${r}, ${g}, ${b})`
+   229→    } else {
+   230→      // Negative: white to red
+   231→      const r = Math.round(200 + 55 * intensity)
+   232→      const g = Math.round(255 * (1 - intensity))
+   233→      const b = Math.round(255 * (1 - intensity))
+   234→      return `rgb(${r}, ${g}, ${b})`
+   235→    }
+   236→  }
+   237→
+   238→  // Render correlation matrix as heatmap
+   239→  const renderCorrelationHeatmap = () => {
+   240→    if (!corrResult) return null
+   241→    
+   242→    const { matrix, pValues, variables } = corrResult
+   243→    
+   244→    return (
+   245→      <div className="overflow-x-auto">
+   246→        <table className="w-full text-sm border-collapse">
+   247→          <thead>
+   248→            <tr>
+   249→              <th className="p-2 text-xs font-medium"></th>
+   250→              {variables.map((v, i) => (
+   251→                <th key={i} className="p-2 text-xs font-medium text-center min-w-[80px]" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+   252→                  {v}
+   253→                </th>
+   254→              ))}
+   255→            </tr>
+   256→          </thead>
+   257→          <tbody>
+   258→            {variables.map((varI, i) => (
+   259→              <tr key={i}>
+   260→                <td className="p-2 font-medium text-xs">{varI}</td>
+   261→                {variables.map((_, j) => (
+   262→                  <td 
+   263→                    key={j}
+   264→                    className="p-1 text-center"
+   265→                    style={{ backgroundColor: i !== j ? getHeatmapColor(matrix[i][j]) : '#f3f4f6' }}
+   266→                  >
+   267→                    <div className="font-mono text-xs">
+   268→                      {matrix[i][j].toFixed(3)}
+   269→                    </div>
+   270→                    {i !== j && (
+   271→                      <div className={`text-[10px] ${getSignificanceStars(pValues[i][j]) ? 'font-bold' : ''}`}>
+   272→                        {getSignificanceStars(pValues[i][j])}
+   273→                      </div>
+   274→                    )}
+   275→                  </td>
+   276→                ))}
+   277→              </tr>
+   278→            ))}
+   279→          </tbody>
+   280→        </table>
+   281→        
+   282→        {/* Legend */}
+   283→        <div className="flex items-center justify-center gap-4 mt-4 text-xs">
+   284→          <span className="flex items-center gap-1">
+   285→            <span className="w-4 h-4 rounded" style={{ backgroundColor: 'rgb(255, 75, 75)' }}></span> Strong negative (-1)
+   286→          </span>
+   287→          <span className="flex items-center gap-1">
+   288→            <span className="w-4 h-4 rounded bg-white border"></span> No correlation (0)
+   289→          </span>
+   290→          <span className="flex items-center gap-1">
+   291→            <span className="w-4 h-4 rounded" style={{ backgroundColor: 'rgb(75, 255, 75)' }}></span> Strong positive (+1)
+   292→          </span>
+   293→          <span className="text-muted-foreground ml-4">*** p&lt;0.001 ** p&lt;0.01 * p&lt;0.05</span>
+   294→        </div>
+   295→      </div>
+   296→    )
+   297→  }
+   298→
+   299→  // Render scatter plot with regression line (simplified SVG)
+   300→  const renderScatterPlot = () => {
+   301→    if (!regResult || !parsedData.length) return null
+   302→    
+   303→    const depIdx = variableNames.indexOf(dependentVar)
+   304→    const indepIdx = analysisType === 'simple-regression' && independentVars.length > 0
+   305→      ? variableNames.indexOf(independentVars[0])
+   306→      : 0
+   307→    
+   308→    if (depIdx === -1 || indepIdx === -1) return null
+   309→    
+   310→    const xData = parsedData.map(row => row[indepIdx])
+   311→    const yData = parsedData.map(row => row[depIdx])
+   312→    
+   313→    // Calculate bounds with padding
+   314→    const xMin = Math.min(...xData) * 0.95
+   315→    const xMax = Math.max(...xData) * 1.05
+   316→    const yMin = Math.min(...yData) * 0.95
+   317→    const yMax = Math.max(...yData) * 1.05
+   318→    
+   319→    const width = 400
+   320→    const height = 300
+   321→    const padding = 40
+   322→    
+   323→    const scaleX = (x: number) => padding + ((x - xMin) / (xMax - xMin)) * (width - 2 * padding)
+   324→    const scaleY = (y: number) => height - padding - ((y - yMin) / (yMax - yMin)) * (height - 2 * padding)
+   325→    
+   326→    // Generate regression line points
+   327→    const regLineStartX = xMin
+   328→    const regLineEndX = xMax
+   329→    const regLineStartY = regResult.coefficients[0] + regResult.coefficients[1] * regLineStartX
+   330→    const regLineEndY = regResult.coefficients[0] + regResult.coefficients[1] * regLineEndX
+   331→    
+   332→    return (
+   333→      <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-lg border">
+   334→        {/* Grid */}
+   335→        {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => (
+   336→          <g key={i}>
+   337→            <line 
+   338→              x1={padding} 
+   339→              y1={padding + frac * (height - 2 * padding)} 
+   340→              x2={width - padding} 
+   341→              y2={padding + frac * (height - 2 * padding)} 
+   342→              stroke="#e5e7eb" 
+   343→              strokeWidth="0.5"
+   344→            />
+   345→            <line 
+   346→              x1={padding + frac * (width - 2 * padding)} 
+   347→              y1={padding} 
+   348→              x2={padding + frac * (width - 2 * padding)} 
+   349→              y2={height - padding} 
+   350→              stroke="#e5e7eb" 
+   351→              strokeWidth="0.5"
+   352→            />
+   353→          </g>
+   354→        ))}
+   355→        
+   356→        {/* Axes */}
+   357→        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#374151" strokeWidth="1.5" />
+   358→        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#374151" strokeWidth="1.5" />
+   359→        
+   360→        {/* Axis labels */}
+   361→        <text x={width / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#6b7280">
+   362→          {variableNames[indepIdx]}
+   363→        </text>
+   364→        <text x={12} y={height / 2} textAnchor="middle" fontSize="12" fill="#6b7280" transform={`rotate(-90, 12, ${height / 2})`}>
+   365→          {dependentVar}
+   366→        </text>
+   367→        
+   368→        {/* Regression line */}
+   369→        <line 
+   370→          x1={scaleX(regLineStartX)} 
+   371→          y1={scaleY(regLineStartY)} 
+   372→          x2={scaleX(regLineEndX)} 
+   373→          y2={scaleY(regLineEndY)} 
+   374→          stroke="#C1121F" 
+   375→          strokeWidth="2"
+   376→        />
+   377→        
+   378→        {/* Data points */}
+   379→        {xData.map((x, i) => (
+   380→          <circle
+   381→            key={i}
+   382→            cx={scaleX(x)}
+   383→            cy={scaleY(yData[i])}
+   384→            r="5"
+   385→            fill="#3b82f6"
+   386→            stroke="white"
+   387→            strokeWidth="1.5"
+   388→            opacity="0.8"
+   389→          />
+   390→        ))}
+   391→        
+   392→        {/* Equation label */}
+   393→        <text x={width - padding - 10} y={padding + 20} textAnchor="end" fontSize="11" fill="#C1121F" fontWeight="bold">
+   394→          {regResult.equation}
+   395→        </text>
+   396→        <text x={width - padding - 10} y={padding + 35} textAnchor="end" fontSize="10" fill="#6b7280">
+   397→          R² = {regResult.rSquared.toFixed(4)}
+   398→        </text>
+   399→      </svg>
+   400→    )
+   401→  }
+   402→
+   403→  // Export results
+   404→  const exportResults = () => {
+   405→    if (corrResult) {
+   406→      const rows = [
+   407→        ['Correlation Matrix'],
+   408→        ['', ...corrResult.variables],
+   409→        ...corrResult.matrix.map((row, i) => [corrResult.variables[i], ...row.map(v => v.toFixed(4))]),
+   410→        [''],
+   411→        ['P-values'],
+   412→        ['', ...corrResult.variables],
+   413→        ...corrResult.pValues.map((row, i) => [corrResult.variables[i], ...row.map(v => v.toFixed(4))])
+   414→      ]
+   415→      const csv = rows.map(r => r.join(',')).join('\n')
+   416→      downloadCSV(csv, 'correlation_matrix.csv')
+   417→    } else if (regResult) {
+   418→      const rows = [
+   419→        ['Regression Results'],
+   420→        ['Equation', regResult.equation],
+   421→        ['R-squared', regResult.rSquared.toFixed(4)],
+   422→        ['Adjusted R-squared', regResult.adjustedRSquared.toFixed(4)],
+   423→        ['F-statistic', regResult.fStatistic.toFixed(4)],
+   424→        ['P-value', regResult.pValue.toFixed(4)],
+   425→        [''],
+   426→        ['Coefficient', 'Value', 'Std. Error', 't-value'],
+   427→        ...regResult.coefficients.map((coef, i) => [
+   428→          i === 0 ? 'Intercept' : `X${i}`,
+   429→          coef.toFixed(4),
+   430→          regResult.stdErrors[i]?.toFixed(4) || '',
+   431→          (coef / (regResult.stdErrors[i] || 1)).toFixed(4)
+   432→        ])
+   433→      ]
+   434→      const csv = rows.map(r => r.join(',')).join('\n')
+   435→      downloadCSV(csv, 'regression_results.csv')
+   436→    }
+   437→  }
+   438→
+   439→  const downloadCSV = (content: string, filename: string) => {
+   440→    const blob = new Blob([content], { type: 'text/csv' })
+   441→    const url = URL.createObjectURL(blob)
+   442→    const a = document.createElement('a')
+   443→    a.href = url
+   444→    a.download = filename
+   445→    a.click()
+   446→    URL.revokeObjectURL(url)
+   447→  }
+   448→
+   449→  return (
+   450→    <div className={`space-y-6 ${className || ''}`}>
+   451→      {/* Input Section */}
+   452→      <Card>
+   453→        <CardHeader>
+   454→          <CardTitle className="flex items-center gap-2">
+   455→            <GitBranch className="h-5 w-5 text-primary" />
+   456→            Correlation & Regression Analysis
+   457→          </CardTitle>
+   458→          <CardDescription>
+   459→            Multi-trait correlation analysis and regression modeling
+   460→          </CardDescription>
+   461→        </CardHeader>
+   462→        <CardContent>
+   463→          {/* Analysis Type Selector */}
+   464→          <div className="mb-6">
+   465→            <Label>Analysis Type</Label>
+   466→            <Select value={analysisType} onValueChange={(v) => setAnalysisType(v as AnalysisType)}>
+   467→              <SelectTrigger className="mt-2 max-w-md">
+   468→                <SelectValue />
+   469→              </SelectTrigger>
+   470→              <SelectContent>
+   471→                <SelectItem value="correlation">Correlation Matrix</SelectItem>
+   472→                <SelectItem value="simple-regression">Simple Linear Regression</SelectItem>
+   473→                <SelectItem value="multiple-regression">Multiple Linear Regression</SelectItem>
+   474→              </SelectContent>
+   475→            </Select>
+   476→          </div>
+   477→
+   478→          <Tabs defaultValue="paste" className="w-full">
+   479→            <TabsList className="grid w-full grid-cols-2">
+   480→              <TabsTrigger value="paste" className="gap-2">
+   481→                <FileText className="h-4 w-4" />
+   482→                Paste Data
+   483→              </TabsTrigger>
+   484→              <TabsTrigger value="upload" className="gap-2">
+   485→                <Upload className="h-4 w-4" />
+   486→                Upload CSV
+   487→              </TabsTrigger>
+   488→            </TabsList>
+   489→
+   490→            <TabsContent value="paste" className="space-y-4 mt-4">
+   491→              <div>
+   492→                <Label htmlFor="data-input">Enter your data (CSV format)</Label>
+   493→                <Textarea
+   494→                  id="data-input"
+   495→                  placeholder={`Genotype,Trait1,Trait2,Trait3\nG1,105,24,145\nG2,92,21,128\n...`}
+   496→                  value={rawData}
+   497→                  onChange={(e) => setRawData(e.target.value)}
+   498→                  className="mt-2 font-mono text-sm min-h-[120px]"
+   499→                />
+   500→              </div>
+   501→
+   502→              {/* Variable selection for regression */}
+   503→              {(analysisType === 'simple-regression' || analysisType === 'multiple-regression') && variableNames.length > 0 && (
+   504→                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   505→                  <div>
+   506→                    <Label>Dependent Variable (Y)</Label>
+   507→                    <Select value={dependentVar} onValueChange={setDependentVar}>
+   508→                      <SelectTrigger className="mt-1">
+   509→                        <SelectValue placeholder="Select dependent variable" />
+   510→                      </SelectTrigger>
+   511→                      <SelectContent>
+   512→                        {variableNames.map(v => (
+   513→                          <SelectItem key={v} value={v}>{v}</SelectItem>
+   514→                        ))}
+   515→                      </SelectContent>
+   516→                    </Select>
+   517→                  </div>
+   518→                  
+   519→                  <div>
+   520→                    <Label>Independent Variables (X)</Label>
+   521→                    <Select 
+   522→                      value={independentVars.join(',')} 
+   523→                      onValueChange={(val) => setIndependentVars(val.split(','))}
+   524→                    >
+   525→                      <SelectTrigger className="mt-1">
+   526→                        <SelectValue placeholder="Select independent variables" />
+   527→                      </SelectTrigger>
+   528→                      <SelectContent>
+   529→                        {variableNames.filter(v => v !== dependentVar).map(v => (
+   530→                          <SelectItem key={v} value={v}>{v}</SelectItem>
+   531→                        ))}
+   532→                      </SelectContent>
+   533→                    </Select>
+   534→                  </div>
+   535→                </div>
+   536→              )}
+   537→
+   538→              {/* Correlation method selector */}
+   539→              {analysisType === 'correlation' && (
+   540→                <div className="max-w-xs">
+   541→                  <Label>Correlation Method</Label>
+   542→                  <Select value={correlationMethod} onValueChange={(v) => setCorrelationMethod(v as 'pearson' | 'spearman')}>
+   543→                    <SelectTrigger className="mt-1">
+   544→                      <SelectValue />
+   545→                    </SelectTrigger>
+   546→                    <SelectContent>
+   547→                      <SelectItem value="pearson">Pearson (Linear)</SelectItem>
+   548→                      <SelectItem value="spearman">Spearman (Rank)</SelectItem>
+   549→                    </SelectContent>
+   550→                  </Select>
+   551→                </div>
+   552→              )}
+   553→
+   554→              <Button onClick={loadSampleData} variant="outline" size="sm">
+   555→                Load Sample Data
+   556→              </Button>
+   557→            </TabsContent>
+   558→
+   559→            <TabsContent value="upload" className="space-y-4 mt-4">
+   560→              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+   561→                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+   562→                <Input type="file" accept=".csv,.txt" onChange={handleFileUpload} className="max-w-xs mx-auto" />
+   563→              </div>
+   564→            </TabsContent>
+   565→          </Tabs>
+   566→
+   567→          <div className="mt-6 flex justify-end">
+   568→            <Button 
+   569→              onClick={analysisType === 'correlation' ? runCorrelation : runRegression}
+   570→              disabled={!rawData.trim() || (analysisType !== 'correlation' && !dependentVar)}
+   571→              className="gap-2"
+   572→            >
+   573→              <TrendingUp className="h-4 w-4" />
+   574→              Run {analysisType === 'correlation' ? 'Correlation' : 'Regression'} Analysis
+   575→            </Button>
+   576→          </div>
+   577→
+   578→          {error && (
+   579→            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+   580→              className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
+   581→              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+   582→              <span className="text-sm text-destructive">{error}</span>
+   583→            </motion.div>
+   584→          )}
+   585→
+   586→          {parsedData.length > 0 && !corrResult && !regResult && (
+   587→            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+   588→              className="mt-4 p-3 bg-muted/30 rounded-lg">
+   589→              <p className="text-sm font-medium mb-2">Data Preview:</p>
+   590→              <p className="text-xs text-muted-foreground">
+   591→                {parsedData.length} observations × {variableNames.length} variables loaded
+   592→              </p>
+   593→              <div className="flex flex-wrap gap-1 mt-2">
+   594→                {variableNames.map(v => (
+   595→                  <Badge key={v} variant="secondary" className="text-xs">{v}</Badge>
+   596→                ))}
+   597→              </div>
+   598→            </motion.div>
+   599→          )}
+   600→        </CardContent>
+   601→      </Card>
+   602→
+   603→      {/* Correlation Results */}
+   604→      {corrResult && (
+   605→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+   606→          <Card>
+   607→            <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+   608→              <div>
+   609→                <CardTitle className="text-lg capitalize">
+   610→                  {correlationMethod} Correlation Matrix
+   611→                </CardTitle>
+   612→                <CardDescription>
+   613→                  {corrResult.variables.length} variables × {parsedData.length} observations
+   614→                </CardDescription>
+   615→              </div>
+   616→              <Button onClick={exportResults} variant="outline" size="sm" className="gap-2">
+   617→                <Download className="h-4 w-4" />
+   618→                Export
+   619→              </Button>
+   620→            </CardHeader>
+   621→            <CardContent>
+   622→              {renderCorrelationHeatmap()}
+   623→            </CardContent>
+   624→          </Card>
+   625→        </motion.div>
+   626→      )}
+   627→
+   628→      {/* Regression Results */}
+   629→      {regResult && (
+   630→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+   631→          {/* Summary Cards */}
+   632→          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+   633→            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+   634→              <CardContent className="pt-4">
+   635→                <p className="text-xs text-blue-600 dark:text-blue-400">R-squared</p>
+   636→                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{regResult.rSquared.toFixed(4)}</p>
+   637→                <p className="text-xs text-muted-foreground mt-1">{(regResult.rSquared * 100).toFixed(1)}% variance explained</p>
+   638→              </CardContent>
+   639→            </Card>
+   640→            
+   641→            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+   642→              <CardContent className="pt-4">
+   643→                <p className="text-xs text-green-600 dark:text-green-400">Adjusted R²</p>
+   644→                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{regResult.adjustedRSquared.toFixed(4)}</p>
+   645→                <p className="text-xs text-muted-foreground mt-1">Adjusted for predictors</p>
+   646→              </CardContent>
+   647→            </Card>
+   648→            
+   649→            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+   650→              <CardContent className="pt-4">
+   651→                <p className="text-xs text-purple-600 dark:text-purple-400">F-statistic</p>
+   652→                <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{regResult.fStatistic.toFixed(2)}</p>
+   653→                <Badge variant={regResult.pValue < 0.05 ? "default" : "secondary"} className="mt-1">
+   654→                  p = {regResult.pValue < 0.001 ? '<0.001' : regResult.pValue.toFixed(4)}
+   655→                </Badge>
+   656→              </CardContent>
+   657→            </Card>
+   658→          </div>
+   659→
+   660→          {/* Equation & Coefficients */}
+   661→          <Card>
+   662→            <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+   663→              <div>
+   664→                <CardTitle className="text-lg">Regression Model</CardTitle>
+   665→                <CardDescription>Coefficient estimates and model equation</CardDescription>
+   666→              </div>
+   667→              <Button onClick={exportResults} variant="outline" size="sm" className="gap-2">
+   668→                <Download className="h-4 w-4" />
+   669→                Export
+   670→              </Button>
+   671→            </CardHeader>
+   672→            <CardContent>
+   673→              {/* Equation Display */}
+   674→              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 mb-6">
+   675→                <p className="text-sm font-medium text-muted-foreground mb-1">Model Equation:</p>
+   676→                <p className="font-mono text-lg font-bold text-primary">{regResult.equation}</p>
+   677→              </div>
+   678→
+   679→              {/* Coefficients Table */}
+   680→              <div className="overflow-x-auto">
+   681→                <table className="w-full text-sm">
+   682→                  <thead>
+   683→                    <tr className="border-b bg-muted/50">
+   684→                      <th className="text-left py-2 px-3 font-medium">Term</th>
+   685→                      <th className="text-right py-2 px-3 font-medium">Coefficient</th>
+   686→                      <th className="text-right py-2 px-3 font-medium">Std. Error</th>
+   687→                      <th className="text-right py-2 px-3 font-medium">t-value</th>
+   688→                      <th className="text-left py-2 px-3 font-medium">Interpretation</th>
+   689→                    </tr>
+   690→                  </thead>
+   691→                  <tbody>
+   692→                    {regResult.coefficients.map((coef, i) => {
+   693→                      const se = regResult.stdErrors[i] || 0
+   694→                      const tVal = se !== 0 ? coef / se : 0
+   695→                      return (
+   696→                        <tr key={i} className="border-b hover:bg-muted/30">
+   697→                          <td className="py-2 px-3 font-mono font-medium">
+   698→                            {i === 0 ? 'Intercept (β₀)' : `β${i}`}
+   699→                          </td>
+   700→                          <td className="py-2 px-3 text-right font-mono">{coef.toFixed(4)}</td>
+   701→                          <td className="py-2 px-3 text-right font-mono">{se.toFixed(4)}</td>
+   702→                          <td className={`py-2 px-3 text-right font-mono ${Math.abs(tVal) > 2 ? 'font-semibold text-primary' : ''}`}>
+   703→                            {tVal.toFixed(4)}
+   704→                          </td>
+   705→                          <td className="py-2 px-3 text-xs text-muted-foreground">
+   706→                            {i === 0 
+   707→                              ? 'Baseline when all X = 0' 
+   708→                              : `Unit change in Y per unit change in X${i}`
+   709→                            }
+   710→                          </td>
+   711→                        </tr>
+   712→                      )
+   713→                    })}
+   714→                  </tbody>
+   715→                </table>
+   716→              </div>
+   717→            </CardContent>
+   718→          </Card>
+   719→
+   720→          {/* Scatter Plot (for simple regression) */}
+   721→          {analysisType === 'simple-regression' && (
+   722→            <Card>
+   723→              <CardHeader>
+   724→                <CardTitle className="text-lg flex items-center gap-2">
+   725→                  <ScatterChart className="h-5 w-5" />
+   726→                  Scatter Plot with Regression Line
+   727→                </CardTitle>
+   728→              </CardHeader>
+   729→              <CardContent>
+   730→                {renderScatterPlot()}
+   731→              </CardContent>
+   732→            </Card>
+   733→          )}
+   734→        </motion.div>
+   735→      )}
+   736→
+   737→      {/* Loading State */}
+   738→      {isLoading && (
+   739→        <Card>
+   740→          <CardContent className="py-12">
+   741→            <div className="flex flex-col items-center gap-4">
+   742→              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+   743→              <p className="text-sm text-muted-foreground">Running analysis...</p>
+   744→            </div>
+   745→          </CardContent>
+   746→        </Card>
+   747→      )}
+   748→    </div>
+   749→  )
+   750→}
+   751→

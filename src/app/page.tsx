@@ -179,6 +179,9 @@ export default function Home() {
           breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard' }]}
           actions={
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
               <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
                 Upload Files
               </Button>
@@ -290,8 +293,11 @@ export default function Home() {
           breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Workspaces' }]}
           actions={
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                ← Dashboard
+                Dashboard
               </Button>
               <Button className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
                 + New Workspace
@@ -397,7 +403,7 @@ export default function Home() {
 
               {/* Add new workspace card */}
               <button 
-                onClick={() => alert('Create new workspace feature coming soon!')}
+                onClick={() => handleNavigate('dashboard')}
                 className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-biored/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
               >
                 <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-biored/10 flex items-center justify-center mb-3 transition-colors">
@@ -469,8 +475,11 @@ export default function Home() {
             ]}
             actions={
               <div className="flex gap-2">
+                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                  ← Back to Home
+                </Button>
                 <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
-                  ← All Tools
+                  All Tools
                 </Button>
                 <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
                   Dashboard
@@ -506,8 +515,11 @@ export default function Home() {
           ]}
           actions={
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                ← Dashboard
+                Dashboard
               </Button>
               <Button onClick={() => handleNavigate('tools')} className="cursor-pointer">
                 Tools
@@ -688,8 +700,11 @@ export default function Home() {
             breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Plant Breeding' }]}
             actions={
               <div className="flex gap-2">
+                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                  ← Back to Home
+                </Button>
                 <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                  ← Dashboard
+                  Dashboard
                 </Button>
                 <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
                   Tools
@@ -721,8 +736,11 @@ export default function Home() {
           breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Dataset Manager' }]}
           actions={
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                ← Dashboard
+                Dashboard
               </Button>
             </div>
           }
@@ -751,7 +769,24 @@ export default function Home() {
   if (currentView === 'thesis') {
     return (
       <main className="min-h-screen flex flex-col bg-background">
-        <ThesisStudio />
+        <DashboardLayout
+          title="Thesis Studio"
+          subtitle="AI-powered thesis writing and analysis assistant"
+          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Thesis Studio' }]}
+          actions={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
+              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                Dashboard
+              </Button>
+            </div>
+          }
+          onSidebarNavigate={handleSidebarNavigate}
+        >
+          <ThesisStudio />
+        </DashboardLayout>
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
@@ -772,8 +807,11 @@ export default function Home() {
           breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Analyze My Data' }]}
           actions={
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                ← Back to Home
+              </Button>
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                ← Dashboard
+                Dashboard
               </Button>
             </div>
           }

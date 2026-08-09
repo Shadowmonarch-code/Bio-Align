@@ -1,0 +1,762 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback, useMemo } from 'react'
+     4→import { motion } from 'framer-motion'
+     5→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Input } from '@/components/ui/input'
+     8→import { Label } from '@/components/ui/label'
+     9→import { Textarea } from '@/components/ui/textarea'
+    10→import { Badge } from '@/components/ui/badge'
+    11→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    12→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+    13→import { 
+    14→  Users, 
+    15→  Upload, 
+    16→  FileText, 
+    17→  Download,
+    18→  Info,
+    19→  Network,
+    20→  AlertCircle,
+    21→  ZoomIn,
+    22→  ZoomOut
+    23→} from 'lucide-react'
+    24→import { 
+    25→  euclideanDistance, 
+    26→  manhattanDistance, 
+    27→  hierarchicalClustering, 
+    28→  cutDendrogram,
+    29→  principalComponentAnalysis,
+    30→  DiversityResult,
+    31→  DendrogramNode
+    32→} from '@/lib/statistics-engine'
+    33→
+    34→interface DiversityAnalysisProps {
+    35→  className?: string
+    36→}
+    37→
+    38→type DistanceMethod = 'euclidean' | 'manhattan'
+    39→type LinkageMethod = 'average' | 'complete' | 'single'
+    40→
+    41→// Sample diversity data (genotypes × traits)
+    42→const SAMPLE_DATA = `Genotype,Trait1,Trait2,Trait3,Trait4,Trait5
+    43→G1,45,120,8.5,24,145
+    44→G2,52,135,7.8,21,128
+    45→G3,48,128,8.2,23,138
+    46→G4,42,115,9.1,20,122
+    47→G5,55,142,7.2,26,155
+    48→G6,50,130,8.0,23,140
+    49→G7,40,110,9.5,19,115
+    50→G8,47,125,8.4,22,135
+    51→G9,58,148,6.9,27,160
+    52→G10,51,132,7.9,24,142`
+    53→
+    54→export default function DiversityAnalysisComponent({ className }: DiversityAnalysisProps) {
+    55→  const [rawData, setRawData] = useState('')
+    56→  const [parsedData, setParsedData] = useState<number[][]>([])
+    57→  const [genotypeNames, setGenotypeNames] = useState<string[]>([])
+    58→  const [traitNames, setTraitNames] = useState<string[]>([])
+    59→  
+    60→  // Analysis options
+    61→  const [distanceMethod, setDistanceMethod] = useState<DistanceMethod>('euclidean')
+    62→  const [linkageMethod, setLinkageMethod] = useState<LinkageMethod>('average')
+    63→  const [nClusters, setNClusters] = useState(3)
+    64→  
+    65→  // Results
+    66→  const [result, setResult] = useState<DiversityResult | null>(null)
+    67→  const [distanceMatrix, setDistanceMatrix] = useState<number[][] | null>(null)
+    68→  const [error, setError] = useState<string | null>(null)
+    69→  const [isLoading, setIsLoading] = useState(false)
+    70→  const [dendrogramZoom, setDendrogramZoom] = useState(1)
+    71→
+    72→  // Parse CSV data
+    73→  const parseData = useCallback((text: string): boolean => {
+    74→    try {
+    75→      const lines = text.trim().split('\n').filter(line => line.trim())
+    76→      if (lines.length < 4) throw new Error('Need at least header + 3 genotypes for meaningful clustering')
+    77→
+    78→      const headers = lines[0].split(',').map(h => h.trim())
+    79→      const names: string[] = []
+    80→      const data: number[][] = []
+    81→
+    82→      for (let i = 1; i < lines.length; i++) {
+    83→        const values = lines[i].split(',').map(v => v.trim())
+    84→        names.push(values[0])
+    85→        const rowValues = values.slice(1).map(v => parseFloat(v))
+    86→        
+    87→        if (rowValues.some(v => isNaN(v))) {
+    88→          throw new Error(`Invalid number in row ${i + 1}`)
+    89→        }
+    90→        data.push(rowValues)
+    91→      }
+    92→
+    93→      setGenotypeNames(names)
+    94→      setTraitNames(headers.slice(1))  // Store trait names (excluding Genotype column)
+    95→      setParsedData(data)
+    96→      setError(null)
+    97→      return true
+    98→    } catch (err) {
+    99→      setError(err instanceof Error ? err.message : 'Failed to parse data')
+   100→      return false
+   101→    }
+   102→  }, [])
+   103→
+   104→  // Run analysis
+   105→  const handleAnalyze = useCallback(() => {
+   106→    if (parsedData.length === 0) {
+   107→      if (!parseData(rawData)) return
+   108→    }
+   109→    
+   110→    runAnalysis(parsedData)
+   111→  }, [parsedData, rawData, parseData])
+   112→
+   113→  const runAnalysis = (data: number[][]) => {
+   114→    setIsLoading(true)
+   115→    setError(null)
+   116→    
+   117→    setTimeout(() => {
+   118→      try {
+   119→        // Calculate distance matrix
+   120→        const distMatrix = distanceMethod === 'euclidean' 
+   121→          ? euclideanDistance(data)
+   122→          : manhattanDistance(data)
+   123→        
+   124→        setDistanceMatrix(distMatrix)
+   125→        
+   126→        // Perform hierarchical clustering
+   127→        const dendrogram = hierarchicalClustering(distMatrix, linkageMethod)
+   128→        
+   129→        // Perform PCA
+   130→        const pcaResult = principalComponentAnalysis(data)
+   131→        
+   132→        // Cut dendrogram to get clusters
+   133→        const clusterGroups = cutDendrogram(dendrogram, nClusters)
+   134→        
+   135→        const diversityResult: DiversityResult = {
+   136→          distanceMatrix: distMatrix,
+   137→          clusterGroups,
+   138→          dendrogramData: dendrogram,
+   139→          pcaScores: pcaResult.scores,
+   140→          pcaLoadings: pcaResult.loadings,
+   141→          varianceExplained: pcaResult.varianceExplained,
+   142→          method: distanceMethod
+   143→        }
+   144→        
+   145→        setResult(diversityResult)
+   146→      } catch (err) {
+   147→        setError(err instanceof Error ? err.message : 'Diversity analysis failed')
+   148→      }
+   149→      setIsLoading(false)
+   150→    }, 300)
+   151→  }
+   152→
+   153→  // Load sample data
+   154→  const loadSampleData = () => {
+   155→    setRawData(SAMPLE_DATA)
+   156→    parseData(SAMPLE_DATA)
+   157→  }
+   158→
+   159→  // Handle file upload
+   160→  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+   161→    const file = event.target.files?.[0]
+   162→    if (!file) return
+   163→
+   164→    const reader = new FileReader()
+   165→    reader.onload = (e) => {
+   166→      const text = e.target?.result as string
+   167→      setRawData(text)
+   168→      parseData(text)
+   169→    }
+   170→    reader.readAsText(file)
+   171→  }
+   172→
+   173→  // Export results
+   174→  const exportResults = () => {
+   175→    if (!result || !distanceMatrix) return
+   176→    
+   177→    const rows = [
+   178→      ['Diversity Analysis Results'],
+   179→      ['Method', distanceMethod],
+   180→      ['Linkage', linkageMethod],
+   181→      ['Number of Clusters', nClusters.toString()],
+   182→      [''],
+   183→      ['Distance Matrix']
+   184→    ]
+   185→    
+   186→    // Distance matrix header
+   187→    rows.push(['', ...genotypeNames])
+   188→    
+   189→    for (let i = 0; i < genotypeNames.length; i++) {
+   190→      rows.push([genotypeNames[i], ...distanceMatrix[i].map(d => d.toFixed(4))])
+   191→    }
+   192→    
+   193→    rows.push([''])
+   194→    rows.push(['Cluster Assignments'])
+   195→    result.clusterGroups.forEach((group, idx) => {
+   196→      rows.push([`Cluster ${idx + 1}`, ...group.map(i => genotypeNames[i])])
+   197→    })
+   198→    
+   199→    rows.push([''])
+   200→    rows.push(['PCA Variance Explained (%)'])
+   201→    rows.push(['PC', '% Variance', 'Cumulative %'])
+   202→    let cumVar = 0
+   203→    result.varianceExplained.forEach((v, i) => {
+   204→      cumVar += v
+   205→      rows.push([`PC${i + 1}`, v.toFixed(2), cumVar.toFixed(2)])
+   206→    })
+   207→    
+   208→    const csv = rows.map(r => r.join(',')).join('\n')
+   209→    const blob = new Blob([csv], { type: 'text/csv' })
+   210→    const url = URL.createObjectURL(blob)
+   211→    const a = document.createElement('a')
+   212→    a.href = url
+   213→    a.download = 'diversity_analysis.csv'
+   214→    a.click()
+   215→    URL.revokeObjectURL(url)
+   216→  }
+   217→
+   218→  // Render dendrogram SVG
+   219→  const renderDendrogram = (): React.ReactNode => {
+   220→    if (!result) return null
+   221→    
+   222→    const { dendrogramData } = result
+   223→    const width = 600 * dendrogramZoom
+   224→    const height = 350 * dendrogramZoom
+   225→    
+   226→    // Calculate layout positions
+   227→    interface NodePos {
+   228→      x: number
+   229→      y: number
+   230→      label?: string
+   231→    }
+   232→    
+   233→    const positions: Map<string, NodePos> = new Map()
+   234→    let leafIndex = 0
+   235→    const leafSpacing = Math.min(60, (width - 100) / (genotypeNames.length || 1))
+   236→    const startX = 50
+   237→    
+   238→    function calculatePositions(node: DendrogramNode, depth: number): void {
+   239→      if (!node.left || !node.right) {
+   240→        // Leaf node
+   241→        const x = startX + leafIndex * leafSpacing
+   242→        const y = height - 50
+   243→        positions.set(node.id, { x, y, label: node.labels?.[0] || '' })
+   244→        leafIndex++
+   245→        return
+   246→      }
+   247→      
+   248→      // Recursively position children
+   249→      calculatePositions(node.left!, depth + 1)
+   250→      calculatePositions(node.right!, depth + 1)
+   251→      
+   252→      const leftPos = positions.get(node.left!.id)!
+   253→      const rightPos = positions.get(node.right!.id)!
+   254→      
+   255→      // Scale distance for visualization
+   256→      const maxDist = getMaxDistance(dendrogramData)
+   257→      const scaledDepth = (node.distance / maxDist) * (height - 120)
+   258→      
+   259→      positions.set(node.id, {
+   260→        x: (leftPos.x + rightPos.x) / 2,
+   261→        y: 30 + scaledDepth
+   262→      })
+   263→    }
+   264→    
+   265→    function getMaxDistance(node: DendrogramNode): number {
+   266→      if (!node.left || !node.right) return 0
+   267→      return Math.max(node.distance, getMaxDistance(node.left!), getMaxDistance(node.right!))
+   268→    }
+   269→    
+   270→    calculatePositions(dendrogramData, 0)
+   271→    
+   272→    // Cluster colors
+   273→    const clusterColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+   274→    
+   275→    function getClusterColor(labelIdx: number): string {
+   276→      if (!result) return '#94a3b8'
+   277→      for (let i = 0; i < result.clusterGroups.length; i++) {
+   278→        if (result.clusterGroups[i].includes(labelIdx)) {
+   279→          return clusterColors[i % clusterColors.length]
+   280→        }
+   281→      }
+   282→      return '#94a3b8'
+   283→    }
+   284→    
+   285→    // Render nodes recursively
+   286→    function renderNode(node: DendrogramNode): React.ReactNode {
+   287→      const pos = positions.get(node.id)
+   288→      if (!pos) return null
+   289→      
+   290→      if (!node.left || !node.right) {
+   291→        // Leaf node
+   292→        const labelIdx = parseInt(pos.label?.replace('G', '') || '0') - 1
+   293→        const color = getClusterColor(isNaN(labelIdx) ? 0 : labelIdx)
+   294→        
+   295→        return (
+   296→          <g key={node.id}>
+   297→            <circle cx={pos.x} cy={pos.y} r="6" fill={color} stroke="white" strokeWidth="2" />
+   298→            <text 
+   299→              x={pos.x} 
+   300→              y={pos.y + 25} 
+   301→              textAnchor="middle" 
+   302→              fontSize="11" 
+   303→              fill="#374151"
+   304→              transform={`rotate(-35, ${pos.x}, ${pos.y + 25})`}
+   305→            >
+   306→              {pos.label}
+   307→            </text>
+   308→          </g>
+   309→        )
+   310→      }
+   311→      
+   312→      const leftPos = positions.get(node.left!.id)!
+   313→      const rightPos = positions.get(node.right!.id)!
+   314→      
+   315→      return (
+   316→        <g key={node.id}>
+   317→          {/* Lines to children */}
+   318→          <line x1={pos.x} y1={pos.y} x2={leftPos.x} y2={leftPos.y} stroke="#6b7280" strokeWidth="1.5" />
+   319→          <line x1={pos.x} y1={pos.y} x2={rightPos.x} y2={rightPos.y} stroke="#6b7280" strokeWidth="1.5" />
+   320→          
+   321→          {/* Horizontal connector */}
+   322→          <line x1={leftPos.x} y1={pos.y} x2={rightPos.x} y2={pos.y} stroke="#6b7280" strokeWidth="1.5" />
+   323→          
+   324→          {/* Junction point */}
+   325→          <circle cx={pos.x} cy={pos.y} r="3" fill="#374151" />
+   326→          
+   327→          {/* Render children */}
+   328→          {renderNode(node.left!)}
+   329→          {renderNode(node.right!)}
+   330→          
+   331→          {/* Cut line indicator */}
+   332→          {nClusters > 1 && (
+   333→            <line 
+   334→              x1={startX - 10} 
+   335→              y1={pos.y} 
+   336→              x2={startX + (genotypeNames.length - 1) * leafSpacing + 10} 
+   337→              y2={pos.y} 
+   338→              stroke="#ef4444" 
+   339→              strokeWidth="1" 
+   340→              strokeDasharray="4,2"
+   341→              opacity="0.5"
+   342→            />
+   343→          )}
+   344→        </g>
+   345→      )
+   346→    }
+   347→    
+   348→    return (
+   349→      <div className="overflow-x-auto">
+   350→        <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-lg border">
+   351→          <defs>
+   352→            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+   353→              <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.15"/>
+   354→            </filter>
+   355→          </defs>
+   356→          
+   357→          {/* Title */}
+   358→          <text x={width/2} y={20} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#374151">
+   359→            Hierarchical Clustering Dendrogram ({linkageMethod.charAt(0).toUpperCase() + linkageMethod.slice(1)} Linkage)
+   360→          </text>
+   361→          
+   362→          {/* Render tree */}
+   363→          {renderNode(dendrogramData)}
+   364→          
+   365→          {/* Legend */}
+   366→          <g transform="translate(width - 150, 30)">
+   367→            <rect x="0" y="0" width="140" height={result.clusterGroups.length * 22 + 25} rx="5" fill="#f9fafb" stroke="#e5e7eb" />
+   368→            <text x="70" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#374151">Clusters</text>
+   369→            {result.clusterGroups.slice(0, Math.min(result.clusterGroups.length, 6)).map((group, i) => (
+   370→              <g key={i}>
+   371→                <circle cx="15" cy={28 + i * 20} r="5" fill={clusterColors[i]} />
+   372→                <text x="28" y={32} fontSize="10" fill="#374151">Cluster {i + 1} (n={group.length})</text>
+   373→              </g>
+   374→            ))}
+   375→          </g>
+   376→        </svg>
+   377→      </div>
+   378→    )
+   379→  }
+   380→
+   381→  // Render PCA biplot
+   382→  const renderPCABiplot = (): React.ReactNode => {
+   383→    if (!result) return null
+   384→    
+   385→    const { pcaScores, pcaLoadings, varianceExplained } = result
+   386→    
+   387→    if (!pcaScores.length) return null
+   388→    
+   389→    const width = 500
+   390→    const height = 400
+   391→    const padding = 60
+   392→    
+   393→    // Find bounds
+   394→    const pc1Scores = pcaScores.map(s => s[0])
+   395→    const pc2Scores = pcaScores.map(s => s[1])
+   396→    const minX = Math.min(...pc1Scores) * 1.1
+   397→    const maxX = Math.max(...pc1Scores) * 1.1
+   398→    const minY = Math.min(...pc2Scores) * 1.1
+   399→    const maxY = Math.max(...pc2Scores) * 1.1
+   400→    
+   401→    const scaleX = (x: number) => padding + ((x - minX) / (maxX - minX)) * (width - 2 * padding)
+   402→    const scaleY = (y: number) => height - padding - ((y - minY) / (maxY - minY)) * (height - 2 * padding)
+   403→    
+   404→    // Cluster colors
+   405→    const clusterColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+   406→    
+   407→    function getClusterColor(idx: number): string {
+   408→      if (!result) return '#94a3b8'
+   409→      for (let i = 0; i < result.clusterGroups.length; i++) {
+   410→        if (result.clusterGroups[i].includes(idx)) {
+   411→          return clusterColors[i % clusterColors.length]
+   412→        }
+   413→      }
+   414→      return '#94a3b8'
+   415→    }
+   416→    
+   417→    return (
+   418→      <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-lg border">
+   419→        {/* Grid */}
+   420→        {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => (
+   421→          <g key={i}>
+   422→            <line x1={padding} y1={padding + frac * (height - 2 * padding)} x2={width - padding} y2={padding + frac * (height - 2 * padding)} stroke="#e5e7eb" strokeWidth="0.5" />
+   423→            <line x1={padding + frac * (width - 2 * padding)} y1={padding} x2={padding + frac * (width - 2 * padding)} y2={height - padding} stroke="#e5e7eb" strokeWidth="0.5" />
+   424→          </g>
+   425→        ))}
+   426→        
+   427→        {/* Axes */}
+   428→        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#374151" strokeWidth="1.5" />
+   429→        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#374151" strokeWidth="1.5" />
+   430→        
+   431→        {/* Axis labels */}
+   432→        <text x={width / 2} y={height - 12} textAnchor="middle" fontSize="12" fill="#374151" fontWeight="medium">
+   433→          PC1 ({varianceExplained[0]?.toFixed(1)}%)
+   434→        </text>
+   435→        <text x={16} y={height / 2} textAnchor="middle" fontSize="12" fill="#374151" fontWeight="medium" transform={`rotate(-90, 16, ${height / 2})`}>
+   436→          PC2 ({varianceExplained[1]?.toFixed(1)}%)
+   437→        </text>
+   438→        
+   439→        {/* Origin lines */}
+   440→        <line x1={scaleX(0)} y1={padding} x2={scaleX(0)} y2={height - padding} stroke="#d1d5db" strokeWidth="1" strokeDasharray="4,4" />
+   441→        <line x1={padding} y1={scaleY(0)} x2={width - padding} y2={scaleY(0)} stroke="#d1d5db" strokeWidth="1" strokeDasharray="4,4" />
+   442→        
+   443→        {/* Data points */}
+   444→        {pcaScores.map((score, i) => (
+   445→          <g key={i}>
+   446→            <circle
+   447→              cx={scaleX(score[0])}
+   448→              cy={scaleY(score[1])}
+   449→              r="7"
+   450→              fill={getClusterColor(i)}
+   451→              stroke="white"
+   452→              strokeWidth="2"
+   453→              opacity="0.85"
+   454→            />
+   455→            <text
+   456→              x={scaleX(score[0]) + 10}
+   457→              y={scaleY(score[1]) - 5}
+   458→              fontSize="10"
+   459→              fill="#374151"
+   460→            >
+   461→              {genotypeNames[i]}
+   462→            </text>
+   463→          </g>
+   464→        ))}
+   465→        
+   466→        {/* Loading vectors (if available) */}
+   467→        {pcaLoadings && pcaLoadings[0] && (
+   468→          <>
+   469→            {pcaLoadings[0].map((load, i) => {
+   470→              const scale = Math.max(maxX - minX, maxY - minY) * 0.4
+   471→              const endX = load * scale
+   472→              const endY = pcaLoadings[1][i] * scale
+   473→              
+   474→              return (
+   475→                <g key={`vec-${i}`}>
+   476→                  <line
+   477→                    x1={scaleX(0)}
+   478→                    y1={scaleY(0)}
+   479→                    x2={scaleX(endX)}
+   480→                    y2={scaleY(endY)}
+   481→                    stroke="#C1121F"
+   482→                    strokeWidth="2"
+   483→                    markerEnd="url(#arrowRed)"
+   484→                  />
+   485→                  <text
+   486→                    x={scaleX(endX) + 5}
+   487→                    y={scaleY(endY) - 5}
+   488→                    fontSize="10"
+   489→                    fill="#C1121F"
+   490→                    fontWeight="bold"
+   491→                  >
+   492→                    {traitNames[i] || `T${i + 1}`}
+   493→                  </text>
+   494→                </g>
+   495→              )
+   496→            })}
+   497→            
+   498→            <defs>
+   499→              <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+   500→                <path d="M0,0 L0,6 L8,3 z" fill="#C1121F" />
+   501→              </marker>
+   502→            </defs>
+   503→          </>
+   504→        )}
+   505→      </svg>
+   506→    )
+   507→  }
+   508→
+   509→  return (
+   510→    <div className={`space-y-6 ${className || ''}`}>
+   511→      {/* Input Section */}
+   512→      <Card>
+   513→        <CardHeader>
+   514→          <CardTitle className="flex items-center gap-2">
+   515→            <Users className="h-5 w-5 text-primary" />
+   516→            Diversity Analysis
+   517→          </CardTitle>
+   518→          <CardDescription>
+   519→            Analyze genetic diversity using distance metrics, clustering, and PCA
+   520→          </CardDescription>
+   521→        </CardHeader>
+   522→        <CardContent>
+   523→          <Tabs defaultValue="paste" className="w-full">
+   524→            <TabsList className="grid w-full grid-cols-2">
+   525→              <TabsTrigger value="paste" className="gap-2">
+   526→                <FileText className="h-4 w-4" />
+   527→                Paste Data
+   528→              </TabsTrigger>
+   529→              <TabsTrigger value="upload" className="gap-2">
+   530→                <Upload className="h-4 w-4" />
+   531→                Upload CSV
+   532→              </TabsTrigger>
+   533→            </TabsList>
+   534→
+   535→            <TabsContent value="paste" className="space-y-4 mt-4">
+   536→              <div>
+   537→                <Label htmlFor="data-input">Enter your data (CSV format)</Label>
+   538→                <Textarea
+   539→                  id="data-input"
+   540→                  placeholder={`Genotype,Trait1,Trait2,Trait3\nG1,45,120,8.5\nG2,52,135,7.8\n...`}
+   541→                  value={rawData}
+   542→                  onChange={(e) => setRawData(e.target.value)}
+   543→                  className="mt-2 font-mono text-sm min-h-[120px]"
+   544→                />
+   545→              </div>
+   546→
+   547→              <Button onClick={loadSampleData} variant="outline" size="sm">
+   548→                Load Sample Data
+   549→              </Button>
+   550→            </TabsContent>
+   551→
+   552→            <TabsContent value="upload" className="space-y-4 mt-4">
+   553→              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+   554→                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+   555→                <Input type="file" accept=".csv,.txt" onChange={handleFileUpload} className="max-w-xs mx-auto" />
+   556→              </div>
+   557→            </TabsContent>
+   558→          </Tabs>
+   559→
+   560→          {/* Analysis Options */}
+   561→          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t">
+   562→            <div>
+   563→              <Label>Distance Method</Label>
+   564→              <Select value={distanceMethod} onValueChange={(v) => setDistanceMethod(v as DistanceMethod)}>
+   565→                <SelectTrigger className="mt-2">
+   566→                  <SelectValue />
+   567→                </SelectTrigger>
+   568→                <SelectContent>
+   569→                  <SelectItem value="euclidean">Euclidean Distance</SelectItem>
+   570→                  <SelectItem value="manhattan">Manhattan Distance</SelectItem>
+   571→                </SelectContent>
+   572→              </Select>
+   573→            </div>
+   574→            
+   575→            <div>
+   576→              <Label>Linkage Method</Label>
+   577→              <Select value={linkageMethod} onValueChange={(v) => setLinkageMethod(v as LinkageMethod)}>
+   578→                <SelectTrigger className="mt-2">
+   579→                  <SelectValue />
+   580→                </SelectTrigger>
+   581→                <SelectContent>
+   582→                  <SelectItem value="average">UPGMA (Average)</SelectItem>
+   583→                  <SelectItem value="complete">Complete Linkage</SelectItem>
+   584→                  <SelectItem value="single">Single Linkage</SelectItem>
+   585→                </SelectContent>
+   586→              </Select>
+   587→            </div>
+   588→            
+   589→            <div>
+   590→              <Label htmlFor="n-clusters">Number of Clusters</Label>
+   591→              <Input
+   592→                id="n-clusters"
+   593→                type="number"
+   594→                min="2"
+   595→                max="10"
+   596→                value={nClusters}
+   597→                onChange={(e) => setNClusters(parseInt(e.target.value) || 3)}
+   598→                className="mt-2"
+   599→              />
+   600→            </div>
+   601→          </div>
+   602→
+   603→          <div className="mt-6 flex justify-end">
+   604→            <Button onClick={handleAnalyze} disabled={!rawData.trim()} className="gap-2">
+   605→              <Network className="h-4 w-4" />
+   606→              Run Diversity Analysis
+   607→            </Button>
+   608→          </div>
+   609→
+   610→          {error && (
+   611→            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+   612→              className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
+   613→              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+   614→              <span className="text-sm text-destructive">{error}</span>
+   615→            </motion.div>
+   616→          )}
+   617→        </CardContent>
+   618→      </Card>
+   619→
+   620→      {/* Results Section */}
+   621→      {result && (
+   622→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+   623→          {/* Summary Cards */}
+   624→          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+   625→            <Card className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900">
+   626→              <CardContent className="pt-4">
+   627→                <p className="text-xs text-teal-600 dark:text-teal-400">Genotypes Analyzed</p>
+   628→                <p className="text-2xl font-bold text-teal-900 dark:text-teal-100">{genotypeNames.length}</p>
+   629→              </CardContent>
+   630→            </Card>
+   631→            
+   632→            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+   633→              <CardContent className="pt-4">
+   634→                <p className="text-xs text-blue-600 dark:text-blue-400">Clusters Formed</p>
+   635→                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{result.clusterGroups.length}</p>
+   636→              </CardContent>
+   637→            </Card>
+   638→            
+   639→            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+   640→              <CardContent className="pt-4">
+   641→                <p className="text-xs text-green-600 dark:text-green-400">PC1 Variance</p>
+   642→                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{result.varianceExplained[0]?.toFixed(1)}%</p>
+   643→              </CardContent>
+   644→            </Card>
+   645→            
+   646→            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+   647→              <CardContent className="pt-4">
+   648→                <p className="text-xs text-purple-600 dark:text-purple-400">PC2 Variance</p>
+   649→                <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{result.varianceExplained[1]?.toFixed(1)}%</p>
+   650→              </CardContent>
+   651→            </Card>
+   652→          </div>
+   653→
+   654→          {/* Dendrogram */}
+   655→          <Card>
+   656→            <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+   657→              <div>
+   658→                <CardTitle className="text-lg flex items-center gap-2">
+   659→                  <Network className="h-5 w-5" />
+   660→                  Hierarchical Clustering Dendrogram
+   661→                </CardTitle>
+   662→                <CardDescription>
+   663→                  Visual representation of genetic relationships among genotypes
+   664→                </CardDescription>
+   665→              </div>
+   666→              <div className="flex items-center gap-2">
+   667→                <Button variant="outline" size="sm" onClick={() => setDendrogramZoom(Math.max(0.5, dendrogramZoom - 0.2))}>
+   668→                  <ZoomOut className="h-4 w-4" />
+   669→                </Button>
+   670→                <Button variant="outline" size="sm" onClick={() => setDendrogramZoom(Math.min(2, dendrogramZoom + 0.2))}>
+   671→                  <ZoomIn className="h-4 w-4" />
+   672→                </Button>
+   673→                <Button onClick={exportResults} variant="outline" size="sm" className="gap-2">
+   674→                  <Download className="h-4 w-4" />
+   675→                  Export
+   676→                </Button>
+   677→              </div>
+   678→            </CardHeader>
+   679→            <CardContent>
+   680→              {renderDendrogram()}
+   681→              
+   682→              {/* Cluster assignments */}
+   683→              <div className="mt-6 pt-6 border-t">
+   684→                <h4 className="font-medium mb-3">Cluster Memberships</h4>
+   685→                <div className="space-y-2">
+   686→                  {result.clusterGroups.map((group, i) => (
+   687→                    <div key={i} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
+   688→                      <Badge variant="outline" className="font-mono">
+   689→                        Cluster {i + 1}
+   690→                      </Badge>
+   691→                      <div className="flex flex-wrap gap-1">
+   692→                        {group.map(idx => (
+   693→                          <Badge key={idx} variant="secondary" className="text-xs">
+   694→                            {genotypeNames[idx]}
+   695→                          </Badge>
+   696→                        ))}
+   697→                      </div>
+   698→                      <span className="text-xs text-muted-foreground ml-auto">
+   699→                        n = {group.length}
+   700→                      </span>
+   701→                    </div>
+   702→                  ))}
+   703→                </div>
+   704→              </div>
+   705→            </CardContent>
+   706→          </Card>
+   707→
+   708→          {/* PCA Biplot */}
+   709→          <Card>
+   710→            <CardHeader>
+   711→              <CardTitle className="text-lg">PCA Biplot</CardTitle>
+   712→              <CardDescription>
+   713→                Principal Component Analysis showing genetic relationships in reduced dimensions
+   714→              </CardDescription>
+   715→            </CardHeader>
+   716→            <CardContent>
+   717→              {renderPCABiplot()}
+   718→              
+   719→              {/* Variance explained table */}
+   720→              <div className="mt-6 overflow-x-auto">
+   721→                <table className="w-full text-sm">
+   722→                  <thead>
+   723→                    <tr className="border-b bg-muted/50">
+   724→                      <th className="text-left py-2 px-3 font-medium">Principal Component</th>
+   725→                      <th className="text-right py-2 px-3 font-medium">Variance Explained (%)</th>
+   726→                      <th className="text-right py-2 px-3 font-medium">Cumulative (%)</th>
+   727→                    </tr>
+   728→                  </thead>
+   729→                  <tbody>
+   730→                    {result.varianceExplained.slice(0, 5).map((v, i) => {
+   731→                      const cumVar = result.varianceExplained.slice(0, i + 1).reduce((a, b) => a + b, 0)
+   732→                      return (
+   733→                        <tr key={i} className="border-b hover:bg-muted/30">
+   734→                          <td className="py-2 px-3 font-medium">PC{i + 1}</td>
+   735→                          <td className="py-2 px-3 text-right font-mono">{v.toFixed(2)}</td>
+   736→                          <td className="py-2 px-3 text-right font-mono">{cumVar.toFixed(2)}</td>
+   737→                        </tr>
+   738→                      )
+   739→                    })}
+   740→                  </tbody>
+   741→                </table>
+   742→              </div>
+   743→            </CardContent>
+   744→          </Card>
+   745→        </motion.div>
+   746→      )}
+   747→
+   748→      {/* Loading State */}
+   749→      {isLoading && (
+   750→        <Card>
+   751→          <CardContent className="py-12">
+   752→            <div className="flex flex-col items-center gap-4">
+   753→              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+   754→              <p className="text-sm text-muted-foreground">Running diversity analysis...</p>
+   755→            </div>
+   756→          </CardContent>
+   757→        </Card>
+   758→      )}
+   759→    </div>
+   760→  )
+   761→}
+   762→

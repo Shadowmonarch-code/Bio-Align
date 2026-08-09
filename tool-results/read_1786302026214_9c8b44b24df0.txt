@@ -1,0 +1,755 @@
+     1→"use client"
+     2→
+     3→import * as React from "react"
+     4→import { motion, AnimatePresence } from "framer-motion"
+     5→import { useTheme } from "next-themes"
+     6→import { signOut } from "next-auth/react"
+     7→import { useRouter } from "next/navigation"
+     8→import { useUser } from "@/hooks/use-user"
+     9→import {
+    10→  Search,
+    11→  Bell,
+    12→  Sun,
+    13→  Moon,
+    14→  Menu,
+    15→  Command,
+    16→  LogOut,
+    17→  User,
+    18→  Settings,
+    19→  HelpCircle,
+    20→  ChevronRight,
+    21→} from "lucide-react"
+    22→
+    23→import { cn } from "@/lib/utils"
+    24→import { Button } from "@/components/ui/button"
+    25→import { Input } from "@/components/ui/input"
+    26→import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+    27→import { Badge } from "@/components/ui/badge"
+    28→import { ScrollArea } from "@/components/ui/scroll-area"
+    29→import { Separator } from "@/components/ui/separator"
+    30→import {
+    31→  Tooltip,
+    32→  TooltipContent,
+    33→  TooltipProvider,
+    34→  TooltipTrigger,
+    35→} from "@/components/ui/tooltip"
+    36→import {
+    37→  DropdownMenu,
+    38→  DropdownMenuContent,
+    39→  DropdownMenuItem,
+    40→  DropdownMenuLabel,
+    41→  DropdownMenuSeparator,
+    42→  DropdownMenuTrigger,
+    43→} from "@/components/ui/dropdown-menu"
+    44→import {
+    45→  Breadcrumb,
+    46→  BreadcrumbItem,
+    47→  BreadcrumbLink,
+    48→  BreadcrumbList,
+    49→  BreadcrumbPage,
+    50→  BreadcrumbSeparator,
+    51→} from "@/components/ui/breadcrumb"
+    52→
+    53→import {
+    54→  DashboardSidebar,
+    55→  MobileSidebar,
+    56→  useSidebarState,
+    57→} from "./sidebar"
+    58→
+    59→// Types
+    60→interface DashboardLayoutProps {
+    61→  children: React.ReactNode
+    62→  title?: string
+    63→  subtitle?: string
+    64→  actions?: React.ReactNode
+    65→  breadcrumbs?: Array<{ label: string; href?: string; onClick?: () => void }>
+    66→  onSidebarNavigate?: (view: string, toolId?: string) => void
+    67→}
+    68→
+    69→// Tools data for search
+    70→const searchableTools = [
+    71→  { id: 'blast', name: 'BLAST Search', category: 'Sequence Analysis', icon: '🔍', href: '/dashboard/tools/sequence' },
+    72→  { id: 'align', name: 'Multiple Sequence Alignment', category: 'Sequence Analysis', icon: '🧬', href: '/dashboard/tools/sequence' },
+    73→  { id: 'orf', name: 'ORF Finder', category: 'Sequence Analysis', icon: '🔎', href: '/dashboard/tools/sequence' },
+    74→  { id: 'translate', name: 'Translate Sequence', category: 'Sequence Analysis', icon: '🔄', href: '/dashboard/tools/sequence' },
+    75→  { id: 'gc', name: 'GC Content Calculator', category: 'Sequence Analysis', icon: '📈', href: '/dashboard/tools/sequence' },
+    76→  { id: 'primer', name: 'Primer Design', category: 'Primer Design', icon: '🧪', href: '/dashboard/tools/primer' },
+    77→  { id: 'protein', name: 'Protein Analysis', category: 'Protein Analysis', icon: '🔬', href: '/dashboard/tools/protein' },
+    78→  { id: 'genomics', name: 'Variant Analysis', category: 'Genomics', icon: '🧬', href: '/dashboard/tools/genomics' },
+    79→  { id: 'rnaseq', name: 'RNA-seq Analysis', category: 'Transcriptomics', icon: '🧪', href: '/dashboard/tools/transcriptomics' },
+    80→  { id: 'phylo', name: 'Phylogenetic Tree', category: 'Phylogenetics', icon: '🌳', href: '/dashboard/tools/phylogenetics' },
+    81→  { id: 'docking', name: 'Molecular Docking', category: 'Molecular Docking', icon: '⚛️', href: '/dashboard/tools/docking' },
+    82→  { id: 'crispr', name: 'CRISPR Design', category: 'CRISPR Tools', icon: '✂️', href: '/dashboard/tools/crispr' },
+    83→]
+    84→
+    85→const databaseLinks = [
+    86→  { name: 'NCBI GenBank', url: 'https://www.ncbi.nlm.nih.gov/' },
+    87→  { name: 'UniProt', url: 'https://www.uniprot.org/' },
+    88→  { name: 'PDB', url: 'https://www.rcsb.org/' },
+    89→  { name: 'Ensembl', url: 'https://ensembl.org/' },
+    90→  { name: 'KEGG', url: 'https://www.genome.jp/kegg/' },
+    91→  { name: 'PubMed', url: 'https://pubmed.ncbi.nlm.nih.gov/' },
+    92→]
+    93→
+    94→// Search Dialog Component with full functionality
+    95→interface SearchDialogProps {
+    96→  onNavigate?: (view: string, toolId?: string) => void
+    97→}
+    98→
+    99→function SearchDialog({ onNavigate }: SearchDialogProps) {
+   100→  const [open, setOpen] = React.useState(false)
+   101→  const [searchQuery, setSearchQuery] = React.useState("")
+   102→  const inputRef = React.useRef<HTMLInputElement>(null)
+   103→
+   104→  // Filter tools based on search query
+   105→  const filteredTools = React.useMemo(() => {
+   106→    if (!searchQuery.trim()) return []
+   107→    const query = searchQuery.toLowerCase()
+   108→    return searchableTools.filter(tool => 
+   109→      tool.name.toLowerCase().includes(query) || 
+   110→      tool.category.toLowerCase().includes(query) ||
+   111→      tool.id.toLowerCase().includes(query)
+   112→    )
+   113→  }, [searchQuery])
+   114→
+   115→  // Filter databases based on search query
+   116→  const filteredDatabases = React.useMemo(() => {
+   117→    if (!searchQuery.trim()) return []
+   118→    const query = searchQuery.toLowerCase()
+   119→    return databaseLinks.filter(db => 
+   120→      db.name.toLowerCase().includes(query)
+   121→    )
+   122→  }, [searchQuery])
+   123→
+   124→  React.useEffect(() => {
+   125→    const handleKeyDown = (e: KeyboardEvent) => {
+   126→      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+   127→        e.preventDefault()
+   128→        setOpen((prev) => !prev)
+   129→      }
+   130→      // Close on Escape
+   131→      if (e.key === "Escape" && open) {
+   132→        e.preventDefault()
+   133→        setOpen(false)
+   134→      }
+   135→    }
+   136→
+   137→    document.addEventListener("keydown", handleKeyDown)
+   138→    return () => document.removeEventListener("keydown", handleKeyDown)
+   139→  }, [open])
+   140→
+   141→  // Focus input when dialog opens
+   142→  React.useEffect(() => {
+   143→    if (open && inputRef.current) {
+   144→      setTimeout(() => inputRef.current?.focus(), 100)
+   145→    }
+   146→    // Reset search when closing
+   147→    if (!open) {
+   148→      setSearchQuery("")
+   149→    }
+   150→  }, [open])
+   151→
+   152→  const handleToolClick = (toolId: string) => {
+   153→    setOpen(false)
+   154→    if (onNavigate) {
+   155→      onNavigate('analysis', toolId)
+   156→    }
+   157→  }
+   158→
+   159→  const handleDatabaseClick = (url: string) => {
+   160→    window.open(url, '_blank', 'noopener,noreferrer')
+   161→    setOpen(false)
+   162→  }
+   163→
+   164→  const hasResults = filteredTools.length > 0 || filteredDatabases.length > 0
+   165→  const showInitial = !searchQuery.trim()
+   166→
+   167→  return (
+   168→    <>
+   169→      <Tooltip>
+   170→        <TooltipTrigger asChild>
+   171→          <Button
+   172→            variant="outline"
+   173→            className="relative h-9 w-full max-w-sm justify-start gap-2 text-sm text-muted-foreground sm:pr-12 cursor-pointer"
+   174→            onClick={() => setOpen(true)}
+   175→          >
+   176→            <Search className="size-4" />
+   177→            <span className="hidden lg:inline-flex">Search...</span>
+   178→            <span className="inline-flex lg:hidden">Search</span>
+   179→            <kbd className="pointer-events-none absolute right-1.5 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+   180→              <Command className="size-3" />K
+   181→            </kbd>
+   182→          </Button>
+   183→        </TooltipTrigger>
+   184→        <TooltipContent>
+   185→          <p>Search <kbd className="rounded border bg-muted px-1 text-xs">⌘K</kbd></p>
+   186→        </TooltipContent>
+   187→      </Tooltip>
+   188→
+   189→      {/* Search Overlay */}
+   190→      <AnimatePresence>
+   191→        {open && (
+   192→          <>
+   193→            <motion.div
+   194→              initial={{ opacity: 0 }}
+   195→              animate={{ opacity: 1 }}
+   196→              exit={{ opacity: 0 }}
+   197→              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+   198→              onClick={() => setOpen(false)}
+   199→            />
+   200→            <motion.div
+   201→              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+   202→              animate={{ opacity: 1, scale: 1, y: 0 }}
+   203→              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+   204→              transition={{ duration: 0.2, ease: "easeOut" }}
+   205→              className="fixed left-1/2 top-[15%] z-50 w-full max-w-lg -translate-x-1/2 overflow-hidden rounded-xl border bg-background shadow-2xl"
+   206→              onClick={(e) => e.stopPropagation()}
+   207→            >
+   208→              {/* Search Input Header */}
+   209→              <div className="flex items-center border-b px-4">
+   210→                <Search className="size-4 shrink-0 text-muted-foreground" />
+   211→                <Input
+   212→                  ref={inputRef}
+   213→                  value={searchQuery}
+   214→                  onChange={(e) => setSearchQuery(e.target.value)}
+   215→                  placeholder="Search tools, databases, analysis..."
+   216→                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+   217→                />
+   218→                <kbd className="pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+   219→                  ESC
+   220→                </kbd>
+   221→              </div>
+   222→              
+   223→              {/* Search Results */}
+   224→              <div className="max-h-[400px] overflow-y-auto">
+   225→                {showInitial ? (
+   226→                  /* Initial State - Quick Actions */
+   227→                  <div className="p-4">
+   228→                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
+   229→                      Quick Actions
+   230→                    </p>
+   231→                    <div className="space-y-1">
+   232→                      <button
+   233→                        onClick={() => handleToolClick('blast')}
+   234→                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   235→                      >
+   236→                        <DnaIcon className="size-4 text-biored" />
+   237→                        <span>Run BLAST Search</span>
+   238→                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘S</kbd>
+   239→                      </button>
+   240→                      <button
+   241→                        onClick={() => handleToolClick('primer')}
+   242→                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   243→                      >
+   244→                        <FolderIcon className="size-4 text-blue-500" />
+   245→                        <span>Design Primers</span>
+   246→                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘P</kbd>
+   247→                      </button>
+   248→                      <button
+   249→                        onClick={() => onNavigate?.('workspaces')}
+   250→                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   251→                      >
+   252→                        <FolderIcon className="size-4 text-green-500" />
+   253→                        <span>Open Workspaces</span>
+   254→                        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘W</kbd>
+   255→                      </button>
+   256→                    </div>
+   257→
+   258→                    <div className="mt-6">
+   259→                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
+   260→                        Popular Databases
+   261→                      </p>
+   262→                      <div className="grid grid-cols-2 gap-2">
+   263→                        {databaseLinks.slice(0, 6).map((db) => (
+   264→                          <button
+   265→                            key={db.name}
+   266→                            onClick={() => handleDatabaseClick(db.url)}
+   267→                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   268→                          >
+   269→                            <span className="text-xs">🔗</span>
+   270→                            <span className="truncate">{db.name}</span>
+   271→                          </button>
+   272→                        ))}
+   273→                      </div>
+   274→                    </div>
+   275→                  </div>
+   276→                ) : hasResults ? (
+   277→                  /* Search Results */
+   278→                  <div className="p-2">
+   279→                    {filteredTools.length > 0 && (
+   280→                      <div className="mb-2">
+   281→                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 py-2">
+   282→                          Tools ({filteredTools.length})
+   283→                        </p>
+   284→                        {filteredTools.map((tool) => (
+   285→                          <button
+   286→                            key={tool.id}
+   287→                            onClick={() => handleToolClick(tool.id)}
+   288→                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   289→                          >
+   290→                            <span className="text-base">{tool.icon}</span>
+   291→                            <div className="flex-1 min-w-0">
+   292→                              <p className="font-medium truncate">{tool.name}</p>
+   293→                              <p className="text-xs text-muted-foreground">{tool.category}</p>
+   294→                            </div>
+   295→                            <ChevronRight className="size-4 text-muted-foreground" />
+   296→                          </button>
+   297→                        ))}
+   298→                      </div>
+   299→                    )}
+   300→                    {filteredDatabases.length > 0 && (
+   301→                      <div className={filteredTools.length > 0 ? "mt-2 pt-2 border-t" : ""}>
+   302→                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 px-3 py-2">
+   303→                          Databases ({filteredDatabases.length})
+   304→                        </p>
+   305→                        {filteredDatabases.map((db) => (
+   306→                          <button
+   307→                            key={db.name}
+   308→                            onClick={() => handleDatabaseClick(db.url)}
+   309→                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+   310→                          >
+   311→                            <span>🔗</span>
+   312→                            <span className="flex-1 truncate">{db.name}</span>
+   313→                            <span className="text-xs text-muted-foreground">External →</span>
+   314→                          </button>
+   315→                        ))}
+   316→                      </div>
+   317→                    )}
+   318→                  </div>
+   319→                ) : (
+   320→                  /* No Results */
+   321→                  <div className="p-8 text-center">
+   322→                    <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
+   323→                    <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
+   324→                  </div>
+   325→                )}
+   326→              </div>
+   327→            </motion.div>
+   328→          </>
+   329→        )}
+   330→      </AnimatePresence>
+   331→    </>
+   332→  )
+   333→}
+   334→
+   335→// Simple icons for quick actions
+   336→function DnaIcon({ className }: { className?: string }) {
+   337→  // Using a simple placeholder - in real app would import from lucide-react
+   338→  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6M12 3v18"/></svg>
+   339→}
+   340→
+   341→function FolderIcon({ className }: { className?: string }) {
+   342→  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+   343→}
+   344→
+   345→function BrainIcon({ className }: { className?: string }) {
+   346→  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0 .73 3.53 2.5 2.5 0 0 0 0 2.86 2.5 2.5 0 0 0-.73 3.53 2.5 2.5 0 0 0 1.98 3A2.5 2.5 0 0 0 12 19.5a2.5 2.5 0 0 0 4.96.46 2.5 2.5 0 0 0 1.98-3 2.5 2.5 0 0 0-.73-3.53 2.5 2.5 0 0 0 0-2.86 2.5 2.5 0 0 0 .73-3.53 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 12 4.5z"/><circle cx="12" cy="12" r="3"/></svg>
+   347→}
+   348→
+   349→// Theme Toggle Component
+   350→function ThemeToggle() {
+   351→  const { theme, setTheme } = useTheme()
+   352→  const [mounted, setMounted] = React.useState(false)
+   353→
+   354→  React.useEffect(() => {
+   355→    setMounted(true)
+   356→  }, [])
+   357→
+   358→  if (!mounted) {
+   359→    return (
+   360→      <Button variant="ghost" size="icon" className="size-9">
+   361→        <Sun className="size-4" />
+   362→      </Button>
+   363→    )
+   364→  }
+   365→
+   366→  return (
+   367→    <Tooltip>
+   368→      <TooltipTrigger asChild>
+   369→        <Button
+   370→          variant="ghost"
+   371→          size="icon"
+   372→          className="size-9"
+   373→          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+   374→        >
+   375→          <AnimatePresence mode="wait">
+   376→            {theme === "dark" ? (
+   377→              <motion.div
+   378→                key="moon"
+   379→                initial={{ rotate: -90, opacity: 0 }}
+   380→                animate={{ rotate: 0, opacity: 1 }}
+   381→                exit={{ rotate: 90, opacity: 0 }}
+   382→                transition={{ duration: 0.2 }}
+   383→              >
+   384→                <Moon className="size-4" />
+   385→              </motion.div>
+   386→            ) : (
+   387→              <motion.div
+   388→                key="sun"
+   389→                initial={{ rotate: 90, opacity: 0 }}
+   390→                animate={{ rotate: 0, opacity: 1 }}
+   391→                exit={{ rotate: -90, opacity: 0 }}
+   392→                transition={{ duration: 0.2 }}
+   393→              >
+   394→                <Sun className="size-4" />
+   395→              </motion.div>
+   396→            )}
+   397→          </AnimatePresence>
+   398→          <span className="sr-only">Toggle theme</span>
+   399→        </Button>
+   400→      </TooltipTrigger>
+   401→      <TooltipContent>
+   402→        Switch to {theme === "dark" ? "light" : "dark"} mode
+   403→      </TooltipContent>
+   404→    </Tooltip>
+   405→  )
+   406→}
+   407→
+   408→// Notification Bell Component
+   409→function NotificationBell() {
+   410→  const [notificationCount] = React.useState(3)
+   411→
+   412→  return (
+   413→    <Tooltip>
+   414→      <TooltipTrigger asChild>
+   415→        <Button variant="ghost" size="icon" className="size-9 relative">
+   416→          <Bell className="size-4" />
+   417→          {notificationCount > 0 && (
+   418→            <motion.span
+   419→              initial={{ scale: 0 }}
+   420→              animate={{ scale: 1 }}
+   421→              className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-biored text-[10px] font-bold text-white"
+   422→            >
+   423→              {notificationCount}
+   424→            </motion.span>
+   425→          )}
+   426→          <span className="sr-only">Notifications</span>
+   427→        </Button>
+   428→      </TooltipTrigger>
+   429→      <TooltipContent>Notifications ({notificationCount})</TooltipContent>
+   430→    </Tooltip>
+   431→  )
+   432→}
+   433→
+   434→// User Menu Component with proper authentication
+   435→function UserMenu({ onNavigate }: { onNavigate?: (view: string) => void }) {
+   436→  const router = useRouter()
+   437→  const { 
+   438→    isAuthenticated, 
+   439→    userDisplayName, 
+   440→    userEmail, 
+   441→    userInitials, 
+   442→    userProfile,
+   443→    status 
+   444→  } = useUser()
+   445→  const [isSigningOut, setIsSigningOut] = React.useState(false)
+   446→
+   447→  // Handle sign out with proper cleanup
+   448→  const handleSignOut = async () => {
+   449→    setIsSigningOut(true)
+   450→    try {
+   451→      // Sign out and redirect to home page
+   452→      await signOut({ 
+   453→        redirect: false 
+   454→      })
+   455→      // Clear any local state and redirect
+   456→      router.push('/')
+   457→      router.refresh()
+   458→    } catch (error) {
+   459→      console.error('Sign out error:', error)
+   460→      // Force redirect even on error
+   461→      window.location.href = '/'
+   462→    } finally {
+   463→      setIsSigningOut(false)
+   464→    }
+   465→  }
+   466→
+   467→  // Show loading state while checking auth
+   468→  if (status === 'loading') {
+   469→    return (
+   470→      <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3" disabled>
+   471→        <div className="size-7 rounded-full bg-muted animate-pulse" />
+   472→        <span className="hidden md:inline-flex text-sm">Loading...</span>
+   473→      </Button>
+   474→    )
+   475→  }
+   476→
+   477→  // Not authenticated - show nothing or login prompt
+   478→  if (!isAuthenticated) {
+   479→    return null
+   480→  }
+   481→
+   482→  return (
+   483→    <DropdownMenu>
+   484→      <DropdownMenuTrigger asChild>
+   485→        <Button variant="ghost" className="relative h-9 gap-2 pl-2 pr-3 cursor-pointer">
+   486→          <Avatar className="size-7 ring-2 ring-biored/20">
+   487→            <AvatarImage src={userProfile?.image || undefined} alt={userDisplayName} />
+   488→            <AvatarFallback className="bg-biored/10 text-biored text-xs font-medium">
+   489→              {userInitials}
+   490→            </AvatarFallback>
+   491→          </Avatar>
+   492→          <span className="hidden md:inline-flex text-sm font-medium max-w-[100px] truncate">
+   493→            {userDisplayName.split(' ')[0]}
+   494→          </span>
+   495→          <ChevronRight className="size-3.5 rotate-90 text-muted-foreground hidden md:block" />
+   496→        </Button>
+   497→      </DropdownMenuTrigger>
+   498→      <DropdownMenuContent align="end" className="w-56">
+   499→        <DropdownMenuLabel className="font-normal">
+   500→          <div className="flex flex-col space-y-1">
+   501→            <div className="flex items-center gap-2">
+   502→              <p className="text-sm font-medium leading-none">{userDisplayName}</p>
+   503→              {userProfile?.role === 'admin' && (
+   504→                <Badge variant="default" className="text-[10px] px-1 py-0 bg-biored">Admin</Badge>
+   505→              )}
+   506→            </div>
+   507→            <p className="text-xs leading-none text-muted-foreground truncate max-w-[200px]">
+   508→              {userEmail}
+   509→            </p>
+   510→            {userProfile?.institution && (
+   511→              <p className="text-xs leading-none text-muted-foreground mt-1">
+   512→                🏛️ {userProfile.institution}
+   513→              </p>
+   514→            )}
+   515→          </div>
+   516→        </DropdownMenuLabel>
+   517→        <DropdownMenuSeparator />
+   518→        <DropdownMenuItem onClick={() => onNavigate?.('settings')} className="cursor-pointer">
+   519→          <User className="mr-2 size-4" />
+   520→          Profile
+   521→        </DropdownMenuItem>
+   522→        <DropdownMenuItem onClick={() => onNavigate?.('settings')} className="cursor-pointer">
+   523→          <Settings className="mr-2 size-4" />
+   524→          Settings
+   525→        </DropdownMenuItem>
+   526→        <DropdownMenuItem onClick={() => window.open('https://github.com/toufikmahata/BioAlign/issues', '_blank')} className="cursor-pointer">
+   527→          <HelpCircle className="mr-2 size-4" />
+   528→          Help & Support
+   529→        </DropdownMenuItem>
+   530→        <DropdownMenuSeparator />
+   531→        <DropdownMenuItem 
+   532→          onClick={handleSignOut} 
+   533→          disabled={isSigningOut}
+   534→          className="text-destructive focus:text-destructive cursor-pointer"
+   535→        >
+   536→          {isSigningOut ? (
+   537→            <>
+   538→              <div className="mr-2 size-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
+   539→              Signing out...
+   540→            </>
+   541→          ) : (
+   542→            <>
+   543→              <LogOut className="mr-2 size-4" />
+   544→              Log out
+   545→            </>
+   546→          )}
+   547→        </DropdownMenuItem>
+   548→      </DropdownMenuContent>
+   549→    </DropdownMenu>
+   550→  )
+   551→}
+   552→
+   553→// Header Component with auth awareness
+   554→function Header({
+   555→  onMobileMenuClick,
+   556→  title,
+   557→  subtitle,
+   558→  actions,
+   559→  breadcrumbs = [],
+   560→  onSearchNavigate,
+   561→  onNavigate,
+   562→}: {
+   563→  onMobileMenuClick: () => void
+   564→  title?: string
+   565→  subtitle?: string
+   566→  actions?: React.ReactNode
+   567→  breadcrumbs?: Array<{ label: string; href?: string }>
+   568→  onSearchNavigate?: (view: string, toolId?: string) => void
+   569→  onNavigate?: (view: string) => void
+   570→}) {
+   571→  return (
+   572→    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+   573→      {/* Mobile menu button */}
+   574→      <Button
+   575→        variant="ghost"
+   576→        size="icon"
+   577→        className="md:hidden size-9 cursor-pointer"
+   578→        onClick={onMobileMenuClick}
+   579→      >
+   580→        <Menu className="size-5" />
+   581→        <span className="sr-only">Toggle menu</span>
+   582→      </Button>
+   583→
+   584→      {/* Left section */}
+   585→      <div className="flex flex-1 items-center gap-4">
+   586→        {/* Search */}
+   587→        <SearchDialog onNavigate={onSearchNavigate} />
+   588→
+   589→        {/* Spacer for mobile */}
+   590→        <div className="hidden md:block" />
+   591→      </div>
+   592→
+   593→      {/* Right section - only show user menu when authenticated */}
+   594→      <div className="flex items-center gap-1">
+   595→        <ThemeToggle />
+   596→        <NotificationBell />
+   597→        <Separator orientation="vertical" className="mx-1 h-6 hidden sm:block" />
+   598→        <UserMenu onNavigate={onNavigate} />
+   599→      </div>
+   600→    </header>
+   601→  )
+   602→}
+   603→
+   604→// Main Dashboard Layout Component
+   605→export default function DashboardLayout({
+   606→  children,
+   607→  title,
+   608→  subtitle,
+   609→  actions,
+   610→  breadcrumbs = [],
+   611→  onSidebarNavigate,
+   612→}: DashboardLayoutProps) {
+   613→  const sidebarState = useSidebarState()
+   614→
+   615→  // Default breadcrumbs if not provided
+   616→  const defaultBreadcrumbs = title
+   617→    ? [{ label: "Dashboard", href: "/dashboard" }, { label: title }]
+   618→    : []
+   619→
+   620→  const displayBreadcrumbs = breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcrumbs
+   621→
+   622→  return (
+   623→    <TooltipProvider delayDuration={0}>
+   624→      <div className="min-h-screen bg-background">
+   625→        {/* Desktop Sidebar */}
+   626→        <div className="hidden md:block">
+   627→          <DashboardSidebar
+   628→            collapsed={sidebarState.collapsed}
+   629→            onToggle={sidebarState.toggle}
+   630→            onNavigate={onSidebarNavigate}
+   631→          />
+   632→        </div>
+   633→
+   634→        {/* Mobile Sidebar */}
+   635→        <MobileSidebar
+   636→          open={sidebarState.mobileOpen}
+   637→          onClose={() => sidebarState.setMobileOpen(false)}
+   638→          onNavigate={onSidebarNavigate}
+   639→        />
+   640→
+   641→        {/* Main Content Area */}
+   642→        <motion.main
+   643→          animate={{
+   644→            marginLeft: sidebarState.isMobile ? 0 : sidebarState.collapsed ? 64 : 280,
+   645→          }}
+   646→          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+   647→          className="min-h-screen flex flex-col"
+   648→        >
+   649→          {/* Header */}
+   650→          <Header
+   651→            onMobileMenuClick={sidebarState.toggle}
+   652→            title={title}
+   653→            subtitle={subtitle}
+   654→            onNavigate={onSidebarNavigate}
+   655→            actions={actions}
+   656→            breadcrumbs={displayBreadcrumbs}
+   657→            onSearchNavigate={onSidebarNavigate}
+   658→          />
+   659→
+   660→          {/* Page Title & Breadcrumbs Section */}
+   661→          {(title || displayBreadcrumbs.length > 0) && (
+   662→            <div className="border-b bg-background/50 backdrop-blur-sm px-4 sm:px-6 lg:px-8 py-4">
+   663→              {/* Breadcrumbs */}
+   664→              {displayBreadcrumbs.length > 0 && (
+   665→                <Breadcrumb className="mb-2">
+   666→                  <BreadcrumbList>
+   667→                    {displayBreadcrumbs.map((crumb, index) => (
+   668→                      <React.Fragment key={crumb.label}>
+   669→                        <BreadcrumbItem>
+   670→                          {index === displayBreadcrumbs.length - 1 || (!crumb.href && !('onClick' in crumb)) ? (
+   671→                            <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+   672→                          ) : 'onClick' in crumb && crumb.onClick ? (
+   673→                            <button onClick={(e) => { e.preventDefault(); (crumb.onClick as () => void)(); }} className="flex items-center gap-1.5 hover:text-biored transition-colors">
+   674→                              {crumb.label}
+   675→                            </button>
+   676→                          ) : (
+   677→                            <BreadcrumbLink href={crumb.href || '#'}>{crumb.label}</BreadcrumbLink>
+   678→                          )}
+   679→                        </BreadcrumbItem>
+   680→                        {index < displayBreadcrumbs.length - 1 && (
+   681→                          <BreadcrumbSeparator />
+   682→                        )}
+   683→                      </React.Fragment>
+   684→                    ))}
+   685→                  </BreadcrumbList>
+   686→                </Breadcrumb>
+   687→              )}
+   688→
+   689→              {/* Title & Actions Row */}
+   690→              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+   691→                <div>
+   692→                  {title && (
+   693→                    <motion.h1
+   694→                      initial={{ opacity: 0, y: -10 }}
+   695→                      animate={{ opacity: 1, y: 0 }}
+   696→                      className="text-2xl font-bold tracking-tight"
+   697→                    >
+   698→                      {title}
+   699→                    </motion.h1>
+   700→                  )}
+   701→                  {subtitle && (
+   702→                    <motion.p
+   703→                      initial={{ opacity: 0 }}
+   704→                      animate={{ opacity: 1 }}
+   705→                      transition={{ delay: 0.1 }}
+   706→                      className="text-sm text-muted-foreground mt-1"
+   707→                    >
+   708→                      {subtitle}
+   709→                    </motion.p>
+   710→                  )}
+   711→                </div>
+   712→                {actions && (
+   713→                  <motion.div
+   714→                    initial={{ opacity: 0, x: 20 }}
+   715→                    animate={{ opacity: 1, x: 0 }}
+   716→                    transition={{ delay: 0.15 }}
+   717→                    className="flex items-center gap-2"
+   718→                  >
+   719→                    {actions}
+   720→                  </motion.div>
+   721→                )}
+   722→              </div>
+   723→            </div>
+   724→          )}
+   725→
+   726→          {/* Main Content */}
+   727→          <ScrollArea className="flex-1">
+   728→            <div className="p-4 sm:p-6 lg:p-8">
+   729→              <motion.div
+   730→                initial={{ opacity: 0, y: 20 }}
+   731→                animate={{ opacity: 1, y: 0 }}
+   732→                transition={{ duration: 0.3, ease: "easeOut" }}
+   733→              >
+   734→                {children}
+   735→              </motion.div>
+   736→            </div>
+   737→          </ScrollArea>
+   738→        </motion.main>
+   739→      </div>
+   740→    </TooltipProvider>
+   741→  )
+   742→}
+   743→
+   744→// Export individual components for customization
+   745→export {
+   746→  Header,
+   747→  SearchDialog,
+   748→  ThemeToggle,
+   749→  NotificationBell,
+   750→  UserMenu,
+   751→  DashboardSidebar,
+   752→  MobileSidebar,
+   753→  useSidebarState,
+   754→}
+   755→
