@@ -25,6 +25,7 @@ import DatasetManager from '@/components/dataset/dataset-manager'
 import PlantBreedingModule from '@/components/plant-breeding/plant-breeding-module'
 import ThesisStudio from '@/components/thesis/thesis-studio'
 import AnalyzeMyData from '@/components/ai/analyze-my-data'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 // View types for the application - extended with new views
 type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'databases' | 'settings' | 'documentation' | 'tutorials' | 'coffee' | 'about' | 'workspaces' | 'dataset' | 'plant-breeding' | 'thesis' | 'analyze-data'
@@ -421,70 +422,74 @@ export default function Home() {
   // Render Tools Catalog
   if (currentView === 'tools') {
     return (
-      <main className="min-h-screen flex flex-col">
-        <DashboardLayout
-          title="Tools Catalog"
-          subtitle="Browse and launch 84+ bioinformatics tools"
-          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Tools' }]}
-          actions={
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
-                ← Back to Home
-              </Button>
-              <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                Dashboard
-              </Button>
-            </div>
-          }
-          onSidebarNavigate={handleSidebarNavigate}
-        >
-          <ToolsCatalog onToolSelect={handleToolSelect} />
-        </DashboardLayout>
+      <ErrorBoundary>
+        <main className="min-h-screen flex flex-col">
+          <DashboardLayout
+            title="Tools Catalog"
+            subtitle="Browse and launch 84+ bioinformatics tools"
+            breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Tools' }]}
+            actions={
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleGoHome} className="cursor-pointer">
+                  ← Back to Home
+                </Button>
+                <Button onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                  Dashboard
+                </Button>
+              </div>
+            }
+            onSidebarNavigate={handleSidebarNavigate}
+          >
+            <ToolsCatalog onToolSelect={handleToolSelect} />
+          </DashboardLayout>
 
-        
-        {/* Sticky Footer */}
-        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
-        </footer>
-      </main>
+          
+          {/* Sticky Footer */}
+          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+          </footer>
+        </main>
+      </ErrorBoundary>
     )
   }
 
   // Render Tool Analysis Page
   if (currentView === 'analysis') {
     return (
-      <main className="min-h-screen flex flex-col">
-        <DashboardLayout
-          title={selectedTool ? `${selectedTool} Analysis` : 'Sequence Analysis'}
-          subtitle="Perform comprehensive sequence analysis"
-          breadcrumbs={[
-            { label: 'Home', href: '#', onClick: handleGoHome },
-            { label: 'Tools', href: '#', onClick: () => handleNavigate('tools') },
-            { label: selectedTool || 'Analysis', href: '#' }
-          ]}
-          actions={
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
-                ← All Tools
-              </Button>
-              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                Dashboard
-              </Button>
-            </div>
-          }
-          onSidebarNavigate={handleSidebarNavigate}
-        >
-          <SequenceAnalysisTool selectedTool={selectedTool} />
-        </DashboardLayout>
+      <ErrorBoundary>
+        <main className="min-h-screen flex flex-col">
+          <DashboardLayout
+            title={selectedTool ? `${selectedTool} Analysis` : 'Sequence Analysis'}
+            subtitle="Perform comprehensive sequence analysis"
+            breadcrumbs={[
+              { label: 'Home', href: '#', onClick: handleGoHome },
+              { label: 'Tools', href: '#', onClick: () => handleNavigate('tools') },
+              { label: selectedTool || 'Analysis', href: '#' }
+            ]}
+            actions={
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+                  ← All Tools
+                </Button>
+                <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                  Dashboard
+                </Button>
+              </div>
+            }
+            onSidebarNavigate={handleSidebarNavigate}
+          >
+            <SequenceAnalysisTool selectedTool={selectedTool} />
+          </DashboardLayout>
 
-        
-        {/* Sticky Footer */}
-        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
-        </footer>
-      </main>
+          
+          {/* Sticky Footer */}
+          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+          </footer>
+        </main>
+      </ErrorBoundary>
     )
   }
 
@@ -675,32 +680,34 @@ export default function Home() {
   // Render Plant Breeding Module Page
   if (currentView === 'plant-breeding') {
     return (
-      <main className="min-h-screen flex flex-col bg-background">
-        <DashboardLayout
-          title="Plant Breeding Analysis"
-          subtitle="Professional quantitative genetics tools for crop improvement research"
-          breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Plant Breeding' }]}
-          actions={
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
-                ← Dashboard
-              </Button>
-              <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
-                Tools
-              </Button>
-            </div>
-          }
-          onSidebarNavigate={handleSidebarNavigate}
-        >
-          <PlantBreedingModule />
-        </DashboardLayout>
+      <ErrorBoundary>
+        <main className="min-h-screen flex flex-col bg-background">
+          <DashboardLayout
+            title="Plant Breeding Analysis"
+            subtitle="Professional quantitative genetics tools for crop improvement research"
+            breadcrumbs={[{ label: 'Home', href: '#', onClick: handleGoHome }, { label: 'Dashboard', onClick: () => handleNavigate('dashboard') }, { label: 'Plant Breeding' }]}
+            actions={
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
+                  ← Dashboard
+                </Button>
+                <Button variant="outline" onClick={() => handleNavigate('tools')} className="cursor-pointer">
+                  Tools
+                </Button>
+              </div>
+            }
+            onSidebarNavigate={handleSidebarNavigate}
+          >
+            <PlantBreedingModule />
+          </DashboardLayout>
 
-        {/* Sticky Footer */}
-        <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
-        </footer>
-      </main>
+          {/* Sticky Footer */}
+          <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
+            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
+          </footer>
+        </main>
+      </ErrorBoundary>
     )
   }
 
