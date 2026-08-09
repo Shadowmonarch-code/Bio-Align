@@ -110,6 +110,14 @@ export const toolCategories: ToolCategory[] = [
   },
 ];
 
+// Populate tools for each category
+export function getCategoriesWithTools(): ToolCategory[] {
+  return toolCategories.map(category => ({
+    ...category,
+    tools: allTools.filter(tool => tool.category === category.id)
+  }));
+}
+
 // All Tools Database
 const allTools: BioTool[] = [
   // Sequence Analysis Tools

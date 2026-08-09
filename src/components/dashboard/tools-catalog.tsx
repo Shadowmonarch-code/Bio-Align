@@ -94,6 +94,7 @@ import {
   searchTools,
   recentlyUsedTools,
   popularTools,
+  getCategoriesWithTools,
   type BioTool,
   type ToolCategory,
   type ToolStatus,
@@ -806,11 +807,14 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
 
   // Get filtered categories
   const getFilteredCategories = React.useCallback((): ToolCategory[] => {
+    // Get categories with their tools populated
+    const categoriesWithTools = getCategoriesWithTools()
+    
     if (!searchQuery.trim() && statusFilter === "all") {
-      return toolCategories
+      return categoriesWithTools
     }
 
-    return toolCategories
+    return categoriesWithTools
       .map((cat) => ({
         ...cat,
         tools: cat.tools?.filter((tool) => {
@@ -1027,7 +1031,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
                 {/* Expanded Category Tools */}
                 <AnimatePresence>
                   {Array.from(expandedCategories).map((categoryId) => {
-                    const category = toolCategories.find(
+                    const category = getCategoriesWithTools().find(
                       (c) => c.id === categoryId
                     )
                     if (!category) return null
@@ -1196,7 +1200,7 @@ export default function ToolsCatalog({ onToolSelect }: ToolsCatalogProps) {
           </TabsContent>
 
           {/* Individual Category Tabs (generated dynamically) */}
-          {toolCategories.map((category) => (
+          {getCategoriesWithTools().map((category) => (
             <TabsContent
               key={category.id}
               value={`category-${category.id}`}

@@ -1,0 +1,1344 @@
+     1→"use client";
+     2→
+     3→import React, { useState, useCallback, useMemo } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  Tabs,
+     7→  TabsContent,
+     8→  TabsList,
+     9→  TabsTrigger,
+    10→} from '@/components/ui/tabs';
+    11→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    12→import { Button } from '@/components/ui/button';
+    13→import { Input } from '@/components/ui/input';
+    14→import { Label } from '@/components/ui/label';
+    15→import { Textarea } from '@/components/ui/textarea';
+    16→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    17→import { Switch } from '@/components/ui/switch';
+    18→import { Slider } from '@/components/ui/slider';
+    19→import { Separator } from '@/components/ui/separator';
+    20→import { Badge } from '@/components/ui/badge';
+    21→import { Progress } from '@/components/ui/progress';
+    22→import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+    23→
+    24→// Icons
+    25→import {
+    26→  Dna,
+    27→  Search,
+    28→  Code2,
+    29→  ArrowLeftRight,
+    30→  Languages,
+    31→  Percent,
+    32→  Target,
+    33→  FileSearch,
+    34→  Scissors,
+    35→  ChevronDown,
+    36→  ChevronUp,
+    37→  Upload,
+    38→  FileText,
+    39→  Download,
+    40→  Copy,
+    41→  Check,
+    42→  Loader2,
+    43→  AlertCircle,
+    44→  Info,
+    45→  RotateCcw,
+    46→  Play,
+    47→  Settings2
+    48→} from 'lucide-react';
+    49→
+    50→// Sequence utilities
+    51→import {
+    52→  cleanSequence,
+    53→  detectSequenceType,
+    54→  calculateGCContent,
+    55→  getComposition,
+    56→  getSequenceStats,
+    57→  reverseComplement as rc,
+    58→  translate,
+    59→  findORFs,
+    60→  globalAlignment,
+    61→  localAlignment,
+    62→  mockBLASTSearch,
+    63→  findRestrictionSites,
+    64→  searchMotif,
+    65→  parseFASTA,
+    66→  formatFASTA,
+    67→  validateSequence,
+    68→  EXAMPLE_SEQUENCES,
+    69→  GENETIC_CODES,
+    70→  SUBSTITUTION_MATRICES,
+    71→  RESTRICTION_ENZYMES,
+    72→  type SequenceStats,
+    73→  type ORF,
+    74→  type AlignmentResult,
+    75→  type BLASTResult,
+    76→  type RestrictionSite,
+    77→  type MotifMatch
+    78→} from '@/lib/sequence-utils';
+    79→
+    80→// Tool types
+    81→type ToolId = 
+    82→  | 'pairwise'
+    83→  | 'blast'
+    84→  | 'orf'
+    85→  | 'reverse-complement'
+    86→  | 'translation'
+    87→  | 'gc-content'
+    88→  | 'motif-search'
+    89→  | 'pattern-search'
+    90→  | 'restriction-map';
+    91→
+    92→interface ToolConfig {
+    93→  id: ToolId;
+    94→  name: string;
+    95→  description: string;
+    96→  icon: React.ReactNode;
+    97→}
+    98→
+    99→const TOOLS: ToolConfig[] = [
+   100→  { id: 'pairwise', name: 'Pairwise Alignment', description: 'Global/Local sequence alignment', icon: <ArrowLeftRight className="w-4 h-4" /> },
+   101→  { id: 'blast', name: 'BLAST Search', description: 'Search against databases', icon: <Search className="w-4 h-4" /> },
+   102→  { id: 'orf', name: 'ORF Finder', description: 'Find open reading frames', icon: <Code2 className="w-4 h-4" /> },
+   103→  { id: 'reverse-complement', name: 'Reverse Complement', description: 'Generate reverse complement', icon: <RotateCcw className="w-4 h-4" /> },
+   104→  { id: 'translation', name: 'Translation', description: 'DNA/RNA to Protein', icon: <Languages className="w-4 h-4" /> },
+   105→  { id: 'gc-content', name: 'GC Content', description: 'Calculate GC percentage', icon: <Percent className="w-4 h-4" /> },
+   106→  { id: 'motif-search', name: 'Motif Search', description: 'Find sequence motifs', icon: <Target className="w-4 h-4" /> },
+   107→  { id: 'pattern-search', name: 'Pattern Search', description: 'Search with regex patterns', icon: <FileSearch className="w-4 h-4" /> },
+   108→  { id: 'restriction-map', name: 'Restriction Map', description: 'Map restriction sites', icon: <Scissors className="w-4 h-4" /> },
+   109→];
+   110→
+   111→// Nucleotide colors for highlighting
+   112→const NUCLEOTIDE_COLORS: Record<string, string> = {
+   113→  A: 'text-green-600 dark:text-green-400 font-semibold',
+   114→  T: 'text-red-600 dark:text-red-400 font-semibold',
+   115→  U: 'text-red-600 dark:text-red-400 font-semibold',
+   116→  G: 'text-yellow-600 dark:text-yellow-400 font-semibold',
+   117→  C: 'text-blue-600 dark:text-blue-400 font-semibold',
+   118→};
+   119→
+   120→// Result types
+   121→interface AnalysisResult {
+   122→  type: ToolId;
+   123→  data: unknown;
+   124→  timestamp: Date;
+   125→}
+   126→
+   127→interface SequenceAnalysisToolProps {
+   128→  selectedTool?: string | null;
+   129→}
+   130→
+   131→export default function SequenceAnalysisTool({ selectedTool }: SequenceAnalysisToolProps) {
+   132→  // State
+   133→  // Map tool IDs from sidebar to internal tool IDs
+   134→  const getInitialTool = (): ToolId => {
+   135→    if (!selectedTool) return 'pairwise';
+   136→    const toolMap: Record<string, ToolId> = {
+   137→      'sequence': 'pairwise',
+   138→      'blast': 'blast',
+   139→      'orf': 'orf',
+   140→      'reverse-complement': 'reverse-complement',
+   141→      'translate': 'translation',
+   142→      'gc-content': 'gc-content',
+   143→      'motif-search': 'motif-search',
+   144→      'pattern-search': 'pattern-search',
+   145→      'restriction-map': 'restriction-map',
+   146→    };
+   147→    return toolMap[selectedTool] || 'pairwise';
+   148→  };
+   149→  
+   150→  const [activeTool, setActiveTool] = useState<ToolId>(getInitialTool);
+   151→  const [sequence1, setSequence1] = useState('');
+   152→  const [sequence2, setSequence2] = useState('');
+   153→  const [isAnalyzing, setIsAnalyzing] = useState(false);
+   154→  const [progress, setProgress] = useState(0);
+   155→  const [result, setResult] = useState<AnalysisResult | null>(null);
+   156→  const [showAdvanced, setShowAdvanced] = useState(false);
+   157→  const [copied, setCopied] = useState(false);
+   158→  
+   159→  // Tool-specific options state
+   160→  const [alignmentOptions, setAlignmentOptions] = useState({
+   161→    algorithm: 'global' as 'global' | 'local',
+   162→    matchScore: 1,
+   163→    mismatchPenalty: -1,
+   164→    gapPenalty: -1,
+   165→    matrix: 'BLOSUM62',
+   166→  });
+   167→
+   168→  const [blastOptions, setBlastOptions] = useState({
+   169→    program: 'blastn',
+   170→    database: 'nr',
+   171→    eValue: '0.001',
+   172→    maxTargets: 10,
+   173→    wordSize: 11,
+   174→    lowComplexityFilter: true,
+   175→  });
+   176→
+   177→  const [orfOptions, setOrfOptions] = useState({
+   178→    geneticCode: 1,
+   179→    minLength: 30,
+   180→    showAllFrames: true,
+   181→    startCodons: ['ATG'],
+   182→  });
+   183→
+   184→  const [translationOptions, setTranslationOptions] = useState({
+   185→    frame: 1,
+   186→    geneticCode: 1,
+   187→  });
+   188→
+   189→  const [motifPattern, setMotifPattern] = useState('');
+   190→  const [patternSearchOptions, setPatternSearchOptions] = useState({
+   191→    caseSensitive: false,
+   192→    allowMismatch: false,
+   193→    maxMismatches: 0,
+   194→  });
+   195→
+   196→  // Get sequence stats for display
+   197→  const seq1Stats = useMemo(() => 
+   198→    sequence1 ? getSequenceStats(sequence1) : null, [sequence1]
+   199→  );
+   200→
+   201→  const seq2Stats = useMemo(() => 
+   202→    sequence2 ? getSequenceStats(sequence2) : null, [sequence2]
+   203→  );
+   204→
+   205→  // Load example sequences
+   206→  const loadExampleDNA = useCallback(() => {
+   207→    setSequence1(EXAMPLE_SEQUENCES.dna);
+   208→  }, []);
+   209→
+   210→  const loadExampleProtein = useCallback(() => {
+   211→    setSequence1(EXAMPLE_SEQUENCES.protein);
+   212→  }, []);
+   213→
+   214→  // Handle file upload
+   215→  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+   216→    const file = event.target.files?.[0];
+   217→    if (file) {
+   218→      const reader = new FileReader();
+   219→      reader.onload = (e) => {
+   220→        const content = e.target?.result as string;
+   221→        if (content.startsWith('>')) {
+   222→          const parsed = parseFASTA(content);
+   223→          if (parsed.length > 0) {
+   224→            setSequence1(parsed[0].sequence);
+   225→            if (parsed.length > 1) {
+   226→              setSequence2(parsed[1].sequence);
+   227→            }
+   228→          }
+   229→        } else {
+   230→          setSequence1(content);
+   231→        }
+   232→      };
+   233→      reader.readAsText(file);
+   234→    }
+   235→  }, []);
+   236→
+   237→  // Run analysis based on active tool
+   238→  const runAnalysis = useCallback(async () => {
+   239→    setIsAnalyzing(true);
+   240→    setProgress(0);
+   241→    setResult(null);
+   242→
+   243→    // Simulate progress
+   244→    const progressInterval = setInterval(() => {
+   245→      setProgress(prev => Math.min(prev + Math.random() * 15, 90));
+   246→    }, 200);
+   247→
+   248→    // Simulate processing delay
+   249→    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
+   250→
+   251→    let analysisResult: AnalysisResult;
+   252→
+   253→    try {
+   254→      switch (activeTool) {
+   255→        case 'pairwise': {
+   256→          const alignFn = alignmentOptions.algorithm === 'global' ? globalAlignment : localAlignment;
+   257→          const alignmentResult = alignFn(sequence1, sequence2, {
+   258→            matchScore: alignmentOptions.matchScore,
+   259→            mismatchPenalty: alignmentOptions.mismatchPenalty,
+   260→            gapPenalty: alignmentOptions.gapPenalty,
+   261→          });
+   262→          analysisResult = { type: 'pairwise', data: alignmentResult, timestamp: new Date() };
+   263→          break;
+   264→        }
+   265→
+   266→        case 'blast': {
+   267→          const blastResult = mockBLASTSearch(sequence1, {
+   268→            database: blastOptions.database,
+   269→            maxTargets: blastOptions.maxTargets,
+   270→            program: blastOptions.program,
+   271→          });
+   272→          analysisResult = { type: 'blast', data: blastResult, timestamp: new Date() };
+   273→          break;
+   274→        }
+   275→
+   276→        case 'orf': {
+   277→          const orfs = findORFs(sequence1, {
+   278→            minLength: orfOptions.minLength,
+   279→            geneticCode: orfOptions.geneticCode,
+   280→            allFrames: orfOptions.showAllFrames,
+   281→            startCodons: orfOptions.startCodons,
+   282→          });
+   283→          analysisResult = { type: 'orf', data: orfs, timestamp: new Date() };
+   284→          break;
+   285→        }
+   286→
+   287→        case 'reverse-complement': {
+   288→          const rcResult = rc(sequence1);
+   289→          analysisResult = { type: 'reverse-complement', data: rcResult, timestamp: new Date() };
+   290→          break;
+   291→        }
+   292→
+   293→        case 'translation': {
+   294→          const translationResult = translate(
+   295→            sequence1,
+   296→            translationOptions.frame,
+   297→            translationOptions.geneticCode
+   298→          );
+   299→          analysisResult = { type: 'translation', data: translationResult, timestamp: new Date() };
+   300→          break;
+   301→        }
+   302→
+   303→        case 'gc-content': {
+   304→          const gcResult = getSequenceStats(sequence1);
+   305→          analysisResult = { type: 'gc-content', data: gcResult, timestamp: new Date() };
+   306→          break;
+   307→        }
+   308→
+   309→        case 'motif-search':
+   310→        case 'pattern-search': {
+   311→          const motifResults = searchMotif(sequence1, motifPattern || 'ATG', patternSearchOptions);
+   312→          analysisResult = { type: activeTool, data: motifResults, timestamp: new Date() };
+   313→          break;
+   314→        }
+   315→
+   316→        case 'restriction-map': {
+   317→          const restrictionSites = findRestrictionSites(sequence1);
+   318→          analysisResult = { type: 'restriction-map', data: restrictionSites, timestamp: new Date() };
+   319→          break;
+   320→        }
+   321→
+   322→        default:
+   323→          throw new Error('Unknown tool');
+   324→      }
+   325→
+   326→      clearInterval(progressInterval);
+   327→      setProgress(100);
+   328→      
+   329→      setTimeout(() => {
+   330→        setResult(analysisResult);
+   331→        setIsAnalyzing(false);
+   332→        setProgress(0);
+   333→      }, 300);
+   334→
+   335→    } catch (error) {
+   336→      clearInterval(progressInterval);
+   337→      setIsAnalyzing(false);
+   338→      console.error('Analysis error:', error);
+   339→    }
+   340→  }, [activeTool, sequence1, sequence2, alignmentOptions, blastOptions, orfOptions, translationOptions, motifPattern, patternSearchOptions]);
+   341→
+   342→  // Copy to clipboard
+   343→  const copyToClipboard = useCallback((text: string) => {
+   344→    navigator.clipboard.writeText(text);
+   345→    setCopied(true);
+   346→    setTimeout(() => setCopied(false), 2000);
+   347→  }, []);
+   348→
+   349→  // Download result
+   350→  const downloadResult = useCallback((format: 'json' | 'csv' | 'txt') => {
+   351→    if (!result) return;
+   352→
+   353→    let content = '';
+   354→    let filename = '';
+   355→    let mimeType = '';
+   356→
+   357→    switch (format) {
+   358→      case 'json':
+   359→        content = JSON.stringify(result.data, null, 2);
+   360→        filename = `bioalign-${result.type}-result.json`;
+   361→        mimeType = 'application/json';
+   362→        break;
+   363→      case 'csv':
+   364→        content = convertToCSV(result.data);
+   365→        filename = `bioalign-${result.type}-result.csv`;
+   366→        mimeType = 'text/csv';
+   367→        break;
+   368→      case 'txt':
+   369→        content = formatPlainText(result);
+   370→        filename = `bioalign-${result.type}-result.txt`;
+   371→        mimeType = 'text/plain';
+   372→        break;
+   373→    }
+   374→
+   375→    const blob = new Blob([content], { type: mimeType });
+   376→    const url = URL.createObjectURL(blob);
+   377→    const a = document.createElement('a');
+   378→    a.href = url;
+   379→    a.download = filename;
+   380→    a.click();
+   381→    URL.revokeObjectURL(url);
+   382→  }, [result]);
+   383→
+   384→  // Highlight nucleotides in sequence
+   385→  const highlightSequence = (seq: string): React.ReactNode[] => {
+   386→    return seq.split('').map((char, i) => (
+   387→      <span key={i} className={NUCLEOTIDE_COLORS[char.toUpperCase()] || ''}>
+   388→        {char}
+   389→      </span>
+   390→    ));
+   391→  };
+   392→
+   393→  // Render tool-specific options
+   394→  const renderToolOptions = () => {
+   395→    switch (activeTool) {
+   396→      case 'pairwise':
+   397→        return (
+   398→          <div className="space-y-4">
+   399→            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   400→              <div>
+   401→                <Label htmlFor="algorithm">Algorithm</Label>
+   402→                <Select value={alignmentOptions.algorithm} onValueChange={(v) => 
+   403→                  setAlignmentOptions(prev => ({ ...prev, algorithm: v as 'global' | 'local' }))
+   404→                }>
+   405→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   406→                  <SelectContent>
+   407→                    <SelectItem value="global">Global (Needleman-Wunsch)</SelectItem>
+   408→                    <SelectItem value="local">Local (Smith-Waterman)</SelectItem>
+   409→                  </SelectContent>
+   410→                </Select>
+   411→              </div>
+   412→              <div>
+   413→                <Label htmlFor="matrix">Substitution Matrix</Label>
+   414→                <Select value={alignmentOptions.matrix} onValueChange={(v) =>
+   415→                  setAlignmentOptions(prev => ({ ...prev, matrix: v }))
+   416→                }>
+   417→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   418→                  <SelectContent>
+   419→                    {Object.keys(SUBSTITUTION_MATRICES).map(m => (
+   420→                      <SelectItem key={m} value={m}>{m}</SelectItem>
+   421→                    ))}
+   422→                  </SelectContent>
+   423→                </Select>
+   424→              </div>
+   425→            </div>
+   426→            
+   427→            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+   428→              <CollapsibleTrigger asChild>
+   429→                <Button variant="ghost" size="sm" className="w-full justify-between">
+   430→                  <span className="flex items-center gap-2">
+   431→                    <Settings2 className="w-4 h-4" />
+   432→                    Advanced Scoring Options
+   433→                  </span>
+   434→                  {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+   435→                </Button>
+   436→              </CollapsibleTrigger>
+   437→              <CollapsibleContent className="space-y-4 pt-4">
+   438→                <div className="grid grid-cols-3 gap-4">
+   439→                  <div>
+   440→                    <Label>Match Score</Label>
+   441→                    <Input
+   442→                      type="number"
+   443→                      value={alignmentOptions.matchScore}
+   444→                      onChange={(e) => setAlignmentOptions(prev => ({ ...prev, matchScore: Number(e.target.value) }))}
+   445→                    />
+   446→                  </div>
+   447→                  <div>
+   448→                    <Label>Mismatch Penalty</Label>
+   449→                    <Input
+   450→                      type="number"
+   451→                      value={alignmentOptions.mismatchPenalty}
+   452→                      onChange={(e) => setAlignmentOptions(prev => ({ ...prev, mismatchPenalty: Number(e.target.value) }))}
+   453→                    />
+   454→                  </div>
+   455→                  <div>
+   456→                    <Label>Gap Penalty</Label>
+   457→                    <Input
+   458→                      type="number"
+   459→                      value={alignmentOptions.gapPenalty}
+   460→                      onChange={(e) => setAlignmentOptions(prev => ({ ...prev, gapPenalty: Number(e.target.value) }))}
+   461→                    />
+   462→                  </div>
+   463→                </div>
+   464→              </CollapsibleContent>
+   465→            </Collapsible>
+   466→
+   467→            {/* Second sequence input */}
+   468→            <div>
+   469→              <Label htmlFor="seq2">Second Sequence</Label>
+   470→              <Textarea
+   471→                id="seq2"
+   472→                placeholder="Enter second sequence..."
+   473→                value={sequence2}
+   474→                onChange={(e) => setSequence2(e.target.value)}
+   475→                rows={4}
+   476→                className="font-mono text-sm"
+   477→              />
+   478→              {seq2Stats && (
+   479→                <div className="flex flex-wrap gap-2 mt-2">
+   480→                  <Badge variant="secondary">{seq2Stats.length} bp</Badge>
+   481→                  <Badge variant="secondary">{seq2Stats.type}</Badge>
+   482→                  <Badge variant="secondary">GC: {seq2Stats.gcContent.toFixed(1)}%</Badge>
+   483→                </div>
+   484→              )}
+   485→            </div>
+   486→          </div>
+   487→        );
+   488→
+   489→      case 'blast':
+   490→        return (
+   491→          <div className="space-y-4">
+   492→            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   493→              <div>
+   494→                <Label>Program</Label>
+   495→                <Select value={blastOptions.program} onValueChange={(v) =>
+   496→                  setBlastOptions(prev => ({ ...prev, program: v }))
+   497→                }>
+   498→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   499→                  <SelectContent>
+   500→                    <SelectItem value="blastn">BLASTN (Nucleotide)</SelectItem>
+   501→                    <SelectItem value="blastp">BLASTP (Protein)</SelectItem>
+   502→                    <SelectItem value="blastx">BLASTX (Translated)</SelectItem>
+   503→                    <SelectItem value="tblastn">TBLASTN</SelectItem>
+   504→                    <SelectItem value="tblastx">TBLASTX</SelectItem>
+   505→                  </SelectContent>
+   506→                </Select>
+   507→              </div>
+   508→              <div>
+   509→                <Label>Database</Label>
+   510→                <Select value={blastOptions.database} onValueChange={(v) =>
+   511→                  setBlastOptions(prev => ({ ...prev, database: v }))
+   512→                }>
+   513→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   514→                  <SelectContent>
+   515→                    <SelectItem value="nr">NR (Non-redundant)</SelectItem>
+   516→                    <SelectItem value="nt">NT (Nucleotide)</SelectItem>
+   517→                    <SelectItem value="pdb">PDB</SelectItem>
+   518→                    <SelectItem value="swissprot">SwissProt</SelectItem>
+   519→                    <SelectItem value="refseq">RefSeq</SelectItem>
+   520→                  </SelectContent>
+   521→                </Select>
+   522→              </div>
+   523→            </div>
+   524→            
+   525→            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+   526→              <CollapsibleTrigger asChild>
+   527→                <Button variant="ghost" size="sm" className="w-full justify-between">
+   528→                  <span className="flex items-center gap-2">
+   529→                    <Settings2 className="w-4 h-4" />
+   530→                    Advanced Parameters
+   531→                  </span>
+   532→                  {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+   533→                </Button>
+   534→              </CollapsibleTrigger>
+   535→              <CollapsibleContent className="space-y-4 pt-4">
+   536→                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+   537→                  <div>
+   538→                    <Label>E-value Threshold</Label>
+   539→                    <Input
+   540→                      value={blastOptions.eValue}
+   541→                      onChange={(e) => setBlastOptions(prev => ({ ...prev, eValue: e.target.value }))}
+   542→                    />
+   543→                  </div>
+   544→                  <div>
+   545→                    <Label>Max Targets</Label>
+   546→                    <Input
+   547→                      type="number"
+   548→                      min={1}
+   549→                      max={100}
+   550→                      value={blastOptions.maxTargets}
+   551→                      onChange={(e) => setBlastOptions(prev => ({ ...prev, maxTargets: Number(e.target.value) }))}
+   552→                    />
+   553→                  </div>
+   554→                  <div>
+   555→                    <Label>Word Size</Label>
+   556→                    <Input
+   557→                      type="number"
+   558→                      value={blastOptions.wordSize}
+   559→                      onChange={(e) => setBlastOptions(prev => ({ ...prev, wordSize: Number(e.target.value) }))}
+   560→                    />
+   561→                  </div>
+   562→                </div>
+   563→                <div className="flex items-center space-x-2">
+   564→                  <Switch
+   565→                    checked={blastOptions.lowComplexityFilter}
+   566→                    onCheckedChange={(checked) => setBlastOptions(prev => ({ ...prev, lowComplexityFilter: checked }))}
+   567→                  />
+   568→                  <Label>Low complexity filter</Label>
+   569→                </div>
+   570→              </CollapsibleContent>
+   571→            </Collapsible>
+   572→          </div>
+   573→        );
+   574→
+   575→      case 'orf':
+   576→        return (
+   577→          <div className="space-y-4">
+   578→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+   579→              <div>
+   580→                <Label>Genetic Code</Label>
+   581→                <Select value={String(orfOptions.geneticCode)} onValueChange={(v) =>
+   582→                  setOrfOptions(prev => ({ ...prev, geneticCode: Number(v) }))
+   583→                }>
+   584→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   585→                  <SelectContent>
+   586→                    <SelectItem value="1">Standard (1)</SelectItem>
+   587→                    <SelectItem value="2">Vertebrate Mitochondrial (2)</SelectItem>
+   588→                    <SelectItem value="4">Invertebrate Mitochondrial (4)</SelectItem>
+   589→                    <SelectItem value="11">Bacterial (11)</SelectItem>
+   590→                  </SelectContent>
+   591→                </Select>
+   592→              </div>
+   593→              <div>
+   594→                <Label>Min ORF Length (bp)</Label>
+   595→                <Input
+   596→                  type="number"
+   597→                  min={10}
+   598→                  value={orfOptions.minLength}
+   599→                  onChange={(e) => setOrfOptions(prev => ({ ...prev, minLength: Number(e.target.value) }))}
+   600→                />
+   601→              </div>
+   602→              <div className="flex items-end pb-1">
+   603→                <div className="flex items-center space-x-2">
+   604→                  <Switch
+   605→                    checked={orfOptions.showAllFrames}
+   606→                    onCheckedChange={(checked) => setOrfOptions(prev => ({ ...prev, showAllFrames: checked }))}
+   607→                  />
+   608→                  <Label>Show all 6 frames</Label>
+   609→                </div>
+   610→              </div>
+   611→            </div>
+   612→          </div>
+   613→        );
+   614→
+   615→      case 'translation':
+   616→        return (
+   617→          <div className="space-y-4">
+   618→            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   619→              <div>
+   620→                <Label>Reading Frame</Label>
+   621→                <Select value={String(translationOptions.frame)} onValueChange={(v) =>
+   622→                  setTranslationOptions(prev => ({ ...prev, frame: Number(v) }))
+   623→                }>
+   624→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   625→                  <SelectContent>
+   626→                    <SelectItem value="1">Frame +1</SelectItem>
+   627→                    <SelectItem value="2">Frame +2</SelectItem>
+   628→                    <SelectItem value="3">Frame +3</SelectItem>
+   629→                    <SelectItem value="-1">Frame -1</SelectItem>
+   630→                    <SelectItem value="-2">Frame -2</SelectItem>
+   631→                    <SelectItem value="-3">Frame -3</SelectItem>
+   632→                  </SelectContent>
+   633→                </Select>
+   634→              </div>
+   635→              <div>
+   636→                <Label>Genetic Code</Label>
+   637→                <Select value={String(translationOptions.geneticCode)} onValueChange={(v) =>
+   638→                  setTranslationOptions(prev => ({ ...prev, geneticCode: Number(v) }))
+   639→                }>
+   640→                  <SelectTrigger><SelectValue /></SelectTrigger>
+   641→                  <SelectContent>
+   642→                    <SelectItem value="1">Standard (1)</SelectItem>
+   643→                    <SelectItem value="2">Vertebrate Mitochondrial (2)</SelectItem>
+   644→                  </SelectContent>
+   645→                </Select>
+   646→              </div>
+   647→            </div>
+   648→          </div>
+   649→        );
+   650→
+   651→      case 'motif-search':
+   652→      case 'pattern-search':
+   653→        return (
+   654→          <div className="space-y-4">
+   655→            <div>
+   656→              <Label>Motif / Pattern</Label>
+   657→              <Input
+   658→                placeholder="Enter search pattern (e.g., ATG, GAATTC)"
+   659→                value={motifPattern}
+   660→                onChange={(e) => setMotifPattern(e.target.value)}
+   661→                className="font-mono uppercase"
+   662→              />
+   663→            </div>
+   664→            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+   665→              <CollapsibleTrigger asChild>
+   666→                <Button variant="ghost" size="sm" className="w-full justify-between">
+   667→                  <span className="flex items-center gap-2">
+   668→                    <Settings2 className="w-4 h-4" />
+   669→                    Search Options
+   670→                  </span>
+   671→                  {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+   672→                </Button>
+   673→              </CollapsibleTrigger>
+   674→              <CollapsibleContent className="space-y-4 pt-4">
+   675→                <div className="flex items-center space-x-4">
+   676→                  <div className="flex items-center space-x-2">
+   677→                    <Switch
+   678→                      checked={patternSearchOptions.caseSensitive}
+   679→                      onCheckedChange={(checked) => setPatternSearchOptions(prev => ({ ...prev, caseSensitive: checked }))}
+   680→                    />
+   681→                    <Label>Case sensitive</Label>
+   682→                  </div>
+   683→                  <div className="flex items-center space-x-2">
+   684→                    <Switch
+   685→                      checked={patternSearchOptions.allowMismatch}
+   686→                      onCheckedChange={(checked) => setPatternSearchOptions(prev => ({ ...prev, allowMismatch: checked }))}
+   687→                    />
+   688→                    <Label>Allow mismatches</Label>
+   689→                  </div>
+   690→                </div>
+   691→                {patternSearchOptions.allowMismatch && (
+   692→                  <div>
+   693→                    <Label>Max Mismatches</Label>
+   694→                    <Slider
+   695→                      value={[patternSearchOptions.maxMismatches]}
+   696→                      onValueChange={([v]) => setPatternSearchOptions(prev => ({ ...prev, maxMismatches: v }))}
+   697→                      min={0}
+   698→                      max={5}
+   699→                      step={1}
+   700→                    />
+   701→                  </div>
+   702→                )}
+   703→              </CollapsibleContent>
+   704→            </Collapsible>
+   705→          </div>
+   706→        );
+   707→
+   708→      case 'restriction-map':
+   709→        return (
+   710→          <div className="space-y-4">
+   711→            <p className="text-sm text-muted-foreground">
+   712→              Will search for common restriction enzyme recognition sites in your sequence.
+   713→            </p>
+   714→            <div className="flex flex-wrap gap-2">
+   715→              {RESTRICTION_ENZYMES.map(enzyme => (
+   716→                <Badge key={enzyme.name} variant="outline" className="font-mono text-xs">
+   717→                  {enzyme.name}: {enzyme.recognition}
+   718→                </Badge>
+   719→              ))}
+   720→            </div>
+   721→          </div>
+   722→        );
+   723→
+   724→      default:
+   725→        return null;
+   726→    }
+   727→  };
+   728→
+   729→  // Render results based on tool type
+   730→  const renderResults = () => {
+   731→    if (!result) return null;
+   732→
+   733→    switch (result.type) {
+   734→      case 'pairwise':
+   735→        return <AlignmentView data={result.data as AlignmentResult} highlightSequence={highlightSequence} />;
+   736→      
+   737→      case 'blast':
+   738→        return <BLASTView data={result.data as BLASTResult} highlightSequence={highlightSequence} />;
+   739→      
+   740→      case 'orf':
+   741→        return <ORFView data={result.data as ORF[]} />;
+   742→      
+   743→      case 'reverse-complement':
+   744→        return <TextView label="Reverse Complement" data={result.data as string} highlightSequence={highlightSequence} />;
+   745→      
+   746→      case 'translation':
+   747→        return <TextView label="Translated Protein" data={result.data as string} />;
+   748→      
+   749→      case 'gc-content':
+   750→        return <GCContentView data={result.data as SequenceStats} />;
+   751→      
+   752→      case 'motif-search':
+   753→      case 'pattern-search':
+   754→        return <MotifView data={result.data as MotifMatch[]} />;
+   755→      
+   756→      case 'restriction-map':
+   757→        return <RestrictionMapView data={result.data as RestrictionSite[]} />;
+   758→      
+   759→      default:
+   760→        return <p>No visualization available for this tool.</p>;
+   761→    }
+   762→  };
+   763→
+   764→  return (
+   765→    <div className="w-full max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+   766→      {/* Header */}
+   767→      <motion.div
+   768→        initial={{ opacity: 0, y: -20 }}
+   769→        animate={{ opacity: 1, y: 0 }}
+   770→        className="flex items-center gap-3"
+   771→      >
+   772→        <div className="p-2 rounded-lg bg-[#C1121F]/10">
+   773→          <Dna className="w-6 h-6 text-[#C1121F]" />
+   774→        </div>
+   775→        <div>
+   776→          <h1 className="text-2xl md:text-3xl font-bold">Sequence Analysis</h1>
+   777→          <p className="text-muted-foreground text-sm">Comprehensive bioinformatics tools for sequence analysis</p>
+   778→        </div>
+   779→      </motion.div>
+   780→
+   781→      {/* Tool Selector */}
+   782→      <Card>
+   783→        <CardContent className="pt-6">
+   784→          <Tabs value={activeTool} onValueChange={(v) => { setActiveTool(v as ToolId); setResult(null); }}>
+   785→            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50">
+   786→              {TOOLS.map(tool => (
+   787→                <TabsTrigger
+   788→                  key={tool.id}
+   789→                  value={tool.id}
+   790→                  className="data-[state=active]:bg-[#C1121F] data-[state=active]:text-white text-xs sm:text-sm px-2 py-1.5"
+   791→                >
+   792→                  <span className="hidden sm:inline mr-1">{tool.icon}</span>
+   793→                  <span className="truncate">{tool.name}</span>
+   794→                </TabsTrigger>
+   795→              ))}
+   796→            </TabsList>
+   797→          </Tabs>
+   798→        </CardContent>
+   799→      </Card>
+   800→
+   801→      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+   802→        {/* Input Section */}
+   803→        <motion.div
+   804→          key={`input-${activeTool}`}
+   805→          initial={{ opacity: 0, x: -20 }}
+   806→          animate={{ opacity: 1, x: 0 }}
+   807→          transition={{ duration: 0.3 }}
+   808→          className="lg:col-span-3 space-y-4"
+   809→        >
+   810→          <Card>
+   811→            <CardHeader>
+   812→              <CardTitle className="flex items-center gap-2 text-lg">
+   813→                <FileText className="w-5 h-5 text-[#C1121F]" />
+   814→                Input Sequence{activeTool === 'pairwise' ? 's' : ''}
+   815→              </CardTitle>
+   816→              <CardDescription>
+   817→                {TOOLS.find(t => t.id === activeTool)?.description}
+   818→              </CardDescription>
+   819→            </CardHeader>
+   820→            <CardContent className="space-y-4">
+   821→              {/* Main sequence input */}
+   822→              <div>
+   823→                <div className="flex items-center justify-between mb-2">
+   824→                  <Label htmlFor="seq1">Sequence</Label>
+   825→                  <div className="flex gap-2">
+   826→                    <Button variant="outline" size="sm" onClick={loadExampleDNA}>
+   827→                      DNA Example
+   828→                    </Button>
+   829→                    <Button variant="outline" size="sm" onClick={loadExampleProtein}>
+   830→                      Protein Example
+   831→                    </Button>
+   832→                    <label className="cursor-pointer">
+   833→                      <input
+   834→                        type="file"
+   835→                        accept=".fasta,.fa,.fna,.faa,.txt"
+   836→                        onChange={handleFileUpload}
+   837→                        className="hidden"
+   838→                      />
+   839→                      <Button variant="outline" size="sm" asChild>
+   840→                        <span className="flex items-center gap-1">
+   841→                          <Upload className="w-3 h-3" />
+   842→                          File
+   843→                        </span>
+   844→                      </Button>
+   845→                    </label>
+   846→                  </div>
+   847→                </div>
+   848→                <Textarea
+   849→                  id="seq1"
+   850→                  placeholder="Paste your sequence here (FASTA format supported)..."
+   851→                  value={sequence1}
+   852→                  onChange={(e) => setSequence1(e.target.value)}
+   853→                  rows={8}
+   854→                  className="font-mono text-sm resize-none"
+   855→                />
+   856→                
+   857→                {/* Sequence stats */}
+   858→                {seq1Stats && (
+   859→                  <motion.div
+   860→                    initial={{ opacity: 0, height: 0 }}
+   861→                    animate={{ opacity: 1, height: 'auto' }}
+   862→                    className="flex flex-wrap gap-2 mt-3"
+   863→                  >
+   864→                    <Badge variant="default" className="bg-[#C1121F]">
+   865→                      {seq1Stats.length.toLocaleString()} bp
+   866→                    </Badge>
+   867→                    <Badge variant="secondary">{seq1Stats.type}</Badge>
+   868→                    {seq1Stats.type !== 'Protein' && (
+   869→                      <Badge variant="secondary">GC: {seq1Stats.gcContent.toFixed(1)}%</Badge>
+   870→                    )}
+   871→                    <Badge variant="outline" className="font-mono text-xs">
+   872→                      {Object.entries(seq1Stats.composition).slice(0, 4).map(([k, v]) => `${k}:${v}`).join(' ')}
+   873→                    </Badge>
+   874→                  </motion.div>
+   875→                )}
+   876→
+   877→                {/* Validation errors */}
+   878→                {sequence1 && validateSequence(sequence1).errors.length > 0 && (
+   879→                  <div className="flex items-start gap-2 mt-2 p-2 bg-destructive/10 rounded-md">
+   880→                    <AlertCircle className="w-4 h-4 text-destructive mt-0.5" />
+   881→                    <div className="text-xs text-destructive">
+   882→                      {validateSequence(sequence1).errors.map((err, i) => (
+   883→                        <p key={i}>{err}</p>
+   884→                      ))}
+   885→                    </div>
+   886→                  </div>
+   887→                )}
+   888→              </div>
+   889→
+   890→              <Separator />
+   891→
+   892→              {/* Tool-specific options */}
+   893→              {renderToolOptions()}
+   894→            </CardContent>
+   895→          </Card>
+   896→
+   897→          {/* Run button */}
+   898→          <Button
+   899→            onClick={runAnalysis}
+   900→            disabled={!sequence1.trim() || isAnalyzing || (activeTool === 'pairwise' && !sequence2.trim())}
+   901→            className="w-full bg-[#C1121F] hover:bg-[#8B0A14] text-white h-12 text-lg"
+   902→            size="lg"
+   903→          >
+   904→            {isAnalyzing ? (
+   905→              <>
+   906→                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+   907→                Analyzing...
+   908→              </>
+   909→            ) : (
+   910→              <>
+   911→                <Play className="w-5 h-5 mr-2" />
+   912→                Run Analysis
+   913→              </>
+   914→            )}
+   915→          </Button>
+   916→
+   917→          {/* Progress bar */}
+   918→          {isAnalyzing && (
+   919→            <motion.div
+   920→              initial={{ opacity: 0 }}
+   921→              animate={{ opacity: 1 }}
+   922→            >
+   923→              <Progress value={progress} className="h-2" />
+   924→              <p className="text-xs text-center text-muted-foreground mt-1">
+   925→                Processing... {Math.round(progress)}%
+   926→              </p>
+   927→            </motion.div>
+   928→          )}
+   929→        </motion.div>
+   930→
+   931→        {/* Results Section */}
+   932→        <motion.div
+   933→          key={`results-${activeTool}`}
+   934→          initial={{ opacity: 0, x: 20 }}
+   935→          animate={{ opacity: 1, x: 0 }}
+   936→          transition={{ duration: 0.3, delay: 0.1 }}
+   937→          className="lg:col-span-2"
+   938→        >
+   939→          <Card className="h-full">
+   940→            <CardHeader className="pb-3">
+   941→              <div className="flex items-center justify-between">
+   942→                <CardTitle className="flex items-center gap-2 text-lg">
+   943→                  <Target className="w-5 h-5 text-[#C1121F]" />
+   944→                  Results
+   945→                </CardTitle>
+   946→                {result && (
+   947→                  <div className="flex gap-1">
+   948→                    <Button
+   949→                      variant="ghost"
+   950→                      size="icon"
+   951→                      className="h-8 w-8"
+   952→                      onClick={() => copyToClipboard(typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2))}
+   953→                    >
+   954→                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+   955→                    </Button>
+   956→                    <div className="relative group">
+   957→                      <Button variant="ghost" size="icon" className="h-8 w-8">
+   958→                        <Download className="w-4 h-4" />
+   959→                      </Button>
+   960→                      <div className="absolute right-0 top-full mt-1 hidden group-hover:flex flex-col bg-popover border rounded-md shadow-md z-50">
+   961→                        <button
+   962→                          onClick={() => downloadResult('json')}
+   963→                          className="px-3 py-1.5 text-sm hover:bg-accent text-left whitespace-nowrap"
+   964→                        >
+   965→                          JSON
+   966→                        </button>
+   967→                        <button
+   968→                          onClick={() => downloadResult('csv')}
+   969→                          className="px-3 py-1.5 text-sm hover:bg-accent text-left whitespace-nowrap"
+   970→                        >
+   971→                          CSV
+   972→                        </button>
+   973→                        <button
+   974→                          onClick={() => downloadResult('txt')}
+   975→                          className="px-3 py-1.5 text-sm hover:bg-accent text-left whitespace-nowrap"
+   976→                        >
+   977→                          TXT
+   978→                        </button>
+   979→                      </div>
+   980→                    </div>
+   981→                  </div>
+   982→                )}
+   983→              </div>
+   984→            </CardHeader>
+   985→            <CardContent>
+   986→              {!result && !isAnalyzing && (
+   987→                <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+   988→                  <Dna className="w-16 h-16 mb-4 opacity-20" />
+   989→                  <p className="text-center">
+   990→                    Enter a sequence and click &quot;Run Analysis&quot; to see results
+   991→                  </p>
+   992→                </div>
+   993→              )}
+   994→              
+   995→              {isAnalyzing && (
+   996→                <div className="flex flex-col items-center justify-center h-64">
+   997→                  <Loader2 className="w-12 h-12 animate-spin text-[#C1121F] mb-4" />
+   998→                  <p className="text-muted-foreground">Analyzing sequence...</p>
+   999→                </div>
+  1000→              )}
+  1001→
+  1002→              <AnimatePresence mode="wait">
+  1003→                {result && !isAnalyzing && (
+  1004→                  <motion.div
+  1005→                    key={`result-${result.timestamp.getTime()}`}
+  1006→                    initial={{ opacity: 0, scale: 0.95 }}
+  1007→                    animate={{ opacity: 1, scale: 1 }}
+  1008→                    exit={{ opacity: 0, scale: 0.95 }}
+  1009→                    transition={{ duration: 0.3 }}
+  1010→                    className="max-h-[500px] overflow-y-auto"
+  1011→                  >
+  1012→                    {renderResults()}
+  1013→                  </motion.div>
+  1014→                )}
+  1015→              </AnimatePresence>
+  1016→            </CardContent>
+  1017→          </Card>
+  1018→        </motion.div>
+  1019→      </div>
+  1020→    </div>
+  1021→  );
+  1022→}
+  1023→
+  1024→// Sub-components for rendering different result types
+  1025→
+  1026→function AlignmentView({ data, highlightSequence }: { data: AlignmentResult; highlightSequence: (s: string) => React.ReactNode[] }) {
+  1027→  const [viewTab, setViewTab] = useState<'alignment' | 'stats' | 'raw'>('alignment');
+  1028→
+  1029→  return (
+  1030→    <div className="space-y-4">
+  1031→      <Tabs value={viewTab} onValueChange={(v) => setViewTab(v as typeof viewTab)}>
+  1032→        <TabsList className="w-full">
+  1033→          <TabsTrigger value="alignment" className="flex-1">Alignment</TabsTrigger>
+  1034→          <TabsTrigger value="stats" className="flex-1">Statistics</TabsTrigger>
+  1035→          <TabsTrigger value="raw" className="flex-1">Raw Output</TabsTrigger>
+  1036→        </TabsList>
+  1037→
+  1038→        <TabsContent value="alignment" className="mt-4">
+  1039→          <div className="bg-muted/50 rounded-lg p-3 overflow-x-auto">
+  1040→            <pre className="font-mono text-xs leading-relaxed">
+  1041→              <div className="mb-1"><strong>Query:</strong> {highlightSequence(data.alignedSeq1)}</div>
+  1042→              <div className="mb-1 text-center text-[#C1121F]">{data.midpoint}</div>
+  1043→              <div><strong>Sbjct:</strong> {highlightSequence(data.alignedSeq2)}</div>
+  1044→            </pre>
+  1045→          </div>
+  1046→        </TabsContent>
+  1047→
+  1048→        <TabsContent value="stats" className="mt-4 space-y-3">
+  1049→          <div className="grid grid-cols-2 gap-3">
+  1050→            <StatCard label="Score" value={data.score.toString()} />
+  1051→            <StatCard label="Identity" value={`${data.identity}%`} />
+  1052→            <StatCard label="Similarity" value={`${data.similarity}%`} />
+  1053→            <StatCard label="Gaps" value={data.gaps.toString()} />
+  1054→          </div>
+  1055→        </TabsContent>
+  1056→
+  1057→        <TabsContent value="raw" className="mt-4">
+  1058→          <pre className="bg-muted/50 rounded-lg p-3 overflow-x-auto font-mono text-xs whitespace-pre-wrap">
+  1059→            {JSON.stringify(data, null, 2)}
+  1060→          </pre>
+  1061→        </TabsContent>
+  1062→      </Tabs>
+  1063→    </div>
+  1064→  );
+  1065→}
+  1066→
+  1067→function BLASTView({ data, highlightSequence }: { data: BLASTResult; highlightSequence: (s: string) => React.ReactNode[] }) {
+  1068→  const [selectedHit, setSelectedHit] = useState<number>(0);
+  1069→
+  1070→  return (
+  1071→    <div className="space-y-4">
+  1072→      <div className="text-sm text-muted-foreground">
+  1073→        Found <strong>{data.hits.length}</strong> hits in <strong>{data.database}</strong>
+  1074→      </div>
+  1075→
+  1076→      {/* Hit list */}
+  1077→      <div className="space-y-2 max-h-48 overflow-y-auto">
+  1078→        {data.hits.map((hit, idx) => (
+  1079→          <button
+  1080→            key={idx}
+  1081→            onClick={() => setSelectedHit(idx)}
+  1082→            className={`w-full text-left p-2 rounded-md border transition-colors ${
+  1083→              selectedHit === idx ? 'border-[#C1121F] bg-[#C1121F]/5' : 'border-border hover:border-[#C1121F]/50'
+  1084→            }`}
+  1085→          >
+  1086→            <div className="flex justify-between items-start">
+  1087→              <span className="text-xs font-medium truncate mr-2">{hit.description}</span>
+  1088→              <Badge variant="secondary" className="shrink-0 text-xs">{hit.score}</Badge>
+  1089→            </div>
+  1090→            <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+  1091→              <span>{hit.identity}% identity</span>
+  1092→              <span>E-value: {hit.eValue.toExponential(1)}</span>
+  1093→            </div>
+  1094→          </button>
+  1095→        ))}
+  1096→      </div>
+  1097→
+  1098→      {/* Selected hit alignment */}
+  1099→      {data.hits[selectedHit] && (
+  1100→        <div className="border-t pt-4">
+  1101→          <h4 className="font-medium text-sm mb-2">Alignment Details</h4>
+  1102→          <div className="bg-muted/50 rounded-lg p-3 overflow-x-auto">
+  1103→            <pre className="font-mono text-xs leading-relaxed">
+  1104→              <div className="mb-1"><strong>Query:</strong> {highlightSequence(data.hits[selectedHit].queryAlignment)}</div>
+  1105→              <div className="mb-1 text-center text-[#C1121F]">{data.hits[selectedHit].midpoint}</div>
+  1106→              <div><strong>Sbjct:</strong> {highlightSequence(data.hits[selectedHit].subjectAlignment)}</div>
+  1107→            </pre>
+  1108→          </div>
+  1109→          
+  1110→          <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+  1111→            <div><strong>Score:</strong> {data.hits[selectedHit].score}</div>
+  1112→            <div><strong>E-value:</strong> {data.hits[selectedHit].eValue.toExponential(2)}</div>
+  1113→            <div><strong>Identity:</strong> {data.hits[selectedHit].identity}%</div>
+  1114→            <div><strong>Length:</strong> {data.hits[selectedHit].alignmentLength}</div>
+  1115→          </div>
+  1116→        </div>
+  1117→      )}
+  1118→    </div>
+  1119→  );
+  1120→}
+  1121→
+  1122→function ORFView({ data }: { data: ORF[] }) {
+  1123→  if (data.length === 0) {
+  1124→    return (
+  1125→      <div className="text-center py-8 text-muted-foreground">
+  1126→        <Info className="w-8 h-8 mx-auto mb-2 opacity-50" />
+  1127→        <p>No ORFs found matching criteria</p>
+  1128→      </div>
+  1129→    );
+  1130→  }
+  1131→
+  1132→  return (
+  1133→    <div className="space-y-3">
+  1134→      <p className="text-sm text-muted-foreground">
+  1135→        Found <strong>{data.length}</strong> ORF(s)
+  1136→      </p>
+  1137→      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+  1138→        {data.map((orf, idx) => (
+  1139→          <div key={idx} className="border rounded-lg p-3 space-y-2">
+  1140→            <div className="flex justify-between items-start">
+  1141→              <Badge variant="default" className="bg-[#C1121F]">ORF {idx + 1}</Badge>
+  1142→              <div className="flex gap-2 text-xs text-muted-foreground">
+  1143→                <span>Frame: {orf.frame}</span>
+  1144→                <span>{orf.length} bp</span>
+  1145→              </div>
+  1146→            </div>
+  1147→            <div className="text-xs">
+  1148→              <div><strong>Position:</strong> {orf.start} - {orf.end}</div>
+  1149→              <div className="mt-1"><strong>Protein:</strong></div>
+  1150→              <div className="font-mono bg-muted/50 rounded p-2 mt-1 break-all max-h-20 overflow-y-auto">
+  1151→                {orf.protein.slice(0, 50)}{orf.protein.length > 50 ? '...' : ''}
+  1152→              </div>
+  1153→            </div>
+  1154→          </div>
+  1155→        ))}
+  1156→      </div>
+  1157→    </div>
+  1158→  );
+  1159→}
+  1160→
+  1161→function TextView({ label, data, highlightSequence }: { label: string; data: string; highlightSequence?: (s: string) => React.ReactNode[] }) {
+  1162→  return (
+  1163→    <div className="space-y-3">
+  1164→      <div className="flex justify-between items-center">
+  1165→        <span className="text-sm font-medium">{label}</span>
+  1166→        <Badge variant="secondary">{data.length} characters</Badge>
+  1167→      </div>
+  1168→      <div className="bg-muted/50 rounded-lg p-3 overflow-x-auto">
+  1169→        <pre className="font-mono text-xs break-all leading-relaxed">
+  1170→          {highlightSequence ? highlightSequence(data) : data}
+  1171→        </pre>
+  1172→      </div>
+  1173→    </div>
+  1174→  );
+  1175→}
+  1176→
+  1177→function GCContentView({ data }: { data: SequenceStats }) {
+  1178→  const totalBases = Object.values(data.composition).reduce((a, b) => a + b, 0);
+  1179→  
+  1180→  return (
+  1181→    <div className="space-y-4">
+  1182→      <div className="grid grid-cols-2 gap-3">
+  1183→        <StatCard label="Length" value={data.length.toLocaleString()} />
+  1184→        <StatCard label="Type" value={data.type} />
+  1185→        <StatCard label="GC Content" value={`${data.gcContent.toFixed(2)}%`} />
+  1186→        <StatCard label="AT Content" value={`${(100 - data.gcContent).toFixed(2)}%`} />
+  1187→      </div>
+  1188→
+  1189→      <Separator />
+  1190→
+  1191→      <div>
+  1192→        <h4 className="font-medium text-sm mb-3">Base Composition</h4>
+  1193→        <div className="space-y-2">
+  1194→          {Object.entries(data.composition)
+  1195→            .sort(([, a], [, b]) => b - a)
+  1196→            .map(([base, count]) => {
+  1197→              const percent = ((count / totalBases) * 100).toFixed(1);
+  1198→              
+  1199→              return (
+  1200→                <div key={base} className="flex items-center gap-2">
+  1201→                  <span className="w-6 font-mono font-bold text-center" style={{ color: base === 'A' ? '#16a34a' : base === 'T' || base === 'U' ? '#dc2626' : base === 'G' ? '#ca8a04' : '#2563eb' }}>
+  1202→                    {base}
+  1203→                  </span>
+  1204→                  <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
+  1205→                    <div
+  1206→                      className="h-full rounded-full transition-all duration-500"
+  1207→                      style={{
+  1208→                        width: `${percent}%`,
+  1209→                        backgroundColor: base === 'A' ? '#16a34a' : base === 'T' || base === 'U' ? '#dc2626' : base === 'G' ? '#ca8a04' : '#2563eb'
+  1210→                      }}
+  1211→                    />
+  1212→                  </div>
+  1213→                  <span className="text-xs text-muted-foreground w-16 text-right">
+  1214→                    {count} ({percent}%)
+  1215→                  </span>
+  1216→                </div>
+  1217→              );
+  1218→            })}
+  1219→        </div>
+  1220→      </div>
+  1221→    </div>
+  1222→  );
+  1223→}
+  1224→
+  1225→function MotifView({ data }: { data: MotifMatch[] }) {
+  1226→  if (data.length === 0) {
+  1227→    return (
+  1228→      <div className="text-center py-8 text-muted-foreground">
+  1229→        <Info className="w-8 h-8 mx-auto mb-2 opacity-50" />
+  1230→        <p>No matches found</p>
+  1231→      </div>
+  1232→    );
+  1233→  }
+  1234→
+  1235→  return (
+  1236→    <div className="space-y-3">
+  1237→      <p className="text-sm text-muted-foreground">
+  1238→        Found <strong>{data.length}</strong> match(es)
+  1239→      </p>
+  1240→      <div className="space-y-2 max-h-[350px] overflow-y-auto">
+  1241→        {data.map((match, idx) => (
+  1242→          <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+  1243→            <div className="flex items-center gap-2">
+  1244→              <Badge variant={match.strand === '+' ? 'default' : 'secondary'} className="text-xs">
+  1245→                {match.strand}
+  1246→              </Badge>
+  1247→              <span className="font-mono text-sm">{match.match}</span>
+  1248→            </div>
+  1249→            <span className="text-xs text-muted-foreground">
+  1250→              Pos: {match.position}
+  1251→            </span>
+  1252→          </div>
+  1253→        ))}
+  1254→      </div>
+  1255→    </div>
+  1256→  );
+  1257→}
+  1258→
+  1259→function RestrictionMapView({ data }: { data: RestrictionSite[] }) {
+  1260→  if (data.length === 0) {
+  1261→    return (
+  1262→      <div className="text-center py-8 text-muted-foreground">
+  1263→        <Scissors className="w-8 h-8 mx-auto mb-2 opacity-50" />
+  1264→        <p>No restriction sites found</p>
+  1265→      </div>
+  1266→    );
+  1267→  }
+  1268→
+  1269→  return (
+  1270→    <div className="space-y-3">
+  1271→      <p className="text-sm text-muted-foreground">
+  1272→        Found <strong>{data.length}</strong> restriction site(s)
+  1273→      </p>
+  1274→      <div className="space-y-2 max-h-[350px] overflow-y-auto">
+  1275→        {data.map((site, idx) => (
+  1276→          <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+  1277→            <div className="flex items-center gap-2">
+  1278→              <Badge variant="outline" className="text-xs font-mono">
+  1279→                {site.enzyme}
+  1280→              </Badge>
+  1281→              <span className="font-mono text-sm">{site.recognitionSite}</span>
+  1282→            </div>
+  1283→            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+  1284→              <Badge variant={site.strand === '+' ? 'default' : 'secondary'} className="text-xs">
+  1285→                {site.strand}
+  1286→              </Badge>
+  1287→              <span>{site.position}</span>
+  1288→            </div>
+  1289→          </div>
+  1290→        ))}
+  1291→      </div>
+  1292→    </div>
+  1293→  );
+  1294→}
+  1295→
+  1296→function StatCard({ label, value }: { label: string; value: string }) {
+  1297→  return (
+  1298→    <div className="bg-muted/50 rounded-lg p-3 text-center">
+  1299→      <div className="text-lg font-bold text-[#C1121F]">{value}</div>
+  1300→      <div className="text-xs text-muted-foreground">{label}</div>
+  1301→    </div>
+  1302→  );
+  1303→}
+  1304→
+  1305→// Helper functions for export
+  1306→function convertToCSV(data: unknown): string {
+  1307→  if (typeof data === 'string') return data;
+  1308→  if (Array.isArray(data)) {
+  1309→    if (data.length === 0) return '';
+  1310→    const headers = Object.keys(data[0]);
+  1311→    const rows = data.map(item => 
+  1312→      headers.map(h => JSON.stringify((item as Record<string, unknown>)[h] ?? '')).join(',')
+  1313→    );
+  1314→    return [headers.join(','), ...rows].join('\n');
+  1315→  }
+  1316→  if (typeof data === 'object' && data !== null) {
+  1317→    const entries = Object.entries(data as Record<string, unknown>);
+  1318→    return entries.map(([k, v]) => `${k},${JSON.stringify(v)}`).join('\n');
+  1319→  }
+  1320→  return String(data);
+  1321→}
+  1322→
+  1323→function formatPlainText(result: AnalysisResult): string {
+  1324→  const lines = [`BioAlign ${result.type.toUpperCase()} Results`, `Generated: ${result.timestamp.toISOString()}`, ''];
+  1325→  
+  1326→  if (typeof result.data === 'string') {
+  1327→    lines.push(result.data);
+  1328→  } else if (Array.isArray(result.data)) {
+  1329→    lines.push(`Total entries: ${result.data.length}`);
+  1330→    result.data.forEach((item, idx) => {
+  1331→      lines.push(`\n--- Entry ${idx + 1} ---`);
+  1332→      Object.entries(item as Record<string, unknown>).forEach(([k, v]) => {
+  1333→        lines.push(`${k}: ${JSON.stringify(v)}`);
+  1334→      });
+  1335→    });
+  1336→  } else if (typeof result.data === 'object' && result.data !== null) {
+  1337→    Object.entries(result.data as Record<string, unknown>).forEach(([k, v]) => {
+  1338→      lines.push(`${k}: ${JSON.stringify(v)}`);
+  1339→    });
+  1340→  }
+  1341→  
+  1342→  return lines.join('\n');
+  1343→}
+  1344→
