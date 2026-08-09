@@ -806,7 +806,10 @@ export default function ThesisStudio() {
             className="space-y-6"
           >
             <ResearchNotes 
-              notes={activeProject.notes}
+              notes={activeProject.notes.map(note => ({
+                ...note,
+                isPinned: note.isPinned ?? false
+              }))}
               onNoteAdd={addNote}
             />
 

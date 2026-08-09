@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   User, 
@@ -18,12 +19,68 @@ import {
   BookOpen,
   Cpu,
   Leaf,
-  FlaskConical
+  FlaskConical,
+  GraduationCap,
+  Award,
+  Target,
+  Database
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Skills/Interests data
-const interests = [
+// Creators data
+const creators = [
+  {
+    id: 'toufik',
+    name: 'Toufik Mahata',
+    title: 'Biotechnology Undergraduate • Bioinformatician • AI Enthusiast',
+    institution: 'CBSH, RPCAU (Pusa, Samastipur, Bihar)',
+    photo: '/images/toufik-mahata.jpg',
+    email: 'toufikmahata20@gmail.com',
+    phone: '+91 62961 56961',
+    bio: `Hi, I'm Toufik Mahata, a Biotechnology undergraduate with a deep passion for Bioinformatics, Artificial Intelligence, Computational Biology, and Scientific Innovation.`,
+    vision: `BioAlign is my vision of a unified platform where biological data analysis, AI-assisted research, and modern computational workflows come together in one intelligent ecosystem. Rather than forcing researchers to navigate dozens of disconnected tools, BioAlign aims to provide a seamless environment for genomic analysis, protein studies, structural biology, drug discovery, systems biology, and many other areas of biotechnology.`,
+    quote: "Innovation begins where biology meets intelligence.",
+    socials: {
+      github: '#',
+      twitter: '#',
+      linkedin: '#'
+    },
+    interests: [
+      { icon: Dna, label: 'Bioinformatics & Computational Biology', color: 'text-blue-500' },
+      { icon: Brain, label: 'AI for Life Sciences', color: 'text-purple-500' },
+      { icon: Code2, label: 'Scientific Software Development', color: 'text-cyan-500' },
+      { icon: FlaskConical, label: 'Open-Source Research Tools', color: 'text-red-500' }
+    ],
+    badge: { text: 'Creator', gradient: 'from-biored to-purple-600' }
+  },
+  {
+    id: 'nitesh',
+    name: 'Dr. Nitesh Kumar Sharma',
+    title: 'Assistant Professor | Agricultural Biotechnology & Molecular Breeding | Bioinformatics',
+    institution: 'Dr. Rajendra Prasad Central Agricultural University (RPCAU), Pusa',
+    photo: '/images/nitesh-sharma.png',
+    email: '#',
+    phone: '',
+    bio: `Dr. Nitesh Kumar Sharma is an Assistant Professor at Dr. Rajendra Prasad Central Agricultural University, Pusa, specializing in Bioinformatics, Genomics, Transcriptomics, and AI/ML-based predictive modelling. He holds an M.Sc. and Ph.D. from ICAR–IARI, New Delhi.`,
+    vision: `His research focuses on computational analysis of genomic and transcriptomic data, including SNPs, copy number variations, gene expression, genomic diversity, and non-coding RNAs, contributing to data-driven research in agricultural and biological sciences.`,
+    quote: "Data-driven discovery transforms agricultural science.",
+    socials: {
+      github: '#',
+      twitter: '#',
+      linkedin: '#'
+    },
+    interests: [
+      { icon: Microscope, label: 'Genomics & Transcriptomics', color: 'text-green-500' },
+      { icon: Cpu, label: 'AI/ML Predictive Modelling', color: 'text-orange-500' },
+      { icon: Leaf, label: 'Molecular Breeding', color: 'text-emerald-500' },
+      { icon: Database, label: 'Genomic Diversity Analysis', color: 'text-teal-500' }
+    ],
+    badge: { text: 'Co-Creator & Mentor', gradient: 'from-emerald-600 to-teal-700' }
+  }
+];
+
+// Combined expertise areas
+const sharedInterests = [
   { icon: Dna, label: 'Bioinformatics & Computational Biology', color: 'text-blue-500' },
   { icon: Brain, label: 'AI for Life Sciences', color: 'text-purple-500' },
   { icon: Microscope, label: 'Genomics, Proteomics & Structural Biology', color: 'text-green-500' },
@@ -45,16 +102,18 @@ export default function AboutCreator({ onBack }: AboutProps) {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-gradient-to-br from-biored via-rose-700 to-purple-900 text-white py-20 overflow-hidden"
+        className="relative bg-gradient-to-br from-biored via-rose-700 to-emerald-800 text-white py-20 overflow-hidden"
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white rounded-full blur-3xl" />
+          <div className="absolute top-20 right-40 w-32 h-32 bg-emerald-300 rounded-full blur-2xl" />
+          <div className="absolute bottom-32 left-40 w-48 h-48 bg-blue-300 rounded-full blur-2xl" />
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {onBack && (
             <Button
               variant="ghost"
@@ -65,130 +124,206 @@ export default function AboutCreator({ onBack }: AboutProps) {
             </Button>
           )}
           
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            {/* Photo */}
+          <div className="text-center mb-12">
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="relative"
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-4"
             >
-              <div className="w-48 h-48 md:w-64 md:h-64 rounded-2xl overflow-hidden ring-4 ring-white/20 shadow-2xl">
-                <img
-                  src="/images/toufik-mahata.jpg"
-                  alt="Toufik Mahata"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-biored to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-1">
-                <Sparkles className="size-4" />
-                Creator
-              </div>
+              <Sparkles className="size-4" />
+              Meet The Team Behind BioAlign
             </motion.div>
             
-            {/* Intro Text */}
-            <motion.div
-              initial={{ x: 30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="flex-1 text-center md:text-left"
+            <motion.h1
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
             >
-              <p className="text-lg text-white/80 mb-2">Meet the Creator</p>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Toufik Mahata
-              </h1>
-              <p className="text-xl text-white/90 mb-4">
-                Biotechnology Undergraduate • Bioinformatician • AI Enthusiast
-              </p>
-              <p className="text-white/70 max-w-xl">
-                CBSH, RPCAU (Pusa, Samastipur, Bihar)
-              </p>
-              
-              {/* Social Links */}
-              <div className="flex justify-center md:justify-start gap-3 mt-6">
-                <a href="mailto:toufikmahata20@gmail.com" className="size-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                  <Mail className="size-5" />
-                </a>
-                <a href="#" className="size-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                  <Github className="size-5" />
-                </a>
-                <a href="#" className="size-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                  <Twitter className="size-5" />
-                </a>
-                <a href="#" className="size-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                  <Linkedin className="size-5" />
-                </a>
-              </div>
-            </motion.div>
+              Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-emerald-200">Creators</span>
+            </motion.h1>
+            
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg text-white/80 max-w-2xl mx-auto"
+            >
+              A collaboration between academic excellence and innovative student research
+            </motion.p>
+          </div>
+
+          {/* Creator Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {creators.map((creator, index) => (
+              <motion.div
+                key={creator.id}
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 + index * 0.15 }}
+                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all group"
+              >
+                <div className="flex flex-col items-center text-center">
+                  {/* Photo */}
+                  <div className="relative mb-5">
+                    <div className="w-36 h-36 md:w-44 md:h-44 rounded-2xl overflow-hidden ring-4 ring-white/20 shadow-xl group-hover:scale-105 transition-transform duration-300">
+                      <Image
+                        src={creator.photo}
+                        alt={creator.name}
+                        width={176}
+                        height={176}
+                        className="w-full h-full object-cover"
+                        priority
+                      />
+                    </div>
+                    <div className={`absolute -bottom-3 -right-3 bg-gradient-to-r ${creator.badge.gradient} text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1`}>
+                      <Sparkles className="size-3" />
+                      {creator.badge.text}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <h2 className="text-2xl font-bold mb-1">{creator.name}</h2>
+                  <p className="text-sm text-white/90 mb-1">{creator.title}</p>
+                  <p className="text-xs text-white/70 mb-4 flex items-center justify-center gap-1">
+                    <GraduationCap className="size-3" />
+                    {creator.institution}
+                  </p>
+
+                  {/* Social Links */}
+                  <div className="flex justify-center gap-2 mb-4">
+                    <a href={creator.email} className="size-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <Mail className="size-4" />
+                    </a>
+                    <a href={creator.socials.github} className="size-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <Github className="size-4" />
+                    </a>
+                    <a href={creator.socials.twitter} className="size-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <Twitter className="size-4" />
+                    </a>
+                    <a href={creator.socials.linkedin} className="size-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                      <Linkedin className="size-4" />
+                    </a>
+                  </div>
+
+                  {/* Quick Interests */}
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {creator.interests.slice(0, 3).map((interest, i) => (
+                      <span key={i} className={`text-[10px] px-2 py-0.5 rounded-full bg-white/10 ${interest.color}`}>
+                        {interest.label.split(' ')[0]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         
-        {/* About Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <div className="bg-card border rounded-2xl p-8 md:p-12 shadow-sm">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <User className="size-6 text-biored" />
-              About Me
-            </h2>
-            
-            <div className="prose prose-slate dark:prose-invert max-w-none space-y-4 text-muted-foreground">
-              <p className="text-lg leading-relaxed">
-                Hi, I'm <span className="font-semibold text-foreground">Toufik Mahata</span>, a Biotechnology undergraduate with a deep passion for{' '}
-                <span className="text-biored font-medium">Bioinformatics</span>,{' '}
-                <span className="text-biored font-medium">Artificial Intelligence</span>,{' '}
-                <span className="text-biored font-medium">Computational Biology</span>, and{' '}
-                <span className="text-biored font-medium">Scientific Innovation</span>.
-              </p>
+        {/* Individual About Sections */}
+        {creators.map((creator, index) => (
+          <motion.section
+            key={creator.id}
+            id={`about-${creator.id}`}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <div className="bg-card border rounded-2xl p-8 md:p-12 shadow-sm relative overflow-hidden">
+              {/* Accent bar */}
+              <div className={`absolute top-0 left-0 w-1.5 h-full ${index === 0 ? 'bg-biored' : 'bg-emerald-600'}`} />
               
-              <p className="leading-relaxed">
-                I believe the future of biology lies at the intersection of life sciences and intelligent computing. My goal is to build technologies that simplify complex biological research, empower scientists with advanced computational tools, and make cutting-edge biotechnology accessible to everyone—from students taking their first steps in bioinformatics to researchers solving real-world challenges.
-              </p>
-              
-              <div className="bg-gradient-to-r from-biored/10 to-purple-500/10 border border-biored/20 rounded-xl p-6 my-8">
-                <h3 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
-                  <Sparkles className="size-5 text-biored" />
-                  BioAlign Vision
-                </h3>
-                <p className="text-foreground/80">
-                  <strong>BioAlign</strong> is my vision of a unified platform where biological data analysis, AI-assisted research, and modern computational workflows come together in one intelligent ecosystem. Rather than forcing researchers to navigate dozens of disconnected tools, BioAlign aims to provide a seamless environment for genomic analysis, protein studies, structural biology, drug discovery, systems biology, and many other areas of biotechnology.
-                </p>
+              <div className="flex items-start gap-6 mb-6">
+                <div className="hidden sm:block flex-shrink-0">
+                  <div className="w-24 h-24 rounded-xl overflow-hidden ring-2 ring-border">
+                    <Image
+                      src={creator.photo}
+                      alt={creator.name}
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                    <User className={`size-6 ${index === 0 ? 'text-biored' : 'text-emerald-600'}`} />
+                    About {creator.name.split(' ')[0]}
+                    {index === 1 && (
+                      <span className="ml-2 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-normal">
+                        Ph.D.
+                      </span>
+                    )}
+                  </h2>
+                  
+                  <div className="space-y-4 text-muted-foreground mt-4">
+                    <p className="text-base leading-relaxed">
+                      {creator.bio.split(' ').map((word, i) => {
+                        const keywords = ['Bioinformatics', 'Artificial Intelligence', 'Computational Biology', 'Scientific Innovation', 'Genomics', 'Transcriptomics', 'AI/ML'];
+                        if (keywords.some(k => word.includes(k))) {
+                          return <span key={i} className={`${index === 0 ? 'text-biored' : 'text-emerald-600'} font-medium`}>{word} </span>;
+                        }
+                        return word + ' ';
+                      })}
+                    </p>
+                    
+                    <div className={`bg-gradient-to-r ${index === 0 ? 'from-biored/10 to-purple-500/10 border-biored/20' : 'from-emerald-500/10 to-teal-500/10 border-emerald-500/20'} border rounded-xl p-6`}>
+                      <h3 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
+                        <Target className={`size-5 ${index === 0 ? 'text-biored' : 'text-emerald-600'}`} />
+                        {index === 0 ? 'BioAlign Vision' : 'Research Focus'}
+                      </h3>
+                      <p className="text-foreground/80 text-sm leading-relaxed">
+                        {creator.vision}
+                      </p>
+                    </div>
+                    
+                    {index === 1 && (
+                      <div className="bg-muted/50 border rounded-xl p-4">
+                        <h4 className="font-medium text-foreground text-sm mb-2 flex items-center gap-2">
+                          <Award className="size-4 text-yellow-500" />
+                          Academic Background
+                        </h4>
+                        <ul className="text-sm space-y-1">
+                          <li>• M.Sc. from ICAR–IARI, New Delhi</li>
+                          <li>• Ph.D. from ICAR–IARI, New Delhi</li>
+                          <li>• Specialization: Genomics & Bioinformatics</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quote */}
+                  <blockquote className="mt-6 pl-6 border-l-4 border-current italic text-lg text-muted-foreground">
+                    <p className="text-foreground">
+                      "{creator.quote}"
+                    </p>
+                    <footer className={`mt-2 ${index === 0 ? 'text-biored' : 'text-emerald-600'} font-medium not-italic`}>
+                      — {creator.name}
+                    </footer>
+                  </blockquote>
+                </div>
               </div>
-              
-              <p className="leading-relaxed">
-                I am committed to developing impactful technologies that bridge biology and computer science while contributing to a future where scientific discovery becomes faster, more collaborative, and more accessible through innovation.
-              </p>
             </div>
+          </motion.section>
+        ))}
 
-            {/* Quote */}
-            <blockquote className="mt-8 pl-6 border-l-4 border-biored italic text-lg">
-              <p className="text-foreground">
-                "Innovation begins where biology meets intelligence."
-              </p>
-              <footer className="mt-2 text-biored font-medium not-italic">
-                — Toufik Mahata
-              </footer>
-            </blockquote>
-          </div>
-        </motion.section>
-
-        {/* Interests Grid */}
+        {/* Shared Expertise Grid */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl font-bold mb-6 text-center">My Interests & Expertise</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">Shared Expertise & Interests</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {interests.map((interest, idx) => (
+            {sharedInterests.map((interest, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -196,7 +331,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05 }}
                 whileHover={{ y: -4 }}
-                className="bg-card border rounded-xl p-5 hover:border-biored/30 hover:shadow-md transition-all group cursor-default"
+                className="bg-card border rounded-xl p-5 hover:border-primary/30 hover:shadow-md transition-all group cursor-default"
               >
                 <interest.icon className={`size-8 ${interest.color} mb-3 group-hover:scale-110 transition-transform`} />
                 <p className="font-medium text-sm">{interest.label}</p>
@@ -205,34 +340,73 @@ export default function AboutCreator({ onBack }: AboutProps) {
           </div>
         </motion.section>
 
-
+        {/* Collaboration Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-biored/5 via-purple-500/5 to-emerald-500/5 border border-biored/10 rounded-2xl p-8 md:p-12"
+        >
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-900 px-4 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
+              <Heart className="size-4 text-red-500" />
+              Student-Faculty Collaboration
+            </div>
+            
+            <h2 className="text-3xl font-bold mb-4">Bridging Academia & Innovation</h2>
+            <p className="text-muted-foreground text-lg mb-6">
+              BioAlign represents a unique collaboration between experienced academic guidance and fresh student innovation. 
+              Together, we're building tools that serve both the research community and the next generation of bioinformaticians.
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
+                <GraduationCap className="size-5 text-biored" />
+                <span className="text-sm font-medium">Academic Excellence</span>
+              </div>
+              <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
+                <Sparkles className="size-5 text-purple-500" />
+                <span className="text-sm font-medium">Student Innovation</span>
+              </div>
+              <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
+                <Code2 className="size-5 text-emerald-600" />
+                <span className="text-sm font-medium">Open Source</span>
+              </div>
+            </div>
+          </div>
+        </motion.section>
 
         {/* Contact CTA */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-8 md:p-12 text-white text-center"
+          className="bg-gradient-to-br from-biored via-rose-700 to-emerald-800 rounded-2xl p-8 md:p-12 text-white text-center"
         >
           <Heart className="size-12 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Let's Connect!</h2>
+          <h2 className="text-3xl font-bold mb-4">Get In Touch!</h2>
           <p className="text-white/90 max-w-xl mx-auto mb-8">
-            I'm always open to discussing research collaborations, bioinformatics projects, or just having a chat about science and technology!
+            We're always open to discussing research collaborations, bioinformatics projects, or just having a chat about science and technology!
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="mailto:toufikmahata20@gmail.com"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-emerald-700 font-semibold rounded-xl hover:bg-white/90 transition-all no-underline"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-biored font-semibold rounded-xl hover:bg-white/90 transition-all no-underline"
             >
               <Mail className="size-5" />
-              toufikmahata20@gmail.com
+              Contact Toufik
             </a>
             <a
-              href="tel:+916296159691"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-800 text-white font-semibold rounded-xl hover:bg-emerald-900 transition-all no-underline border border-white/20"
+              href="#about-nitesh"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('about-nitesh')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all no-underline border border-white/20"
             >
-              📞 +91 62961 56961
+              <ExternalLink className="size-5" />
+              Learn More About Dr. Sharma
             </a>
           </div>
         </motion.section>

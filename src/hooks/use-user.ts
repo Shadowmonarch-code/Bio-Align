@@ -20,7 +20,7 @@ export interface UserProfile {
 
 interface UseUserReturn {
   // Session info
-  session: ReturnType<typeof useSession>["session"]
+  session: any
   status: "loading" | "authenticated" | "unauthenticated"
   
   // User profile (from database)
@@ -126,13 +126,14 @@ export function useUser(): UseUserReturn {
     return "U"
   })()
 
-  const userRole = userProfile?.role || session?.user?.role || "user"
+  const userRole = userProfile?.role || (session as any)?.user?.role || "user"
 
   return {
-    session,
+    session: session as any,
     status,
     userProfile,
     isLoadingProfile,
+    refreshUser,
     updateUser,
     isAuthenticated,
     userDisplayName,

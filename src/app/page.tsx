@@ -273,7 +273,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -412,7 +412,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -445,7 +445,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -482,7 +482,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -546,7 +546,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -621,7 +621,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -698,7 +698,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -734,7 +734,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -749,7 +749,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )
@@ -780,7 +780,7 @@ export default function Home() {
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
           <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
-          <p className="text-xs mt-1">by Toufik Mahata</p>
+          <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
     )

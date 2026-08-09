@@ -243,7 +243,7 @@ function detectColumnType(values: string[]): ColumnInfo['type'] {
   return 'text'
 }
 
-function calculateNumericStats(values: number[]): Omit<ColumnInfo, 'name' | 'type' | 'categories'> {
+function calculateNumericStats(values: number[]): Omit<ColumnInfo, 'name' | 'type' | 'categories' | 'missingCount'> {
   const sorted = [...values].sort((a, b) => a - b)
   const n = sorted.length
   

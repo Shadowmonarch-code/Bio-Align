@@ -252,17 +252,15 @@ export default function PathAnalysisComponent({ className }: PathAnalysisProps) 
                 />
                 
                 {/* Effect label */}
-                <label>
-                  <text 
-                    x={(pos.x + depX) / 2 + 15} 
-                    y={(pos.y + depY) / 2} 
-                    fontSize="12" 
-                    fontWeight="bold"
-                    fill={color}
-                  >
-                    {effect.toFixed(3)}
-                  </text>
-                </label>
+                <text 
+                  x={(pos.x + depX) / 2 + 15} 
+                  y={(pos.y + depY) / 2} 
+                  fontSize="12" 
+                  fontWeight="bold"
+                  fill={color}
+                >
+                  {effect.toFixed(3)}
+                </text>
                 
                 {/* Variable name label on arrow */}
                 <text 
