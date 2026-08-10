@@ -1,0 +1,881 @@
+     1→// Sequence Analysis Utility Functions for BioAlign
+     2→
+     3→// Types
+     4→export type SequenceType = 'DNA' | 'RNA' | 'Protein' | 'Unknown' | 'Mixed';
+     5→
+     6→export interface SequenceStats {
+     7→  length: number;
+     8→  type: SequenceType;
+     9→  gcContent: number;
+    10→  composition: Record<string, number>;
+    11→  molecularWeight?: number;
+    12→}
+    13→
+    14→export interface ORF {
+    15→  start: number;
+    16→  end: number;
+    17→  frame: number;
+    18→  sequence: string;
+    19→  protein: string;
+    20→  length: number;
+    21→}
+    22→
+    23→export interface AlignmentResult {
+    24→  alignedSeq1: string;
+    25→  alignedSeq2: string;
+    26→  score: number;
+    27→  identity: number;
+    28→  similarity: number;
+    29→  gaps: number;
+    30→  midpoint: string;
+    31→}
+    32→
+    33→export interface BLASTHit {
+    34→  id: string;
+    35→  description: string;
+    36→  score: number;
+    37→  eValue: number;
+    38→  identity: number;
+    39→  alignmentLength: number;
+    40→  queryStart: number;
+    41→  queryEnd: number;
+    42→  subjectStart: number;
+    43→  subjectEnd: number;
+    44→  queryAlignment: string;
+    45→  subjectAlignment: string;
+    46→  midpoint: string;
+    47→}
+    48→
+    49→export interface BLASTResult {
+    50→  queryId: string;
+    51→  queryLength: number;
+    52→  database: string;
+    53→  hits: BLASTHit[];
+    54→  statistics: {
+    55→    eValueThreshold: number;
+    56→    wordSize: number;
+    57→    matrix: string;
+    58→    gapCosts: string;
+    59→  };
+    60→}
+    61→
+    62→export interface RestrictionSite {
+    63→  enzyme: string;
+    64→  recognitionSite: string;
+    65→  position: number;
+    66→  cutPosition: number;
+    67→  strand: '+' | '-';
+    68→}
+    69→
+    70→export interface MotifMatch {
+    71→  pattern: string;
+    72→  position: number;
+    73→  match: string;
+    74→  strand: '+' | '-';
+    75→}
+    76→
+    77→// Example sequences
+    78→export const EXAMPLE_SEQUENCES = {
+    79→  dna: `ATGCGATCGATCGTACGATCGATCGTAGCTAGCTAGCTAGCATGCATGCATGCATGCGATCGATCGATCGATCGATCGATCGATCG`,
+    80→  protein: `MAGIVALLPLMLLTLGLVQAPKKVTVRDPSGPLVIFFCCLLLLSYYSYPKKNYKKDLYQLLDSLSKDNSLERLFLRRLPNLKDKIEELASLTTSTNSLQDVNLAPNRLNPFALPPEEENI`,
+    81→  rna: `AUGCGAUCGAUCGUACGAUCGAUCGUAGCUAGCUAGCUAGCAUGCAUGCAUGCAUGCGAUCGAUCGAUCGAUCGAUCGAUCGAUCG`
+    82→};
+    83→
+    84→// Genetic code tables
+    85→export const GENETIC_CODES: Record<number, Record<string, string>> = {
+    86→  // Standard nuclear code
+    87→  1: {
+    88→    'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+    89→    'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+    90→    'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+    91→    'TGT': 'C', 'TGC': 'C', 'TGA': '*', 'TGG': 'W',
+    92→    'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+    93→    'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+    94→    'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+    95→    'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+    96→    'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M',
+    97→    'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+    98→    'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+    99→    'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+   100→    'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+   101→    'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+   102→    'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+   103→    'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+   104→  },
+   105→  // Vertebrate mitochondrial code
+   106→  2: {
+   107→    ...Object.fromEntries(Object.entries({
+   108→      'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+   109→      'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+   110→      'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+   111→      'TGT': 'C', 'TGC': 'C', 'TGA': 'W', 'TGG': 'W',
+   112→      'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+   113→      'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+   114→      'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+   115→      'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+   116→      'ATT': 'I', 'ATC': 'I', 'ATA': 'M', 'ATG': 'M',
+   117→      'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+   118→      'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+   119→      'AGT': 'S', 'AGC': 'S', 'AGA': '*', 'AGG': '*',
+   120→      'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+   121→      'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+   122→      'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+   123→      'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+   124→    }))
+   125→  }
+   126→};
+   127→
+   128→// Substitution matrices (simplified)
+   129→export const SUBSTITUTION_MATRICES = {
+   130→  BLOSUM62: {
+   131→    match: 4,
+   132→    mismatch: -3,
+   133→    gapOpen: -11,
+   134→    gapExtend: -1
+   135→  },
+   136→  BLOSUM50: {
+   137→    match: 3,
+   138→    mismatch: -3,
+   139→    gapOpen: -10,
+   140→    gapExtend: -1
+   141→  },
+   142→  PAM250: {
+   143→    match: 2,
+   144→    mismatch: -2,
+   145→    gapOpen: -8,
+   146→    gapExtend: -2
+   147→  },
+   148→  PAM70: {
+   149→    match: 3,
+   150→    mismatch: -2,
+   151→    gapOpen: -9,
+   152→    gapExtend: -1
+   153→  }
+   154→};
+   155→
+   156→// Common restriction enzymes
+   157→export const RESTRICTION_ENZYMES = [
+   158→  { name: 'EcoRI', site: 'GAATTC', cutPos: 1, recognition: "G^AATTC" },
+   159→  { name: 'BamHI', site: 'GGATCC', cutPos: 1, recognition: "G^GATCC" },
+   160→  { name: 'HindIII', site: 'AAGCTT', cutPos: 1, recognition: "A^AGCTT" },
+   161→  { name: 'XbaI', site: 'TCTAGA', cutPos: 1, recognition: "T^CTAGA" },
+   162→  { name: 'SalI', site: 'GTCGAC', cutPos: 1, recognition: "G^TCGAC" },
+   163→  { name: 'KpnI', site: 'GGTACC', cutPos: 1, recognition: "GGTAC^C" },
+   164→  { name: 'PstI', site: 'CTGCAG', cutPos: 5, recognition: "CTGCA^G" },
+   165→  { name: 'NotI', site: 'GCGGCCGC', cutPos: 2, recognition: "GC^GGCCGC" },
+   166→  { name: 'SacI', site: 'GAGCTC', cutPos: 5, recognition: "GAGCT^C" },
+   167→  { name: 'SmaI', site: 'CCCGGG', cutPos: 3, recognition: "CCC^GGG" }
+   168→];
+   169→
+   170→/**
+   171→ * Clean and validate a sequence string
+   172→ */
+   173→export function cleanSequence(sequence: string): string {
+   174→  return sequence
+   175→    .toUpperCase()
+   176→    .replace(/[^A-Z]/g, '')
+   177→    .trim();
+   178→}
+   179→
+   180→/**
+   181→ * Detect the type of biological sequence
+   182→ */
+   183→export function detectSequenceType(sequence: string): SequenceType {
+   184→  const cleaned = cleanSequence(sequence);
+   185→  if (!cleaned || cleaned.length === 0) return 'Unknown';
+   186→
+   187→  const dnaBases = new Set(['A', 'T', 'G', 'C']);
+   188→  const rnaBases = new Set(['A', 'U', 'G', 'C']);
+   189→  const proteinAminoAcids = new Set([
+   190→    'A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
+   191→    'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V'
+   192→  ]);
+   193→
+   194→  let dnaCount = 0;
+   195→  let rnaCount = 0;
+   196→  let proteinCount = 0;
+   197→
+   198→  for (const char of cleaned) {
+   199→    if (dnaBases.has(char)) dnaCount++;
+   200→    if (rnaBases.has(char)) rnaCount++;
+   201→    if (proteinAminoAcids.has(char)) proteinCount++;
+   202→  }
+   203→
+   204→  const total = cleaned.length;
+   205→  const dnaRatio = dnaCount / total;
+   206→  const rnaRatio = rnaCount / total;
+   207→  const proteinRatio = proteinCount / total;
+   208→
+   209→  // Check for RNA (has U but no T)
+   210→  const hasU = cleaned.includes('U');
+   211→  const hasT = cleaned.includes('T');
+   212→
+   213→  if (hasU && !hasT && rnaRatio > 0.95) return 'RNA';
+   214→  if (!hasU && hasT && dnaRatio > 0.95) return 'DNA';
+   215→  if (proteinRatio > 0.95 && !hasU) return 'Protein';
+   216→  
+   217→  if (dnaRatio > 0.8 || rnaRatio > 0.8) return 'DNA'; // Default to DNA-like
+   218→  if (proteinRatio > 0.8) return 'Protein';
+   219→
+   220→  return 'Mixed';
+   221→}
+   222→
+   223→/**
+   224→ * Calculate GC content of a DNA/RNA sequence
+   225→ */
+   226→export function calculateGCContent(sequence: string): number {
+   227→  const cleaned = cleanSequence(sequence);
+   228→  if (!cleaned) return 0;
+   229→
+   230→  let gcCount = 0;
+   231→  for (const char of cleaned) {
+   232→    if (char === 'G' || char === 'C') {
+   233→      gcCount++;
+   234→    }
+   235→  }
+   236→
+   237→  return (gcCount / cleaned.length) * 100;
+   238→}
+   239→
+   240→/**
+   241→ * Get nucleotide composition
+   242→ */
+   243→export function getComposition(sequence: string): Record<string, number> {
+   244→  const cleaned = cleanSequence(sequence);
+   245→  const composition: Record<string, number> = {};
+   246→
+   247→  for (const char of cleaned) {
+   248→    composition[char] = (composition[char] || 0) + 1;
+   249→  }
+   250→
+   251→  return composition;
+   252→}
+   253→
+   254→/**
+   255→ * Get full sequence statistics
+   256→ */
+   257→export function getSequenceStats(sequence: string): SequenceStats {
+   258→  const cleaned = cleanSequence(sequence);
+   259→  const type = detectSequenceType(cleaned);
+   260→  const gcContent = calculateGCContent(cleaned);
+   261→  const composition = getComposition(cleaned);
+   262→
+   263→  return {
+   264→    length: cleaned.length,
+   265→    type,
+   266→    gcContent: Math.round(gcContent * 100) / 100,
+   267→    composition
+   268→  };
+   269→}
+   270→
+   271→/**
+   272→ * Calculate reverse complement of DNA sequence
+   273→ */
+   274→export function reverseComplement(sequence: string): string {
+   275→  const complement: Record<string, string> = {
+   276→    'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G',
+   277→    'a': 't', 't': 'a', 'g': 'c', 'c': 'g',
+   278→    'U': 'A', 'u': 'a'
+   279→  };
+   280→
+   281→  const cleaned = cleanSequence(sequence);
+   282→  let result = '';
+   283→
+   284→  for (let i = cleaned.length - 1; i >= 0; i--) {
+   285→    const char = cleaned[i];
+   286→    result += complement[char] || char;
+   287→  }
+   288→
+   289→  return result;
+   290→}
+   291→
+   292→/**
+   293→ * Translate DNA/RNA to protein sequence
+   294→ */
+   295→export function translate(
+   296→  sequence: string,
+   297→  frame: number = 1,
+   298→  geneticCode: number = 1
+   299→): string {
+   300→  const cleaned = cleanSequence(sequence).replace(/U/g, 'T');
+   301→  const codeTable = GENETIC_CODES[geneticCode] || GENETIC_CODES[1];
+   302→  
+   303→  // Determine start position based on frame
+   304→  let startPos = 0;
+   305→  let reverseStrand = false;
+   306→
+   307→  if (frame < 0) {
+   308→    reverseStrand = true;
+   309→    startPos = Math.abs(frame) - 1;
+   310→  } else {
+   311→    startPos = frame - 1;
+   312→  }
+   313→
+   314→  let workingSeq = reverseStrand ? reverseComplement(cleaned) : cleaned;
+   315→  workingSeq = workingSeq.slice(startPos);
+   316→
+   317→  let protein = '';
+   318→  for (let i = 0; i < workingSeq.length - 2; i += 3) {
+   319→    const codon = workingSeq.slice(i, i + 3);
+   320→    if (codon.length === 3) {
+   321→      const aminoAcid = codeTable[codon] || 'X';
+   322→      protein += aminoAcid;
+   323→      if (aminoAcid === '*') break; // Stop codon
+   324→    }
+   325→  }
+   326→
+   327→  return protein;
+   328→}
+   329→
+   330→/**
+   331→ * Find all ORFs in a sequence
+   332→ */
+   333→export function findORFs(
+   334→  sequence: string,
+   335→  options: {
+   336→    minLength?: number;
+   337→    geneticCode?: number;
+   338→    allFrames?: boolean;
+   339→    startCodons?: string[];
+   340→  } = {}
+   341→): ORF[] {
+   342→  const {
+   343→    minLength = 30,
+   344→    geneticCode = 1,
+   345→    allFrames = true,
+   346→    startCodons = ['ATG']
+   347→  } = options;
+   348→
+   349→  const cleaned = cleanSequence(sequence).replace(/U/g, 'T');
+   350→  const orfs: ORF[] = [];
+   351→  const frames = allFrames ? [1, 2, 3, -1, -2, -3] : [1];
+   352→
+   353→  for (const frame of frames) {
+   354→    let workingSeq = frame < 0 ? reverseComplement(cleaned) : cleaned;
+   355→    const absFrame = Math.abs(frame);
+   356→    workingSeq = workingSeq.slice(absFrame - 1);
+   357→
+   358→    let inORF = false;
+   359→    let orfStart = 0;
+   360→
+   361→    for (let i = 0; i < workingSeq.length - 2; i += 3) {
+   362→      const codon = workingSeq.slice(i, i + 3);
+   363→
+   364→      if (startCodons.includes(codon) && !inORF) {
+   365→        inORF = true;
+   366→        orfStart = i;
+   367→      }
+   368→
+   369→      if (inORF && (codon === 'TAA' || codon === 'TAG' || codon === 'TGA')) {
+   370→        const orfEnd = i + 3;
+   371→        const orfSeq = workingSeq.slice(orfStart, orfEnd);
+   372→        
+   373→        if (orfSeq.length >= minLength) {
+   374→          const protein = translate(orfSeq, 1, geneticCode);
+   375→          orfs.push({
+   376→            start: orfStart + (absFrame - 1),
+   377→            end: orfEnd + (absFrame - 1),
+   378→            frame,
+   379→            sequence: orfSeq,
+   380→            protein: protein.replace(/\*$/, ''),
+   381→            length: orfSeq.length
+   382→          });
+   383→        }
+   384→        inORF = false;
+   385→      }
+   386→    }
+   387→
+   388→    // Handle ORFs that reach end without stop codon
+   389→    if (inORF) {
+   390→      const orfSeq = workingSeq.slice(orfStart);
+   391→      if (orfSeq.length >= minLength) {
+   392→        const protein = translate(orfSeq, 1, geneticCode);
+   393→        orfs.push({
+   394→          start: orfStart + (absFrame - 1),
+   395→          end: workingSeq.length + (absFrame - 1),
+   396→          frame,
+   397→          sequence: orfSeq,
+   398→          protein: protein.replace(/\*$/, ''),
+   399→          length: orfSeq.length
+   400→        });
+   401→      }
+   402→    }
+   403→  }
+   404→
+   405→  // Sort by length descending
+   406→  return orfs.sort((a, b) => b.length - a.length);
+   407→}
+   408→
+   409→/**
+   410→ * Simple Needleman-Wunsch global alignment (mock implementation)
+   411→ */
+   412→export function globalAlignment(
+   413→  seq1: string,
+   414→  seq2: string,
+   415→  options: {
+   416→    matchScore?: number;
+   417→    mismatchPenalty?: number;
+   418→    gapPenalty?: number;
+   419→  } = {}
+   420→): AlignmentResult {
+   421→  const {
+   422→    matchScore = 1,
+   423→    mismatchPenalty = -1,
+   424→    gapPenalty = -1
+   425→  } = options;
+   426→
+   427→  const s1 = cleanSequence(seq1);
+   428→  const s2 = cleanSequence(seq2);
+   429→  const m = s1.length;
+   430→  const n = s2.length;
+   431→
+   432→  // Initialize scoring matrix
+   433→  const scoreMatrix: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+   434→  
+   435→  for (let i = 0; i <= m; i++) scoreMatrix[i][0] = i * gapPenalty;
+   436→  for (let j = 0; j <= n; j++) scoreMatrix[0][j] = j * gapPenalty;
+   437→
+   438→  // Fill matrix
+   439→  for (let i = 1; i <= m; i++) {
+   440→    for (let j = 1; j <= n; j++) {
+   441→      const match = scoreMatrix[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty);
+   442→      const deleteGap = scoreMatrix[i-1][j] + gapPenalty;
+   443→      const insertGap = scoreMatrix[i][j-1] + gapPenalty;
+   444→      scoreMatrix[i][j] = Math.max(match, deleteGap, insertGap);
+   445→    }
+   446→  }
+   447→
+   448→  // Traceback
+   449→  let aligned1 = '';
+   450→  let aligned2 = '';
+   451→  let midpoint = '';
+   452→  let i = m, j = n;
+   453→  let matches = 0, similarities = 0, gaps = 0;
+   454→
+   455→  while (i > 0 || j > 0) {
+   456→    if (i > 0 && j > 0 && scoreMatrix[i][j] === scoreMatrix[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty)) {
+   457→      aligned1 = s1[i-1] + aligned1;
+   458→      aligned2 = s2[j-1] + aligned2;
+   459→      midpoint = (s1[i-1] === s2[j-1] ? '|' : '.') + midpoint;
+   460→      if (s1[i-1] === s2[j-1]) matches++;
+   461→      else similarities++;
+   462→      i--; j--;
+   463→    } else if (i > 0 && scoreMatrix[i][j] === scoreMatrix[i-1][j] + gapPenalty) {
+   464→      aligned1 = s1[i-1] + aligned1;
+   465→      aligned2 = '-' + aligned2;
+   466→      midpoint = ' ' + midpoint;
+   467→      gaps++;
+   468→      i--;
+   469→    } else {
+   470→      aligned1 = '-' + aligned1;
+   471→      aligned2 = s2[j-1] + aligned2;
+   472→      midpoint = ' ' + midpoint;
+   473→      gaps++;
+   474→      j--;
+   475→    }
+   476→  }
+   477→
+   478→  const alignmentLength = aligned1.length;
+   479→  similarities += matches; // Count matches as similarities too
+   480→
+   481→  return {
+   482→    alignedSeq1: aligned1,
+   483→    alignedSeq2: aligned2,
+   484→    score: scoreMatrix[m][n],
+   485→    identity: alignmentLength > 0 ? Math.round((matches / alignmentLength) * 10000) / 100 : 0,
+   486→    similarity: alignmentLength > 0 ? Math.round((similarities / alignmentLength) * 10000) / 100 : 0,
+   487→    gaps,
+   488→    midpoint
+   489→  };
+   490→}
+   491→
+   492→/**
+   493→ * Real Smith-Waterman Local Alignment Algorithm
+   494→ * Finds the best local alignment between two sequences
+   495→ * Uses dynamic programming with affine gap penalties supported
+   496→ */
+   497→export function localAlignment(
+   498→  seq1: string,
+   499→  seq2: string,
+   500→  options: {
+   501→    matchScore?: number;
+   502→    mismatchPenalty?: number;
+   503→    gapPenalty?: number;
+   504→  } = {}
+   505→): AlignmentResult {
+   506→  const {
+   507→    matchScore = 2,
+   508→    mismatchPenalty = -1,
+   509→    gapPenalty = -1
+   510→  } = options;
+   511→
+   512→  const s1 = cleanSequence(seq1);
+   513→  const s2 = cleanSequence(seq2);
+   514→  const m = s1.length;
+   515→  const n = s2.length;
+   516→  
+   517→  if (m === 0 || n === 0) {
+   518→    return {
+   519→      alignedSeq1: s1,
+   520→      alignedSeq2: s2,
+   521→      score: 0,
+   522→      identity: 0,
+   523→      similarity: 0,
+   524→      gaps: 0,
+   525→      midpoint: ''
+   526→    };
+   527→  }
+   528→
+   529→  // Initialize scoring matrices for Smith-Waterman
+   530→  // H is main scoring matrix, E for gaps in seq1, F for gaps in seq2
+   531→  const H: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+   532→  
+   533→  let maxScore = 0;
+   534→  let maxI = 0;
+   535→  let maxJ = 0;
+   536→
+   537→  // Fill the scoring matrix
+   538→  for (let i = 1; i <= m; i++) {
+   539→    for (let j = 1; j <= n; j++) {
+   540→      const match = H[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty);
+   541→      const deleteGap = H[i-1][j] + gapPenalty;  // gap in seq2 (deletion)
+   542→      const insertGap = H[i][j-1] + gapPenalty;  // gap in seq1 (insertion)
+   543→      
+   544→      // Smith-Waterman: take max of 0 and all options (local alignment)
+   545→      H[i][j] = Math.max(0, match, deleteGap, insertGap);
+   546→      
+   547→      // Track maximum score position
+   548→      if (H[i][j] > maxScore) {
+   549→        maxScore = H[i][j];
+   550→        maxI = i;
+   551→        maxJ = j;
+   552→      }
+   553→    }
+   554→  }
+   555→
+   556→  // Traceback from maximum score position
+   557→  let aligned1 = '';
+   558→  let aligned2 = '';
+   559→  let midpoint = '';
+   560→  let i = maxI, j = maxJ;
+   561→  let matches = 0, gaps = 0;
+   562→
+   563→  while (i > 0 && j > 0 && H[i][j] > 0) {
+   564→    const currentScore = H[i][j];
+   565→    
+   566→    if (i > 0 && j > 0 && currentScore === H[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty)) {
+   567→      aligned1 = s1[i-1] + aligned1;
+   568→      aligned2 = s2[j-1] + aligned2;
+   569→      midpoint = (s1[i-1] === s2[j-1] ? '|' : '.') + midpoint;
+   570→      if (s1[i-1] === s2[j-1]) matches++;
+   571→      i--; j--;
+   572→    } else if (i > 0 && currentScore === H[i-1][j] + gapPenalty) {
+   573→      aligned1 = s1[i-1] + aligned1;
+   574→      aligned2 = '-' + aligned2;
+   575→      midpoint = ' ' + midpoint;
+   576→      gaps++;
+   577→      i--;
+   578→    } else {
+   579→      aligned1 = '-' + aligned1;
+   580→      aligned2 = s2[j-1] + aligned2;
+   581→      midpoint = ' ' + midpoint;
+   582→      gaps++;
+   583→      j--;
+   584→    }
+   585→  }
+   586→
+   587→  const alignLength = aligned1.length || 1;
+   588→  
+   589→  return {
+   590→    alignedSeq1: aligned1,
+   591→    alignedSeq2: aligned2,
+   592→    score: maxScore,
+   593→    identity: Math.round((matches / alignLength) * 10000) / 100,
+   594→    similarity: Math.round(((matches + (alignLength - matches - gaps) * 0.5) / alignLength) * 10000) / 100,
+   595→    gaps,
+   596→    midpoint
+   597→  };
+   598→}
+   599→
+   600→/**
+   601→ * Mock BLAST search results
+   602→ */
+   603→export function mockBLASTSearch(
+   604→  sequence: string,
+   605→  options: {
+   606→    database?: string;
+   607→    maxTargets?: number;
+   608→    program?: string;
+   609→  } = {}
+   610→): BLASTResult {
+   611→  const {
+   612→    database = 'nr',
+   613→    maxTargets = 10,
+   614→    program = 'blastn'
+   615→  } = options;
+   616→
+   617→  const cleaned = cleanSequence(sequence);
+   618→  const queryLength = cleaned.length;
+   619→
+   620→  // Generate mock hits based on sequence characteristics
+   621→  const mockDescriptions = [
+   622→    'Homo sapiens chromosome 1 genomic contig',
+   623→    'Mus musculus clone RP23 genomic sequence',
+   624→    'Synthetic construct DNA',
+   625→    'Escherichia coli strain K-12 genome',
+   626→    'Bacillus subtilis subsp. subtilis str. 168',
+   627→    'Saccharomyces cerevisiae S288c chromosome IV',
+   628→    'Drosophila melanogaster chromosome 3L',
+   629→    'Caenorhabditis elegans chromosome I',
+   630→    'Arabidopsis thaliana chromosome 1',
+   631→    'Zea mays cultivar B73 genome'
+   632→  ];
+   633→
+   634→  const numHits = Math.min(maxTargets, Math.floor(queryLength / 20) + 1);
+   635→  const hits: BLASTHit[] = [];
+   636→
+   637→  for (let i = 0; i < numHits; i++) {
+   638→    const identity = 85 + Math.random() * 14;
+   639→    const alignLen = Math.floor(queryLength * (0.7 + Math.random() * 0.3));
+   640→    
+   641→    // Generate mock alignment
+   642→    const startIdx = Math.floor(Math.random() * (queryLength - alignLen));
+   643→    const queryAlign = cleaned.slice(startIdx, startIdx + alignLen);
+   644→    let subjectAlign = '';
+   645→    let mid = '';
+   646→    
+   647→    for (let j = 0; j < queryAlign.length; j++) {
+   648→      if (Math.random() < identity / 100) {
+   649→        subjectAlign += queryAlign[j];
+   650→        mid += '|';
+   651→      } else {
+   652→        subjectAlign += 'ACGT'[Math.floor(Math.random() * 4)];
+   653→        mid += '.';
+   654→      }
+   655→    }
+   656→
+   657→    hits.push({
+   658→      id: `gi|${Math.floor(Math.random() * 99999999)}|ref|NM_${Math.floor(Math.random() * 999999)}.${Math.floor(Math.random() * 5)}`,
+   659→      description: mockDescriptions[i % mockDescriptions.length],
+   660→      score: Math.floor(100 + Math.random() * 400),
+   661→      eValue: Math.pow(10, -(Math.floor(Math.random() * 150) + 1)),
+   662→      identity: Math.round(identity * 100) / 100,
+   663→      alignmentLength: alignLen,
+   664→      queryStart: startIdx + 1,
+   665→      queryEnd: startIdx + alignLen,
+   666→      subjectStart: Math.floor(Math.random() * 10000) + 1,
+   667→      subjectEnd: Math.floor(Math.random() * 10000) + alignLen,
+   668→      queryAlignment: queryAlign,
+   669→      subjectAlignment: subjectAlign,
+   670→      midpoint: mid
+   671→    });
+   672→
+   673→    // Sort by score descending
+   674→    hits.sort((a, b) => b.score - a.score);
+   675→  }
+   676→
+   677→  return {
+   678→    queryId: 'Query',
+   679→    queryLength,
+   680→    database,
+   681→    hits,
+   682→    statistics: {
+   683→      eValueThreshold: 10,
+   684→      wordSize: program === 'blastp' ? 3 : 11,
+   685→      matrix: program === 'blastp' ? 'BLOSUM62' : '',
+   686→      gapCosts: 'Existence: 5 Extension: 2'
+   687→    }
+   688→  };
+   689→}
+   690→
+   691→/**
+   692→ * Find restriction enzyme sites in sequence
+   693→ */
+   694→export function findRestrictionSites(
+   695→  sequence: string,
+   696→  enzymes: typeof RESTRICTION_ENZYMES = RESTRICTION_ENZYMES
+   697→): RestrictionSite[] {
+   698→  const cleaned = cleanSequence(sequence);
+   699→  const sites: RestrictionSite[] = [];
+   700→  const rcSeq = reverseComplement(cleaned);
+   701→
+   702→  for (const enzyme of enzymes) {
+   703→    // Forward strand
+   704→    let pos = cleaned.indexOf(enzyme.site);
+   705→    while (pos !== -1) {
+   706→      sites.push({
+   707→        enzyme: enzyme.name,
+   708→        recognitionSite: enzyme.site,
+   709→        position: pos,
+   710→        cutPosition: pos + enzyme.cutPos,
+   711→        strand: '+'
+   712→      });
+   713→      pos = cleaned.indexOf(enzyme.site, pos + 1);
+   714→    }
+   715→
+   716→    // Reverse strand
+   717→    const rcSite = reverseComplement(enzyme.site);
+   718→    pos = rcSeq.indexOf(rcSite);
+   719→    while (pos !== -1) {
+   720→      sites.push({
+   721→        enzyme: enzyme.name,
+   722→        recognitionSite: rcSite,
+   723→        position: cleaned.length - pos - rcSite.length,
+   724→        cutPosition: cleaned.length - pos - (rcSite.length - enzyme.cutPos),
+   725→        strand: '-'
+   726→      });
+   727→      pos = rcSeq.indexOf(rcSite, pos + 1);
+   728→    }
+   729→  }
+   730→
+   731→  return sites.sort((a, b) => a.position - b.position);
+   732→}
+   733→
+   734→/**
+   735→ * Search for motifs/patterns in sequence
+   736→ */
+   737→export function searchMotif(
+   738→  sequence: string,
+   739→  pattern: string,
+   740→  options: {
+   741→    caseSensitive?: boolean;
+   742→    allowMismatch?: boolean;
+   743→    maxMismatches?: number;
+   744→  } = {}
+   745→): MotifMatch[] {
+   746→  const {
+   747→    caseSensitive = false,
+   748→    allowMismatch = false,
+   749→    maxMismatches = 0
+   750→  } = options;
+   751→
+   752→  const cleaned = caseSensitive ? sequence.trim() : cleanSequence(sequence);
+   753→  const searchPattern = caseSensitive ? pattern : pattern.toUpperCase();
+   754→  const matches: MotifMatch[] = [];
+   755→
+   756→  for (let i = 0; i <= cleaned.length - searchPattern.length; i++) {
+   757→    const substring = cleaned.slice(i, i + searchPattern.length);
+   758→    
+   759→    if (substring === searchPattern) {
+   760→      matches.push({
+   761→        pattern: searchPattern,
+   762→        position: i,
+   763→        match: substring,
+   764→        strand: '+'
+   765→      });
+   766→    } else if (allowMismatch) {
+   767→      let mismatches = 0;
+   768→      for (let j = 0; j < searchPattern.length; j++) {
+   769→        if (substring[j] !== searchPattern[j]) mismatches++;
+   770→      }
+   771→      if (mismatches <= maxMismatches) {
+   772→        matches.push({
+   773→          pattern: searchPattern,
+   774→          position: i,
+   775→          match: substring,
+   776→          strand: '+'
+   777→        });
+   778→      }
+   779→    }
+   780→  }
+   781→
+   782→  // Also check reverse complement for DNA sequences
+   783→  const type = detectSequenceType(cleaned);
+   784→  if (type === 'DNA' || type === 'RNA') {
+   785→    const rcSeq = reverseComplement(cleaned);
+   786→    const rcPattern = reverseComplement(searchPattern);
+   787→    
+   788→    for (let i = 0; i <= rcSeq.length - rcPattern.length; i++) {
+   789→      const substring = rcSeq.slice(i, i + rcPattern.length);
+   790→      
+   791→      if (substring === rcPattern) {
+   792→        matches.push({
+   793→          pattern: searchPattern,
+   794→          position: cleaned.length - i - rcPattern.length,
+   795→          match: searchPattern,
+   796→          strand: '-'
+   797→        });
+   798→      }
+   799→    }
+   800→  }
+   801→
+   802→  return matches.sort((a, b) => a.position - b.position);
+   803→}
+   804→
+   805→/**
+   806→ * Parse FASTA format
+   807→ */
+   808→export function parseFASTA(fastaString: string): { name: string; sequence: string }[] {
+   809→  const entries: { name: string; sequence: string }[] = [];
+   810→  const lines = fastaString.split('\n');
+   811→  let currentName = '';
+   812→  let currentSequence = '';
+   813→
+   814→  for (const line of lines) {
+   815→    const trimmed = line.trim();
+   816→    if (trimmed.startsWith('>')) {
+   817→      if (currentName) {
+   818→        entries.push({ name: currentName, sequence: currentSequence });
+   819→      }
+   820→      currentName = trimmed.slice(1).split(/\s/)[0];
+   821→      currentSequence = '';
+   822→    } else {
+   823→      currentSequence += trimmed;
+   824→    }
+   825→  }
+   826→
+   827→  if (currentName) {
+   828→    entries.push({ name: currentName, sequence: currentSequence });
+   829→  }
+   830→
+   831→  return entries;
+   832→}
+   833→
+   834→/**
+   835→ * Format as FASTA
+   836→ */
+   837→export function formatFASTA(name: string, sequence: string, lineLength: number = 60): string {
+   838→  const lines: string[] = [];
+   839→  lines.push(`>${name}`);
+   840→  
+   841→  for (let i = 0; i < sequence.length; i += lineLength) {
+   842→    lines.push(sequence.slice(i, i + lineLength));
+   843→  }
+   844→
+   845→  return lines.join('\n');
+   846→}
+   847→
+   848→/**
+   849→ * Validate sequence input
+   850→ */
+   851→export function validateSequence(sequence: string): { valid: boolean; errors: string[] } {
+   852→  const errors: string[] = [];
+   853→  const cleaned = cleanSequence(sequence);
+   854→
+   855→  if (!cleaned) {
+   856→    errors.push('Sequence is empty');
+   857→    return { valid: false, errors };
+   858→  }
+   859→
+   860→  if (cleaned.length < 2) {
+   861→    errors.push('Sequence is too short (minimum 2 characters)');
+   862→  }
+   863→
+   864→  // Check for invalid characters
+   865→  const validChars = new Set('ACGTURYNWSMKHBVDacgturynwsmkhbvd');
+   866→  const invalidChars: string[] = [];
+   867→  
+   868→  for (const char of cleaned) {
+   869→    if (!validChars.has(char)) {
+   870→      invalidChars.push(char);
+   871→    }
+   872→  }
+   873→
+   874→  if (invalidChars.length > 0) {
+   875→    const uniqueInvalid = [...new Set(invalidChars)].join(', ');
+   876→    errors.push(`Invalid character(s) found: ${uniqueInvalid}`);
+   877→  }
+   878→
+   879→  return { valid: errors.length === 0, errors };
+   880→}
+   881→

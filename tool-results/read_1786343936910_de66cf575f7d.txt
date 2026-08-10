@@ -1,0 +1,1789 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback, useRef } from 'react'
+     4→import { motion, AnimatePresence } from 'framer-motion'
+     5→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Input } from '@/components/ui/input'
+     8→import { Label } from '@/components/ui/label'
+     9→import { Textarea } from '@/components/ui/textarea'
+    10→import { Badge } from '@/components/ui/badge'
+    11→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    12→import { 
+    13→  Table,
+    14→  TableBody,
+    15→  TableCell,
+    16→  TableHead,
+    17→  TableHeader,
+    18→  TableRow,
+    19→} from '@/components/ui/table'
+    20→import { 
+    21→  ScatterChart, 
+    22→  PieChart, 
+    23→  TrendingUp, 
+    24→  Info, 
+    25→  Upload, 
+    26→  Download,
+    27→  Calculator,
+    28→  AlertCircle,
+    29→  FileText,
+    30→  BarChart3,
+    31→  Target,
+    32→  Compass,
+    33→  Star,
+    34→  CheckCircle2,
+    35→  XCircle
+    36→} from 'lucide-react'
+    37→import { mean, variance, fDistributionCDF } from '@/lib/statistics-engine'
+    38→
+    39→// ============================================================================
+    40→// TYPE DEFINITIONS
+    41→// ============================================================================
+    42→
+    43→interface PCAxis {
+    44→  axis: number
+    45→  singularValue: number
+    46→  eigenvalue: number
+    47→  variancePercent: number
+    48→  cumulativePercent: number
+    49→}
+    50→
+    51→interface GenotypeCoordinate {
+    52→  genotype: string
+    53→  pc1: number
+    54→  pc2: number
+    55→  pc3?: number
+    56→  meanYield: number
+    57→  stabilityMeasure: number
+    58→  stabilityRank: number
+    59→  meanRank: number
+    60→  idealDistance: number
+    61→  category: string
+    62→}
+    63→
+    64→interface EnvironmentCoordinate {
+    65→  environment: string
+    66→  pc1: number
+    67→  pc2: number
+    68→  pc3?: number
+    69→  meanYield: number
+    70→  vectorLength: number
+    71→  discriminatingPower: string
+    72→  representativeness: number
+    73→  idealEnvDistance: number
+    74→}
+    75→
+    76→interface WhichWonWhereEntry {
+    77→  sector: number
+    78→  winningGenotype: string
+    79→  environments: string[]
+    80→  vertexGenotypes: string[]
+    81→}
+    82→
+    83→interface GGEBiplotResult {
+    84→  // Data info
+    85→  genotypes: string[]
+    86→  environments: string[]
+    87→  dataMatrix: number[][]
+    88→  
+    89→  // Centered matrix (G + GE)
+    90→  centeredMatrix: number[][]
+    91→  environmentMeans: number[]
+    92→  
+    93→  // SVD results
+    94→  singularValues: number[]
+    95→  pcAxes: PCAxis[]
+    96→  
+    97→  // Coordinates
+    98→  genotypeCoords: GenotypeCoordinate[]
+    99→  environmentCoords: EnvironmentCoordinate[]
+   100→  
+   101→  // Which-won-where
+   102→  whichWonWhere: WhichWonWhereEntry[]
+   103→  
+   104→  // Ideal points
+   105→  idealGenotype: { pc1: number; pc2: number }
+   106→  idealEnvironment: { pc1: number; pc2: number }
+   107→  
+   108→  // ANOVA summary
+   109→  anova: {
+   110→    totalSS: number
+   111→    environmentSS: number
+   112→    ggeSS: number
+   113→    ggePercent: number
+   114→  }
+   115→  
+   116→  // Scaling method used
+   117→  scalingMethod: 'symmetric' | 'genotype' | 'environment'
+   118→}
+   119→
+   120→type BiplotView = 'whichWonWhere' | 'meanVsStability' | 'discriminatingVsRepresent' | 'idealGenotype' | 'idealEnvironment'
+   121→
+   122→// ============================================================================
+   123→// SAMPLE DATA
+   124→// ============================================================================
+   125→
+   126→const SAMPLE_DATA = `Genotype,Env1,Env2,Env3,Env4
+   127→G1,3200,2850,3100,2980
+   128→G2,2800,3100,2750,3050
+   129→G3,3500,3200,3400,3300
+   130→G4,2900,2600,2850,2700
+   131→G5,3800,3500,3700,3600
+   132→G6,3100,3400,3050,3350
+   133→G7,2650,2400,2600,2500
+   134→G8,3350,3650,3300,3580
+   135→G9,3950,3700,3900,3800
+   136→G10,3000,2750,2950,2800`
+   137→
+   138→// ============================================================================
+   139→// MATRIX UTILITIES FOR SVD COMPUTATION
+   140→// ============================================================================
+   141→
+   142→function matrixTranspose(matrix: number[][]): number[][] {
+   143→  if (matrix.length === 0) return []
+   144→  return matrix[0].map((_, colIdx) => matrix.map(row => row[colIdx]))
+   145→}
+   146→
+   147→function matrixMultiply(A: number[][], B: number[][]): number[][] {
+   148→  const rowsA = A.length
+   149→  const colsA = A[0]?.length || 0
+   150→  const colsB = B[0]?.length || 0
+   151→  
+   152→  const result: number[][] = []
+   153→  for (let i = 0; i < rowsA; i++) {
+   154→    result[i] = []
+   155→    for (let j = 0; j < colsB; j++) {
+   156→      let sum = 0
+   157→      for (let k = 0; k < colsA; k++) {
+   158→        sum += A[i][k] * B[k][j]
+   159→      }
+   160→      result[i][j] = sum
+   161→    }
+   162→  }
+   163→  return result
+   164→}
+   165→
+   166→function copyMatrix(mat: number[][]): number[][] {
+   167→  return mat.map(row => [...row])
+   168→}
+   169→
+   170→function matrixMultiplyVector(matrix: number[][], vec: number[]): number[] {
+   171→  return matrix.map(row => 
+   172→    row.reduce((sum, val, i) => sum + val * (vec[i] || 0), 0)
+   173→  )
+   174→}
+   175→
+   176→/**
+   177→ * Compute Singular Value Decomposition using power iteration with deflation
+   178→ * Returns U, singular values array, and V transpose
+   179→ */
+   180→function computeSVD(
+   181→  matrix: number[][]
+   182→): { U: number[][]; S: number[]; Vt: number[][] } {
+   183→  const m = matrix.length
+   184→  const n = matrix[0]?.length || 0
+   185→  
+   186→  if (m === 0 || n === 0) {
+   187→    return { U: [], S: [], Vt: [] }
+   188→  }
+   189→  
+   190→  // Work with A^T * A for numerical stability
+   191→  const AtA = matrixMultiply(matrixTranspose(matrix), matrix)
+   192→  const size = Math.min(m, n)
+   193→  
+   194→  const eigenvalues: number[] = []
+   195→  const eigenvectors: number[][] = []
+   196→  
+   197→  let workingMatrix = copyMatrix(AtA)
+   198→  
+   199→  for (let iter = 0; iter < size; iter++) {
+   200→    let v = new Array(n).fill(0)
+   201→    v[iter < n ? iter : 0] = 1
+   202→    
+   203→    for (let powerIter = 0; powerIter < 100; powerIter++) {
+   204→      const Av = eigenvectors.length > 0 && iter > 0 
+   205→        ? deflateVector(matrixMultiply(workingMatrix, v), eigenvectors, eigenvalues)
+   206→        : matrixMultiplyVector(workingMatrix, v)
+   207→      
+   208→      const norm = Math.sqrt(Av.reduce((sum, x) => sum + x * x, 0))
+   209→      if (norm < 1e-10) break
+   210→      
+   211→      v = Av.map(x => x / norm)
+   212→    }
+   213→    
+   214→    const Av = matrixMultiplyVector(workingMatrix, v)
+   215→    const eigenvalue = v.reduce((sum, vi, i) => sum + vi * Av[i], 0)
+   216→    
+   217→    if (eigenvalue > 1e-10) {
+   218→      eigenvalues.push(Math.max(0, eigenvalue))
+   219→      eigenvectors.push(v)
+   220→      
+   221→      // Deflate
+   222→      for (let i = 0; i < n; i++) {
+   223→        for (let j = 0; j < n; j++) {
+   224→          workingMatrix[i][j] -= eigenvalue * v[i] * v[j]
+   225→        }
+   226→      }
+   227→    } else {
+   228→      break
+   229→    }
+   230→  }
+   231→  
+   232→  const S = eigenvalues.map(ev => Math.sqrt(ev))
+   233→  const V = eigenvectors.length > 0 ? matrixTranspose(eigenvectors) : []
+   234→  const Vt = matrixTranspose(V)
+   235→  
+   236→  // Compute U = A * V * Σ^(-1)
+   237→  const U: number[][] = []
+   238→  for (let i = 0; i < m; i++) {
+   239→    U[i] = []
+   240→    for (let j = 0; j < S.length; j++) {
+   241→      if (S[j] > 1e-10) {
+   242→        let sum = 0
+   243→        for (let k = 0; k < n; k++) {
+   244→          sum += matrix[i][k] * (V[k]?.[j] || 0)
+   245→        }
+   246→        U[i][j] = sum / S[j]
+   247→      } else {
+   248→        U[i][j] = 0
+   249→      }
+   250→    }
+   251→  }
+   252→  
+   253→  return { U, S, Vt }
+   254→}
+   255→
+   256→function deflateVector(
+   257→  v: number[], 
+   258→  eigenvectors: number[][], 
+   259→  eigenvalues: number[]
+   260→): number[] {
+   261→  let result = [...v]
+   262→  for (let k = 0; k < eigenvectors.length; k++) {
+   263→    const dot = v.reduce((sum, vi, i) => sum + vi * eigenvectors[k][i], 0)
+   264→    for (let i = 0; i < v.length; i++) {
+   265→      result[i] -= dot * eigenvalues[k] * eigenvectors[k][i]
+   266→    }
+   267→  }
+   268→  return result
+   269→}
+   270→
+   271→/**
+   272→ * Calculate angle between two vectors in radians
+   273→ */
+   274→function angleBetween(v1: [number, number], v2: [number, number]): number {
+   275→  const dot = v1[0] * v2[0] + v1[1] * v2[1]
+   276→  const norm1 = Math.sqrt(v1[0] ** 2 + v1[1] ** 2)
+   277→  const norm2 = Math.sqrt(v2[0] ** 2 + v2[1] ** 2)
+   278→  if (norm1 < 1e-10 || norm2 < 1e-10) return 0
+   279→  return Math.acos(Math.max(-1, Math.min(1, dot / (norm1 * norm2))))
+   280→}
+   281→
+   282→/**
+   283→ * Calculate cross product (for determining sector)
+   284→ */
+   285→function crossProduct(v1: [number, number], v2: [number, number]): number {
+   286→  return v1[0] * v2[1] - v1[1] * v2[0]
+   287→}
+   288→
+   289→// ============================================================================
+   290→// GGE BILOT ANALYSIS FUNCTION
+   291→// ============================================================================
+   292→
+   293→/**
+   294→ * Perform complete GGE Biplot Analysis based on Yan & Kang (2003) methodology
+   295→ * 
+   296→ * Key concept: GGE Biplot = "Genotype main effect + Genotype × Environment interaction"
+   297→ * This is different from AMMI which analyzes only the G×E interaction.
+   298→ * 
+   299→ * Steps:
+   300→ * 1. Center data by environment means (remove environment main effect)
+   301→ * 2. SVD of the centered (G+GE) matrix
+   302→ * 3. Calculate coordinates for genotypes and environments
+   303→ * 4. Determine which-won-where pattern
+   304→ */
+   305→function performGGEBiplotAnalysis(
+   306→  genotypeNames: string[],
+   307→  environmentNames: string[],
+   308→  dataMatrix: number[][],
+   309→  scalingMethod: 'symmetric' | 'genotype' | 'environment' = 'symmetric'
+   310→): GGEBiplotResult {
+   311→  const g = genotypeNames.length
+   312→  const e = environmentNames.length
+   313→  const N = g * e
+   314→  
+   315→  // Step 1: Calculate environment means and center the data
+   316→  const environmentMeans: number[] = []
+   317→  const centeredMatrix: number[][] = []
+   318→  
+   319→  for (let j = 0; j < e; j++) {
+   320→    let envSum = 0
+   321→    for (let i = 0; i < g; i++) {
+   322→      envSum += dataMatrix[i][j]
+   323→    }
+   324→    environmentMeans.push(envSum / g)
+   325→  }
+   326→  
+   327→  // Center by environment means: Y_ij - Ȳ_j
+   328→  // This removes environment main effect, leaving G + GE
+   329→  let totalCenteredSS = 0
+   330→  for (let i = 0; i < g; i++) {
+   331→    centeredMatrix[i] = []
+   332→    for (let j = 0; j < e; j++) {
+   333→      const centered = dataMatrix[i][j] - environmentMeans[j]
+   334→      centeredMatrix[i][j] = centered
+   335→      totalCenteredSS += centered ** 2
+   336→    }
+   337→  }
+   338→  
+   339→  // Step 2: Total SS and Environment SS for reference
+   340→  const grandMean = dataMatrix.flat().reduce((a, b) => a + b, 0) / N
+   341→  let totalSS = 0
+   342→  for (let i = 0; i < g; i++) {
+   343→    for (let j = 0; j < e; j++) {
+   344→      totalSS += (dataMatrix[i][j] - grandMean) ** 2
+   345→    }
+   346→  }
+   347→  
+   348→  let environmentSS = 0
+   349→  for (let j = 0; j < e; j++) {
+   350→    environmentSS += g * (environmentMeans[j] - grandMean) ** 2
+   351→  }
+   352→  
+   353→  const ggeSS = totalCenteredSS
+   354→  
+   355→  // Step 3: SVD of centered (G+GE) matrix
+   356→  const { U, S, Vt } = computeSVD(centeredMatrix)
+   357→  
+   358→  // Step 4: Calculate variance explained
+   359→  const numPCs = Math.min(S.length, Math.min(g, e))
+   360→  let cumulativeVariance = 0
+   361→  const pcAxes: PCAxis[] = []
+   362→  
+   363→  for (let k = 0; k < numPCs; k++) {
+   364→    const eigenvalue = S[k] ** 2
+   365→    const variancePercent = (eigenvalue / ggeSS) * 100
+   366→    cumulativeVariance += variancePercent
+   367→    
+   368→    pcAxes.push({
+   369→      axis: k + 1,
+   370→      singularValue: S[k],
+   371→      eigenvalue,
+   372→      variancePercent,
+   373→      cumulativePercent: cumulativeVariance
+   374→    })
+   375→  }
+   376→  
+   377→  // Step 5: Calculate coordinates based on scaling method
+   378→  // Symmetric scaling: sqrt(lambda) for both
+   379→  // Genotype-focused: full lambda to genotype
+   380→  // Environment-focused: full lambda to environment
+   381→  
+   382→  let genotypeScaling: number[]
+   383→  let environmentScaling: number[]
+   384→  
+   385→  if (scalingMethod === 'symmetric') {
+   386→    const sqrtS = S.map(s => Math.sqrt(s))
+   387→    genotypeScaling = sqrtS
+   388→    environmentScaling = sqrtS
+   389→  } else if (scalingMethod === 'genotype') {
+   390→    genotypeScaling = S.map(s => s)
+   391→    environmentScaling = S.map(s => 1)
+   392→  } else {
+   393→    genotypeScaling = S.map(s => 1)
+   394→    environmentScaling = S.map(s => s)
+   395→  }
+   396→  
+   397→  // Step 6: Calculate genotype coordinates
+   398→  const genotypeMeans: number[] = []
+   399→  for (let i = 0; i < g; i++) {
+   400→    let sum = 0
+   401→    for (let j = 0; j < e; j++) {
+   402→      sum += dataMatrix[i][j]
+   403→    }
+   404→    genotypeMeans.push(sum / e)
+   405→  }
+   406→  
+   407→  const genotypeCoords: GenotypeCoordinate[] = []
+   408→  for (let i = 0; i < g; i++) {
+   409→    const pc1 = (U[i]?.[0] || 0) * (genotypeScaling[0] || 0)
+   410→    const pc2 = (U[i]?.[1] || 0) * (genotypeScaling[1] || 0)
+   411→    const pc3 = (U[i]?.[2] || 0) * (genotypeScaling[2] || 0)
+   412→    
+   413→    // Stability measure: distance from origin in PC space
+   414→    // In GGE biplot, stability is inversely related to this distance
+   415→    const stabilityMeasure = Math.sqrt(pc1 ** 2 + pc2 ** 2)
+   416→    
+   417→    // Mean yield rank (higher is better)
+   418→    const meanYield = genotypeMeans[i]
+   419→    
+   420→    // Ideal genotype distance: distance from "ideal" point
+   421→    // The ideal genotype has highest mean AND perfect stability
+   422→    // We'll calculate this after determining the ideal point
+   423→    
+   424→    let category: string
+   425→    if (stabilityMeasure < 50) category = 'Very Stable'
+   426→    else if (stabilityMeasure < 100) category = 'Stable'
+   427→    else if (stabilityMeasure < 200) category = 'Moderate'
+   428→    else if (stabilityMeasure < 350) category = 'Unstable'
+   429→    else category = 'Very Unstable'
+   430→    
+   431→    genotypeCoords.push({
+   432→      genotype: genotypeNames[i],
+   433→      pc1,
+   434→      pc2,
+   435→      pc3,
+   436→      meanYield,
+   437→      stabilityMeasure,
+   438→      stabilityRank: 0,
+   439→      meanRank: 0,
+   440→      idealDistance: 0,
+   441→      category
+   442→    })
+   443→  }
+   444→  
+   445→  // Rank genotypes by mean yield and stability
+   446→  const sortedByMean = [...genotypeCoords].sort((a, b) => b.meanYield - a.meanYield)
+   447→  sortedByMean.forEach((g, idx) => {
+   448→    const original = genotypeCoords.find(gc => gc.genotype === g.genotype)
+   449→    if (original) original.meanRank = idx + 1
+   450→  })
+   451→  
+   452→  const sortedByStability = [...genotypeCoords].sort((a, b) => a.stabilityMeasure - b.stabilityMeasure)
+   453→  sortedByStability.forEach((g, idx) => {
+   454→    const original = genotypeCoords.find(gc => gc.genotype === g.genotype)
+   455→    if (original) original.stabilityRank = idx + 1
+   456→  })
+   457→  
+   458→  // Step 7: Calculate environment coordinates
+   459→  const environmentCoords: EnvironmentCoordinate[] = []
+   460→  for (let j = 0; j < e; j++) {
+   461→    const pc1 = (Vt[0]?.[j] || 0) * (environmentScaling[0] || 0)
+   462→    const pc2 = (Vt[1]?.[j] || 0) * (environmentScaling[1] || 0)
+   463→    const pc3 = (Vt[2]?.[j] || 0) * (environmentScaling[2] || 0)
+   464→    
+   465→    // Vector length = discriminating power
+   466→    const vectorLength = Math.sqrt(pc1 ** 2 + pc2 ** 2)
+   467→    
+   468→    let discriminatingPower: string
+   469→    if (vectorLength > 150) discriminatingPower = 'High'
+   470→    else if (vectorLength > 80) discriminatingPower = 'Moderate'
+   471→    else discriminatingPower = 'Low'
+   472→    
+   473→    // Representativeness: correlation with average environment
+   474→    // Average environment has coordinates at average of all env coordinates
+   475→    // For now, use proximity to origin as proxy (will refine after all coords calculated)
+   476→    
+   477→    environmentCoords.push({
+   478→      environment: environmentNames[j],
+   479→      pc1,
+   480→      pc2,
+   481→      pc3,
+   482→      meanYield: environmentMeans[j],
+   483→      vectorLength,
+   484→      discriminatingPower,
+   485→      representativeness: 0,
+   486→      idealEnvDistance: 0
+   487→    })
+   488→  }
+   489→  
+   490→  // Calculate representativeness (angle with average environment axis)
+   491→  const avgEnvPC1 = environmentCoords.reduce((sum, e) => sum + e.pc1, 0) / e
+   492→  const avgEnvPC2 = environmentCoords.reduce((sum, e) => sum + e.pc2, 0) / e
+   493→  const avgEnvVector: [number, number] = [avgEnvPC1, avgEnvPC2]
+   494→  const avgEnvNorm = Math.sqrt(avgEnvPC1 ** 2 + avgEnvPC2 ** 2)
+   495→  
+   496→  for (const env of environmentCoords) {
+   497→    const envVector: [number, number] = [env.pc1, env.pc2]
+   498→    const cosAngle = avgEnvNorm > 1e-10 
+   499→      ? (envVector[0] * avgEnvVector[0] + envVector[1] * avgEnvVector[1]) / (Math.sqrt(envVector[0] ** 2 + envVector[1] ** 2) * avgEnvNorm)
+   500→      : 1
+   501→    env.representativeness = Math.max(-1, Math.min(1, cosAngle))
+   502→  }
+   503→  
+   504→  // Step 8: Determine ideal genotype point
+   505→  // Ideal genotype: one with highest mean performance AND absolute stability
+   506→  // Located at the intersection of "ideal" position - longest vector in positive PC1 direction
+   507→  // that also has minimum PC2 (stability)
+   508→  
+   509→  // Find the genotype with maximum PC1 (mean performance proxy in symmetric scaling)
+   510→  const maxPC1 = Math.max(...genotypeCoords.map(g => g.pc1))
+   511→  const minAbsPC2AmongTop = Math.min(
+   512→    ...genotypeCoords
+   513→      .filter(g => g.pc1 > maxPC1 * 0.8)
+   514→      .map(g => Math.abs(g.pc2))
+   515→  )
+   516→  
+   517→  // Ideal genotype is at the "arrow head" position
+   518→  const idealGenotype = {
+   519→    pc1: maxPC1 * 1.15,  // Extend slightly beyond best genotype
+   520→    pc2: 0               // Perfect stability
+   521→  }
+   522→  
+   523→  // Calculate distances to ideal genotype
+   524→  for (const geno of genotypeCoords) {
+   525→    const dx = geno.pc1 - idealGenotype.pc1
+   526→    const dy = geno.pc2 - idealGenotype.pc2
+   527→    geno.idealDistance = Math.sqrt(dx ** 2 + dy ** 2)
+   528→  }
+   529→  
+   530→  // Step 9: Determine ideal environment point
+   531→  // Ideal environment: high discriminating power + high representativeness
+   532→  // Located in direction of average environment with long vector
+   533→  const idealEnvironment = {
+   534→    pc1: avgEnvPC1 * 1.3,
+   535→    pc2: avgEnvPC2 * 1.3
+   536→  }
+   537→  
+   538→  // Calculate distances to ideal environment
+   539→  for (const env of environmentCoords) {
+   540→    const dx = env.pc1 - idealEnvironment.pc1
+   541→    const dy = env.pc2 - idealEnvironment.pc2
+   542→    env.idealEnvDistance = Math.sqrt(dx ** 2 + dy ** 2)
+   543→  }
+   544→  
+   545→  // Step 10: Which-Won-Where analysis
+   546→  // Draw convex hull around genotypes, determine sectors, assign environments
+   547→  const whichWonWhere = performWhichWonWhere(genotypeCoords, environmentCoords)
+   548→  
+   549→  return {
+   550→    genotypes: genotypeNames,
+   551→    environments: environmentNames,
+   552→    dataMatrix,
+   553→    centeredMatrix,
+   554→    environmentMeans,
+   555→    singularValues: S,
+   556→    pcAxes,
+   557→    genotypeCoords,
+   558→    environmentCoords,
+   559→    whichWonWhere,
+   560→    idealGenotype,
+   561→    idealEnvironment,
+   562→    anova: {
+   563→      totalSS,
+   564→      environmentSS,
+   565→      ggeSS,
+   566→      ggePercent: (ggeSS / totalSS) * 100
+   567→    },
+   568→    scalingMethod
+   569→  }
+   570→}
+   571→
+   572→/**
+   573→ * Perform Which-Won-Where analysis using polygon view approach
+   574→ * Based on Yan et al. (2000) methodology
+   575→ */
+   576→function performWhichWonWhere(
+   577→  genotypeCoords: GenotypeCoordinate[],
+   578→  environmentCoords: EnvironmentCoordinate[]
+   579→): WhichWonWhereEntry[] {
+   580→  if (genotypeCoords.length < 3) {
+   581→    return [{
+   582→      sector: 1,
+   583→      winningGenotype: genotypeCoords[0]?.genotype || '',
+   584→      environments: environmentCoords.map(e => e.environment),
+   585→      vertexGenotypes: genotypeCoords.map(g => g.genotype)
+   586→    }]
+   587→  }
+   588→  
+   589→  // Find convex hull vertices (genotypes on the outer boundary)
+   590→  const points = genotypeCoords.map(g => ({ x: g.pc1, y: g.pc2, name: g.genotype }))
+   591→  const hullIndices = convexHull(points)
+   592→  const vertexGenotypes = hullIndices.map(i => genotypeCoords[i].genotype)
+   593→  
+   594→  // Determine sectors from the origin through each vertex
+   595→  // Each sector is defined by perpendicular bisectors of adjacent hull edges
+   596→  const sectors: { startAngle: number; endAngle: number; vertex: string }[] = []
+   597→  
+   598→  for (let i = 0; i < hullIndices.length; i++) {
+   599→    const currIdx = hullIndices[i]
+   600→    const nextIdx = hullIndices[(i + 1) % hullIndices.length]
+   601→    
+   602→    const currPoint = points[currIdx]
+   603→    const nextPoint = points[nextIdx]
+   604→    
+   605→    // Angle to current vertex
+   606→    const angleCurr = Math.atan2(currPoint.y, currPoint.x)
+   607→    const angleNext = Math.atan2(nextPoint.y, nextPoint.x)
+   608→    
+   609→    // Sector midpoint (direction to winning area)
+   610→    let startAngle: number
+   611→    let endAngle: number
+   612→    
+   613→    if (i === 0) {
+   614→      // First sector: from previous vertex's bisector to current bisector
+   615→      const prevIdx = hullIndices[hullIndices.length - 1]
+   616→      const prevPoint = points[prevIdx]
+   617→      const anglePrev = Math.atan2(prevPoint.y, prevPoint.x)
+   618→      
+   619→      startAngle = (anglePrev + angleCurr) / 2
+   620→      if (angleCurr > anglePrev) startAngle += Math.PI
+   621→      
+   622→      endAngle = (angleCurr + angleNext) / 2
+   623→      if (angleNext < angleCurr) endAngle += Math.PI
+   624→    } else {
+   625→      const prevIdx = hullIndices[i - 1]
+   626→      const prevPoint = points[prevIdx]
+   627→      const anglePrev = Math.atan2(prevPoint.y, prevPoint.x)
+   628→      
+   629→      startAngle = (anglePrev + angleCurr) / 2
+   630→      endAngle = (angleCurr + angleNext) / 2
+   631→    }
+   632→    
+   633→    sectors.push({
+   634→      startAngle,
+   635→      endAngle,
+   636→      vertex: genotypeCoords[currIdx].genotype
+   637→    })
+   638→  }
+   639→  
+   640→  // Assign each environment to a sector
+   641→  const results: Map<string, { winner: string; sector: number; vertices: string[] }> = new Map()
+   642→  
+   643→  for (const env of environmentCoords) {
+   644→    const envAngle = Math.atan2(env.pc2, env.pc1)
+   645→    
+   646→    let assignedSector = 0
+   647→    let minAngleDiff = Infinity
+   648→    
+   649→    for (let s = 0; s < sectors.length; s++) {
+   650→      const sector = sectors[s]
+   651→      
+   652→      // Normalize angles for comparison
+   653→      let angleDiff = Math.abs(envAngle - (sector.startAngle + sector.endAngle) / 2)
+   654→      if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff
+   655→      
+   656→      if (angleDiff < minAngleDiff) {
+   657→        minAngleDiff = angleDiff
+   658→        assignedSector = s
+   659→      }
+   660→    }
+   661→    
+   662→    results.set(env.environment, {
+   663→      winner: sectors[assignedSector]?.vertex || genotypeCoords[0].genotype,
+   664→      sector: assignedSector + 1,
+   665→      vertices: vertexGenotypes
+   666→    })
+   667→  }
+   668→  
+   669→  // Group by winning genotype
+   670→  const winnerMap = new Map<string, string[]>()
+   671→  for (const [, value] of results) {
+   672→    if (!winnerMap.has(value.winner)) {
+   673→      winnerMap.set(value.winner, [])
+   674→    }
+   675→  }
+   676→  
+   677→  for (const [envName, value] of results) {
+   678→    winnerMap.get(value.winner)?.push(envName)
+   679→  }
+   680→  
+   681→  // Build final result
+   682→  const whichWonWhere: WhichWonWhereEntry[] = []
+   683→  let sectorNum = 1
+   684→  
+   685→  for (const [winner, envs] of winnerMap) {
+   686→    whichWonWhere.push({
+   687→      sector: sectorNum++,
+   688→      winningGenotype: winner,
+   689→      environments: envs.sort(),
+   690→      vertexGenotypes: vertexGenotypes
+   691→    })
+   692→  }
+   693→  
+   694→  // Sort by sector number
+   695→  whichWonWhere.sort((a, b) => a.sector - b.sector)
+   696→  
+   697→  // If no sectors determined, put everything in one
+   698→  if (whichWonWhere.length === 0) {
+   699→    whichWonWhere.push({
+   700→      sector: 1,
+   701→      winningGenotype: genotypeCoords.sort((a, b) => b.meanYield - a.meanYield)[0]?.genotype || '',
+   702→      environments: environmentCoords.map(e => e.environment),
+   703→      vertexGenotypes: vertexGenotypes
+   704→    })
+   705→  }
+   706→  
+   707→  return whichWonWhere
+   708→}
+   709→
+   710→/**
+   711→ * Compute convex hull using Graham scan algorithm
+   712→ * Returns indices of points forming the convex hull
+   713→ */
+   714→function convexHull(points: { x: number; y: number; name: string }[]): number[] {
+   715→  if (points.length <= 2) return points.map((_, i) => i)
+   716→  
+   717→  // Find lowest point (by y, then by x)
+   718→  let lowest = 0
+   719→  for (let i = 1; i < points.length; i++) {
+   720→    if (points[i].y < points[lowest].y || 
+   721→        (points[i].y === points[lowest].y && points[i].x < points[lowest].x)) {
+   722→      lowest = i
+   723→    }
+   724→  }
+   725→  
+   726→  // Sort by polar angle from lowest point
+   727→  const start = points[lowest]
+   728→  const sorted = points
+   729→    .map((p, i) => ({ ...p, originalIndex: i }))
+   730→    .filter((_, i) => i !== lowest)
+   731→    .sort((a, b) => {
+   732→      const angleA = Math.atan2(a.y - start.y, a.x - start.x)
+   733→      const angleB = Math.atan2(b.y - start.y, b.x - start.x)
+   734→      return angleA - angleB
+   735→    })
+   736→  
+   737→  // Build hull
+   738→  const hull: number[] = [lowest]
+   739→  
+   740→  for (const p of sorted) {
+   741→    while (hull.length > 1) {
+   742→      const top = points[hull[hull.length - 1]]
+   743→      const nextToTop = points[hull[hull.length - 2]]
+   744→      
+   745→      // Cross product to check orientation
+   746→      const cross = (top.x - nextToTop.x) * (p.y - top.y) - (top.y - nextToTop.y) * (p.x - top.x)
+   747→      
+   748→      if (cross <= 0) {
+   749→        hull.pop()
+   750→      } else {
+   751→        break
+   752→      }
+   753→    }
+   754→    hull.push(p.originalIndex)
+   755→  }
+   756→  
+   757→  return hull
+   758→}
+   759→
+   760→// ============================================================================
+   761→// MAIN COMPONENT
+   762→// ============================================================================
+   763→
+   764→export default function GGEBiplotAnalysis() {
+   765→  const [rawData, setRawData] = useState(SAMPLE_DATA)
+   766→  const [result, setResult] = useState<GGEBiplotResult | null>(null)
+   767→  const [isLoading, setIsLoading] = useState(false)
+   768→  const [error, setError] = useState<string | null>(null)
+   769→  const [activeView, setActiveView] = useState<BiplotView>('whichWonWhere')
+   770→  const [scalingMethod, setScalingMethod] = useState<'symmetric' | 'genotype' | 'environment'>('symmetric')
+   771→  const fileInputRef = useRef<HTMLInputElement>(null)
+   772→
+   773→  // Parse CSV data
+   774→  const parseData = useCallback((text: string): { genotypes: string[]; environments: string[]; matrix: number[][] } | null => {
+   775→    try {
+   776→      const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)
+   777→      
+   778→      if (lines.length < 3) {
+   779→        setError('Data must have at least 2 genotypes and 2 environments')
+   780→        return null
+   781→      }
+   782→      
+   783→      // Parse header
+   784→      const header = lines[0].split(',').map(h => h.trim())
+   785→      const environments = header.slice(1) // Skip first column (Genotype)
+   786→      
+   787→      if (environments.length < 2) {
+   788→        setError('Must have at least 2 environments')
+   789→        return null
+   790→      }
+   791→      
+   792→      // Parse data rows
+   793→      const genotypes: string[] = []
+   794→      const matrix: number[][] = []
+   795→      
+   796→      for (let i = 1; i < lines.length; i++) {
+   797→        const cols = lines[i].split(',').map(c => c.trim())
+   798→        
+   799→        if (cols.length !== header.length) {
+   800→          setError(`Row ${i + 1}: Column count mismatch (expected ${header.length}, got ${cols.length})`)
+   801→          return null
+   802→        }
+   803→        
+   804→        genotypes.push(cols[0])
+   805→        const values: number[] = []
+   806→        
+   807→        for (let j = 1; j < cols.length; j++) {
+   808→          const val = parseFloat(cols[j])
+   809→          if (isNaN(val)) {
+   810→            setError(`Row ${i + 1}, Column ${j + 1}: Invalid number "${cols[j]}"`)
+   811→            return null
+   812→          }
+   813→          values.push(val)
+   814→        }
+   815→        
+   816→        matrix.push(values)
+   817→      }
+   818→      
+   819→      if (genotypes.length < 2) {
+   820→        setError('Must have at least 2 genotypes')
+   821→        return null
+   822→      }
+   823→      
+   824→      return { genotypes, environments, matrix: matrix }
+   825→    } catch (err) {
+   826→      setError(`Parse error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+   827→      return null
+   828→    }
+   829→  }, [])
+   830→
+   831→  // Run analysis
+   832→  const runAnalysis = useCallback(() => {
+   833→    setError(null)
+   834→    setIsLoading(true)
+   835→    
+   836→    // Use setTimeout to allow UI to update
+   837→    setTimeout(() => {
+   838→      try {
+   839→        const parsed = parseData(rawData)
+   840→        if (!parsed) {
+   841→          setIsLoading(false)
+   842→          return
+   843→        }
+   844→        
+   845→        const analysisResult = performGGEBiplotAnalysis(
+   846→          parsed.genotypes,
+   847→          parsed.environments,
+   848→          parsed.matrix,
+   849→          scalingMethod
+   850→        )
+   851→        
+   852→        setResult(analysisResult)
+   853→        setIsLoading(false)
+   854→      } catch (err) {
+   855→        setError(`Analysis error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+   856→        setIsLoading(false)
+   857→      }
+   858→    }, 100)
+   859→  }, [rawData, parseData, scalingMethod])
+   860→
+   861→  // Handle file upload
+   862→  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+   863→    const file = event.target.files?.[0]
+   864→    if (!file) return
+   865→    
+   866→    const reader = new FileReader()
+   867→    reader.onload = (e) => {
+   868→      const text = e.target?.result as string
+   869→      if (text) {
+   870→        setRawData(text)
+   871→      }
+   872→    }
+   873→    reader.readAsText(file)
+   874→  }, [])
+   875→
+   876→  // Export results to CSV
+   877→  const exportCSV = useCallback(() => {
+   878→    if (!result) return
+   879→    
+   880→    let csv = ''
+   881→    
+   882→    // Section 1: Genotype coordinates
+   883→    csv += 'GENOTYPE COORDINATES\n'
+   884→    csv += 'Genotype,PC1,PC2,PC3,MeanYield,Stability,StabilityRank,MeanRank,IdealDistance,Category\n'
+   885→    for (const g of result.genotypeCoords) {
+   886→      csv += `${g.genotype},${g.pc1.toFixed(4)},${g.pc2.toFixed(4)},${(g.pc3 ?? 0).toFixed(4)},${g.meanYield.toFixed(2)},${g.stabilityMeasure.toFixed(4)},${g.stabilityRank},${g.meanRank},${g.idealDistance.toFixed(4)},${g.category}\n`
+   887→    }
+   888→    
+   889→    csv += '\nENVIRONMENT COORDINATES\n'
+   890→    csv += 'Environment,PC1,PC2,PC3,MeanYield,VectorLength,DiscriminatingPower,Representativeness,IdealDistance\n'
+   891→    for (const e of result.environmentCoords) {
+   892→      csv += `${e.environment},${e.pc1.toFixed(4)},${e.pc2.toFixed(4)},${(e.pc3 ?? 0).toFixed(4)},${e.meanYield.toFixed(2)},${e.vectorLength.toFixed(4)},${e.discriminatingPower},${e.representativeness.toFixed(4)},${e.idealEnvDistance.toFixed(4)}\n`
+   893→    }
+   894→    
+   895→    csv += '\nVARIANCE EXPLAINED\n'
+   896→    csv += 'Axis,SingularValue,Eigenvalue,VariancePercent,CumulativePercent\n'
+   897→    for (const pc of result.pcAxes) {
+   898→      csv += `${pc.axis},${pc.singularValue.toFixed(4)},${pc.eigenvalue.toFixed(4)},${pc.variancePercent.toFixed(2)},${pc.cumulativePercent.toFixed(2)}\n`
+   899→    }
+   900→    
+   901→    csv += '\nWHICH-WON-WHERE\n'
+   902→    csv += 'Sector,WinningGenotype,Environments\n'
+   903→    for (const www of result.whichWonWhere) {
+   904→      csv += `${www.sector},"${www.winningGenotype}","${www.environments.join(';')}"\n`
+   905→    }
+   906→    
+   907→    // Download
+   908→    const blob = new Blob([csv], { type: 'text/csv' })
+   909→    const url = URL.createObjectURL(blob)
+   910→    const a = document.createElement('a')
+   911→    a.href = url
+   912→    a.download = 'gge-biplot-results.csv'
+   913→    a.click()
+   914→    URL.revokeObjectURL(url)
+   915→  }, [result])
+   916→
+   917→  // SVG Biplot rendering
+   918→  const renderBiplot = useCallback((view: BiplotView) => {
+   919→    if (!result) return null
+   920→    
+   921→    const width = 500
+   922→    const height = 400
+   923→    const padding = 50
+   924→    const plotWidth = width - 2 * padding
+   925→    const plotHeight = height - 2 * padding
+   926→    
+   927→    // Get all points to determine scale
+   928→    let allPoints: { x: number; y: number }[] = []
+   929→    
+   930→    result.genotypeCoords.forEach(g => {
+   931→      allPoints.push({ x: g.pc1, y: g.pc2 })
+   932→    })
+   933→    result.environmentCoords.forEach(e => {
+   934→      allPoints.push({ x: e.pc1, y: e.pc2 })
+   935→    })
+   936→    
+   937→    // Add ideal points based on view
+   938→    if (view === 'idealGenotype') {
+   939→      allPoints.push({ x: result.idealGenotype.pc1, y: result.idealGenotype.pc2 })
+   940→    }
+   941→    if (view === 'idealEnvironment') {
+   942→      allPoints.push({ x: result.idealEnvironment.pc1, y: result.idealEnvironment.pc2 })
+   943→    }
+   944→    
+   945→    // Calculate scale with some padding
+   946→    const xs = allPoints.map(p => p.x)
+   947→    const ys = allPoints.map(p => p.y)
+   948→    const minX = Math.min(...xs)
+   949→    const maxX = Math.max(...xs)
+   950→    const minY = Math.min(...ys)
+   951→    const maxY = Math.max(...ys)
+   952→    
+   953→    const rangeX = maxX - minX || 1
+   954→    const rangeY = maxY - minY || 1
+   955→    const scale = Math.min(plotWidth / rangeX, plotHeight / rangeY) * 0.85
+   956→    
+   957→    const centerX = padding + plotWidth / 2
+   958→    const centerY = padding + plotHeight / 2
+   959→    
+   960→    const toSVGX = (val: number) => centerX + (val - (minX + maxX) / 2) * scale
+   961→    const toSVGY = (val: number) => centerY - (val - (minY + maxY) / 2) * scale
+   962→    
+   963→    // Color palette for genotypes
+   964→    const genotypeColors = [
+   965→      '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
+   966→      '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899',
+   967→      '#f43f5e', '#84cc16', '#10b981', '#0ea5e9', '#6366f1'
+   968→    ]
+   969→    
+   970→    // Generate sector polygons for which-won-where
+   971→    const renderSectors = () => {
+   972→      if (view !== 'whichWonWhere' || !result) return null
+   973→      
+   974→      const hullPoints = [...result.genotypeCoords]
+   975→        .sort((a, b) => Math.atan2(b.pc2, b.pc1) - Math.atan2(a.pc2, a.pc1))
+   976→      
+   977→      const pathData = hullPoints.map((p, i) => {
+   978→        const x = toSVGX(p.pc1)
+   979→        const y = toSVGY(p.pc2)
+   980→        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`
+   981→      }).join(' ') + ' Z'
+   982→      
+   983→      return (
+   984→        <path
+   985→          d={pathData}
+   986→          fill="rgba(59, 130, 246, 0.08)"
+   987→          stroke="rgba(59, 130, 246, 0.3)"
+   988→          strokeWidth={1}
+   989→          strokeDasharray="4,4"
+   990→        />
+   991→      )
+   992→    }
+   993→    
+   994→    // Render mean axis arrow for mean vs stability view
+   995→    const renderMeanAxis = () => {
+   996→      if (view !== 'meanVsStability' && view !== 'idealGenotype') return null
+   997→      
+   998→      // Arrow pointing right (average environment direction / mean performance)
+   999→      const arrowLen = Math.max(...result.genotypeCoords.map(g => g.pc1)) * 1.1
+  1000→      const x1 = toSVGX(0)
+  1001→      const y1 = toSVGY(0)
+  1002→      const x2 = toSVGX(arrowLen)
+  1003→      const y2 = toSVGY(0)
+  1004→      
+  1005→      return (
+  1006→        <g>
+  1007→          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f97316" strokeWidth={2} markerEnd="url(#arrowhead-orange)" />
+  1008→          <text x={x2 + 5} y={y2 - 5} fill="#f97316" fontSize={11} fontWeight="bold">Mean</text>
+  1009→        </g>
+  1010→      )
+  1011→    }
+  1012→    
+  1013→    // Render ideal genotype marker
+  1014→    const renderIdealGenotype = () => {
+  1015→      if (view !== 'idealGenotype' || !result) return null
+  1016→      
+  1017→      const x = toSVGX(result.idealGenotype.pc1)
+  1018→      const y = toSVGY(result.idealGenotype.pc2)
+  1019→      
+  1020→      return (
+  1021→        <g>
+  1022→          <circle cx={x} cy={y} r={8} fill="none" stroke="#22c55e" strokeWidth={2} />
+  1023→          <line x1={x - 12} y1={y - 12} x2={x + 12} y2={y + 12} stroke="#22c55e" strokeWidth={2} />
+  1024→          <line x1={x + 12} y1={y - 12} x2={x - 12} y2={y + 12} stroke="#22c55e" strokeWidth={2} />
+  1025→          <text x={x + 12} y={y - 8} fill="#22c55e" fontSize={10} fontWeight="bold">Ideal</text>
+  1026→          
+  1027→          {/* Draw lines from ideal to all genotypes */}
+  1028→          {result.genotypeCoords.map((g, i) => (
+  1029→            <line
+  1030→              key={`ideal-line-${i}`}
+  1031→              x1={x}
+  1032→              y1={y}
+  1033→              x2={toSVGX(g.pc1)}
+  1034→              y2={toSVGY(g.pc2)}
+  1035→              stroke="rgba(34, 197, 94, 0.2)"
+  1036→              strokeWidth={1}
+  1037→              strokeDasharray="3,3"
+  1038→            />
+  1039→          ))}
+  1040→        </g>
+  1041→      )
+  1042→    }
+  1043→    
+  1044→    // Render ideal environment marker
+  1045→    const renderIdealEnvironment = () => {
+  1046→      if (view !== 'idealEnvironment' || !result) return null
+  1047→      
+  1048→      const x = toSVGX(result.idealEnvironment.pc1)
+  1049→      const y = toSVGY(result.idealEnvironment.pc2)
+  1050→      
+  1051→      return (
+  1052→        <g>
+  1053→          <polygon
+  1054→            points={`${x},${y - 10} ${x + 9},${y + 7} ${x - 9},${y + 7}`}
+  1055→            fill="none"
+  1056→            stroke="#8b5cf6"
+  1057→            strokeWidth={2}
+  1058→          />
+  1059→          <text x={x + 12} y={y + 5} fill="#8b5cf6" fontSize={10} fontWeight="bold">Ideal Env</text>
+  1060→          
+  1061→          {/* Draw lines from ideal to all environments */}
+  1062→          {result.environmentCoords.map((e, i) => (
+  1063→            <line
+  1064→              key={`ideal-env-line-${i}`}
+  1065→              x1={x}
+  1066→              y1={y}
+  1067→              x2={toSVGX(e.pc1)}
+  1068→              y2={toSVGY(e.pc2)}
+  1069→              stroke="rgba(139, 92, 246, 0.2)"
+  1070→              strokeWidth={1}
+  1071→              strokeDasharray="3,3"
+  1072→            />
+  1073→          ))}
+  1074→        </g>
+  1075→      )
+  1076→    }
+  1077→    
+  1078→    // Render average environment axis
+  1079→    const renderAvgEnvAxis = () => {
+  1080→      if (view !== 'discriminatingVsRepresent' && view !== 'idealEnvironment') return null
+  1081→      
+  1082→      const avgPC1 = result.environmentCoords.reduce((s, e) => s + e.pc1, 0) / result.environmentCoords.length
+  1083→      const avgPC2 = result.environmentCoords.reduce((s, e) => s + e.pc2, 0) / result.environmentCoords.length
+  1084→      const len = Math.sqrt(avgPC1 ** 2 + avgPC2 ** 2)
+  1085→      const scaleLen = len * 1.3
+  1086→      
+  1087→      const x1 = toSVGX(0)
+  1088→      const y1 = toSVGY(0)
+  1089→      const x2 = toSVGX(avgPC1 / len * scaleLen)
+  1090→      const y2 = toSVGY(avgPC2 / len * scaleLen)
+  1091→      
+  1092→      return (
+  1093→        <g>
+  1094→          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#8b5cf6" strokeWidth={2} markerEnd="url(#arrowhead-purple)" />
+  1095→          <text x={x2 + 5} y={y2 - 5} fill="#8b5cf6" fontSize={11} fontWeight="bold">Avg Env</text>
+  1096→        </g>
+  1097→      )
+  1098→    }
+  1099→    
+  1100→    return (
+  1101→      <svg width={width} height={height} className="w-full h-auto bg-white rounded-lg border">
+  1102→        <defs>
+  1103→          <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+  1104→            <polygon points="0 0, 10 3.5, 0 7" fill="#f97316" />
+  1105→          </marker>
+  1106→          <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+  1107→            <polygon points="0 0, 10 3.5, 0 7" fill="#8b5cf6" />
+  1108→          </marker>
+  1109→        </defs>
+  1110→        
+  1111→        {/* Background grid */}
+  1112→        <rect x={padding} y={padding} width={plotWidth} height={plotHeight} fill="#fafafa" rx={4} />
+  1113→        <line x1={toSVGX(0)} y1={padding} x2={toSVGX(0)} y2={padding + plotHeight} stroke="#e5e7eb" strokeWidth={1} />
+  1114→        <line x1={padding} y1={toSVGY(0)} x2={padding + plotWidth} y2={toSVGY(0)} stroke="#e5e7eb" strokeWidth={1} />
+  1115→        
+  1116→        {/* View-specific elements */}
+  1117→        {renderSectors()}
+  1118→        {renderMeanAxis()}
+  1119→        {renderAvgEnvAxis()}
+  1120→        {renderIdealGenotype()}
+  1121→        {renderIdealEnvironment()}
+  1122→        
+  1123→        {/* Environment vectors */}
+  1124→        {result.environmentCoords.map((env, i) => {
+  1125→          const x = toSVGX(env.pc1)
+  1126→          const y = toSVGY(env.pc2)
+  1127→          return (
+  1128→            <g key={`env-${i}`}>
+  1129→              <line x1={centerX} y1={centerY} x2={x} y2={y} stroke="#3b82f6" strokeWidth={1.5} />
+  1130→              <circle cx={x} cy={y} r={5} fill="#3b82f6" stroke="white" strokeWidth={1.5} />
+  1131→              <text x={x + 8} y={y - 5} fill="#3b82f6" fontSize={11} fontWeight={600}>{env.environment}</text>
+  1132→            </g>
+  1133→          )
+  1134→        })}
+  1135→        
+  1136→        {/* Genotype points */}
+  1137→        {result.genotypeCoords.map((geno, i) => {
+  1138→          const x = toSVGX(geno.pc1)
+  1139→          const y = toSVGY(geno.pc2)
+  1140→          const color = genotypeColors[i % genotypeColors.length]
+  1141→          return (
+  1142→            <g key={`geno-${i}`}>
+  1143→              <circle cx={x} cy={y} r={7} fill={color} stroke="white" strokeWidth={2} />
+  1144→              <text x={x + 10} y={y + 4} fill={color} fontSize={11} fontWeight={600}>{geno.genotype}</text>
+  1145→            </g>
+  1146→          )
+  1147→        })}
+  1148→        
+  1149→        {/* Origin marker */}
+  1150→        <circle cx={centerX} cy={centerY} r={3} fill="#374151" />
+  1151→        
+  1152→        {/* Axis labels */}
+  1153→        <text x={width - padding} y={height - 10} fill="#6b7280" fontSize={11} textAlign="end">PC1 ({result.pcAxes[0]?.variancePercent.toFixed(1)}%)</text>
+  1154→        <text x={padding + 5} y={padding - 10} fill="#6b7280" fontSize={11}>PC2 ({result.pcAxes[1]?.variancePercent.toFixed(1)}%)</text>
+  1155→      </svg>
+  1156→    )
+  1157→  }, [result])
+  1158→
+  1159→  // View descriptions
+  1160→  const viewDescriptions: Record<BiplotView, { title: string; description: string; icon: React.ReactNode }> = {
+  1161→    whichWonWhere: {
+  1162→      title: 'Which-Won-Where',
+  1163→      description: 'Identifies winning genotypes in each mega-environment sector. Useful for cultivar recommendation and mega-environment delineation.',
+  1164→      icon: <ScatterChart className="w-4 h-4" />
+  1165→    },
+  1166→    meanVsStability: {
+  1167→      title: 'Mean vs Stability',
+  1168→      description: 'Evaluates genotypes based on mean performance (PC1) vs stability (PC2). Ideal genotypes are toward the right with small PC2.',
+  1169→      icon: <TrendingUp className="w-4 h-4" />
+  1170→    },
+  1171→    discriminatingVsRepresent: {
+  1172→      title: 'Discriminating vs Representative',
+  1173→      description: 'Evaluates test environments. Ideal environments have long vectors (high discrimination) and small angle with Avg-Env axis (high representativeness).',
+  1174→      icon: <Compass className="w-4 h-4" />
+  1175→    },
+  1176→    idealGenotype: {
+  1177→      title: 'Ideal Genotype',
+  1178→      description: 'Shows the ideal genotype position (highest mean + perfectly stable). Distance from ideal ranks overall genotype merit.',
+  1179→      icon: <Star className="w-4 h-4" />
+  1180→    },
+  1181→    idealEnvironment: {
+  1182→      title: 'Ideal Environment',
+  1183→      description: 'Shows the ideal test environment position (most discriminating + most representative). Useful for selecting trial locations.',
+  1184→      icon: <Target className="w-4 h-4" />
+  1185→    }
+  1186→  }
+  1187→
+  1188→  return (
+  1189→    <div className="space-y-6">
+  1190→      {/* Header */}
+  1191→      <motion.div
+  1192→        initial={{ opacity: 0, y: -20 }}
+  1193→        animate={{ opacity: 1, y: 0 }}
+  1194→        className="flex items-start justify-between"
+  1195→      >
+  1196→        <div className="flex items-center gap-3">
+  1197→          <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg text-white">
+  1198→            <PieChart className="w-6 h-6" />
+  1199→          </div>
+  1200→          <div>
+  1201→            <h2 className="text-2xl font-bold text-gray-900">GGE Biplot Analysis</h2>
+  1202→            <p className="text-sm text-gray-500 mt-1">
+  1203→              Genotype + Genotype × Environment Interaction Biplot (Yan & Kang, 2003)
+  1204→            </p>
+  1205→          </div>
+  1206→        </div>
+  1207→        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+  1208→          Mega-Environment Analysis
+  1209→        </Badge>
+  1210→      </motion.div>
+  1211→
+  1212→      {/* Info Card */}
+  1213→      <Card className="border-blue-200 bg-blue-50/50">
+  1214→        <CardContent className="pt-4">
+  1215→          <div className="flex gap-3">
+  1216→            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+  1217→            <div className="text-sm text-blue-800 space-y-1">
+  1218→              <p><strong>GGE Biplot</strong> visualizes both genotype main effects (G) and genotype × environment interactions (GE).</p>
+  1219→              <p>Unlike AMMI which separates G and GE, GGE biplot combines them because both are relevant for cultivar evaluation.</p>
+  1220→              <p className="text-xs mt-2">Data format: Rows = Genotypes, Columns = Environments, Values = Trait measurements (e.g., yield)</p>
+  1221→            </div>
+  1222→          </div>
+  1223→        </CardContent>
+  1224→      </Card>
+  1225→
+  1226→      {/* Data Input Section */}
+  1227→      <Card>
+  1228→        <CardHeader>
+  1229→          <CardTitle className="flex items-center gap-2">
+  1230→            <Upload className="w-5 h-5" />
+  1231→            Data Input
+  1232→          </CardTitle>
+  1233→          <CardDescription>
+  1234→            Enter your multi-environment trial data or load sample data
+  1235→          </CardDescription>
+  1236→        </CardHeader>
+  1237→        <CardContent>
+  1238→          <Tabs defaultValue="paste" className="w-full">
+  1239→            <TabsList className="grid w-full grid-cols-2">
+  1240→              <TabsTrigger value="paste" className="flex items-center gap-2">
+  1241→                <FileText className="w-4 h-4" />
+  1242→                Paste Data
+  1243→              </TabsTrigger>
+  1244→              <TabsTrigger value="upload" className="flex items-center gap-2">
+  1245→                <Upload className="w-4 h-4" />
+  1246→                Upload CSV
+  1247→              </TabsTrigger>
+  1248→            </TabsList>
+  1249→            
+  1250→            <TabsContent value="paste" className="space-y-4 mt-4">
+  1251→              <div>
+  1252→                <Label htmlFor="data-input">Data Matrix (CSV Format)</Label>
+  1253→                <Textarea
+  1254→                  id="data-input"
+  1255→                  placeholder={`Paste your data here...\n\nFormat:\nGenotype,Env1,Env2,Env3,Env4\nG1,3200,2850,3100,2980\nG2,2800,3100,2750,3050\n...`}
+  1256→                  value={rawData}
+  1257→                  onChange={(e) => setRawData(e.target.value)}
+  1258→                  className="mt-2 font-mono text-sm min-h-[180px]"
+  1259→                />
+  1260→              </div>
+  1261→              <div className="flex gap-2">
+  1262→                <Button
+  1263→                  variant="outline"
+  1264→                  onClick={() => setRawData(SAMPLE_DATA)}
+  1265→                  className="flex items-center gap-2"
+  1266→                >
+  1267→                  <FileText className="w-4 h-4" />
+  1268→                  Load Sample Data
+  1269→                </Button>
+  1270→              </div>
+  1271→            </TabsContent>
+  1272→            
+  1273→            <TabsContent value="upload" className="space-y-4 mt-4">
+  1274→              <div
+  1275→                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors"
+  1276→                onClick={() => fileInputRef.current?.click()}
+  1277→              >
+  1278→                <Upload className="w-10 h-10 mx-auto text-gray-400 mb-3" />
+  1279→                <p className="text-sm font-medium text-gray-700">Click to upload or drag and drop</p>
+  1280→                <p className="text-xs text-gray-500 mt-1">CSV files only</p>
+  1281→                <input
+  1282→                  ref={fileInputRef}
+  1283→                  type="file"
+  1284→                  accept=".csv,.txt"
+  1285→                  onChange={handleFileUpload}
+  1286→                  className="hidden"
+  1287→                />
+  1288→              </div>
+  1289→              {rawData && rawData !== SAMPLE_DATA && (
+  1290→                <p className="text-sm text-green-600 flex items-center gap-1">
+  1291→                  <CheckCircle2 className="w-4 h-4" />
+  1292→                  File loaded successfully ({rawData.split(`\n`).length - 1} data rows)
+  1293→                </p>
+  1294→              )}
+  1295→            </TabsContent>
+  1296→          </Tabs>
+  1297→          
+  1298→          {/* Scaling Method Selection */}
+  1299→          <div className="mt-6 pt-4 border-t">
+  1300→            <Label className="text-sm font-medium text-gray-700">Biplot Scaling Method</Label>
+  1301→            <div className="flex gap-2 mt-2">
+  1302→              {[
+  1303→                { value: 'symmetric' as const, label: 'Symmetric (SG)', desc: 'Equal weight to genotypes & environments' },
+  1304→                { value: 'genotype' as const, label: 'Genotype Focused', desc: 'Better genotype comparison' },
+  1305→                { value: 'environment' as const, label: 'Environment Focused', desc: 'Better environment comparison' }
+  1306→              ].map(method => (
+  1307→                <Button
+  1308→                  key={method.value}
+  1309→                  variant={scalingMethod === method.value ? 'default' : 'outline'}
+  1310→                  size="sm"
+  1311→                  onClick={() => setScalingMethod(method.value)}
+  1312→                  className="flex flex-col items-start h-auto py-2 px-3"
+  1313→                  title={method.desc}
+  1314→                >
+  1315→                  <span className="font-medium">{method.label}</span>
+  1316→                  <span className="text-xs opacity-70">{method.desc}</span>
+  1317→                </Button>
+  1318→              ))}
+  1319→            </div>
+  1320→          </div>
+  1321→          
+  1322→          {/* Run Analysis Button */}
+  1323→          <div className="mt-6 pt-4 border-t">
+  1324→            <Button
+  1325→              onClick={runAnalysis}
+  1326→              disabled={isLoading || !rawData.trim()}
+  1327→              size="lg"
+  1328→              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+  1329→            >
+  1330→              {isLoading ? (
+  1331→                <>
+  1332→                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+  1333→                  Running GGE Analysis...
+  1334→                </>
+  1335→              ) : (
+  1336→                <>
+  1337→                  <Calculator className="w-4 h-4 mr-2" />
+  1338→                  Run GGE Biplot Analysis
+  1339→                </>
+  1340→              )}
+  1341→            </Button>
+  1342→          </div>
+  1343→          
+  1344→          {/* Error Display */}
+  1345→          <AnimatePresence>
+  1346→            {error && (
+  1347→              <motion.div
+  1348→                initial={{ opacity: 0, height: 0 }}
+  1349→                animate={{ opacity: 1, height: 'auto' }}
+  1350→                exit={{ opacity: 0, height: 0 }}
+  1351→                className="mt-4"
+  1352→              >
+  1353→                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+  1354→                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+  1355→                  <p className="text-sm">{error}</p>
+  1356→                </div>
+  1357→              </motion.div>
+  1358→            )}
+  1359→          </AnimatePresence>
+  1360→        </CardContent>
+  1361→      </Card>
+  1362→
+  1363→      {/* Results Section */}
+  1364→      <AnimatePresence>
+  1365→        {result && (
+  1366→          <motion.div
+  1367→            initial={{ opacity: 0, y: 20 }}
+  1368→            animate={{ opacity: 1, y: 0 }}
+  1369→            className="space-y-6"
+  1370→          >
+  1371→            {/* Summary Cards */}
+  1372→            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  1373→              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+  1374→                <CardContent className="pt-4 pb-4">
+  1375→                  <div className="text-2xl font-bold text-blue-700">{result.genotypes.length}</div>
+  1376→                  <div className="text-xs text-blue-600 font-medium">Genotypes</div>
+  1377→                </CardContent>
+  1378→              </Card>
+  1379→              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+  1380→                <CardContent className="pt-4 pb-4">
+  1381→                  <div className="text-2xl font-bold text-green-700">{result.environments.length}</div>
+  1382→                  <div className="text-xs text-green-600 font-medium">Environments</div>
+  1383→                </CardContent>
+  1384→              </Card>
+  1385→              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+  1386→                <CardContent className="pt-4 pb-4">
+  1387→                  <div className="text-2xl font-bold text-purple-700">
+  1388→                    {(result.pcAxes[0]?.variancePercent + result.pcAxes[1]?.variancePercent || 0).toFixed(1)}%
+  1389→                  </div>
+  1390→                  <div className="text-xs text-purple-600 font-medium">PC1+PC2 Explained</div>
+  1391→                </CardContent>
+  1392→              </Card>
+  1393→              <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+  1394→                <CardContent className="pt-4 pb-4">
+  1395→                  <div className="text-2xl font-bold text-orange-700">{result.whichWonWhere.length}</div>
+  1396→                  <div className="text-xs text-orange-600 font-medium">Mega-Environments</div>
+  1397→                </CardContent>
+  1398→              </Card>
+  1399→            </div>
+  1400→
+  1401→            {/* Variance Explained */}
+  1402→            <Card>
+  1403→              <CardHeader className="pb-3">
+  1404→                <CardTitle className="text-lg flex items-center gap-2">
+  1405→                  <BarChart3 className="w-5 h-5 text-indigo-600" />
+  1406→                  Principal Components - Variance Explained
+  1407→                </CardTitle>
+  1408→              </CardHeader>
+  1409→              <CardContent>
+  1410→                <Table>
+  1411→                  <TableHeader>
+  1412→                    <TableRow>
+  1413→                      <TableHead>PC Axis</TableHead>
+  1414→                      <TableHead>Singular Value</TableHead>
+  1415→                      <TableHead>Eigenvalue</TableHead>
+  1416→                      <TableHead>Variance (%)</TableHead>
+  1417→                      <TableHead>Cumulative (%)</TableHead>
+  1418→                    </TableRow>
+  1419→                  </TableHeader>
+  1420→                  <TableBody>
+  1421→                    {result.pcAxes.slice(0, 5).map(pc => (
+  1422→                      <TableRow key={pc.axis}>
+  1423→                        <TableCell className="font-medium">PC{pc.axis}</TableCell>
+  1424→                        <TableCell>{pc.singularValue.toFixed(4)}</TableCell>
+  1425→                        <TableCell>{pc.eigenvalue.toFixed(4)}</TableCell>
+  1426→                        <TableCell>
+  1427→                          <div className="flex items-center gap-2">
+  1428→                            <div className="w-20 bg-gray-200 rounded-full h-2">
+  1429→                              <div
+  1430→                                className="h-2 rounded-full bg-indigo-600"
+  1431→                                style={{ width: `${Math.min(pc.variancePercent, 100)}%` }}
+  1432→                              />
+  1433→                            </div>
+  1434→                            <span>{pc.variancePercent.toFixed(2)}</span>
+  1435→                          </div>
+  1436→                        </TableCell>
+  1437→                        <TableCell>{pc.cumulativePercent.toFixed(2)}</TableCell>
+  1438→                      </TableRow>
+  1439→                    ))}
+  1440→                  </TableBody>
+  1441→                </Table>
+  1442→                
+  1443→                <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+  1444→                  <strong>GGE Sum of Squares:</strong> {result.anova.ggeSS.toFixed(2)}{' '}
+  1445→                  <span className="ml-4">
+  1446→                    (<strong>{result.anova.ggePercent.toFixed(1)}%</strong> of total variation)
+  1447→                  </span>
+  1448→                </div>
+  1449→              </CardContent>
+  1450→            </Card>
+  1451→
+  1452→            {/* Biplot Visualization */}
+  1453→            <Card>
+  1454→              <CardHeader>
+  1455→                <div className="flex items-center justify-between">
+  1456→                  <CardTitle className="text-lg flex items-center gap-2">
+  1457→                    <ScatterChart className="w-5 h-5 text-emerald-600" />
+  1458→                    GGE Biplot Visualization
+  1459→                  </CardTitle>
+  1460→                  <Button
+  1461→                    variant="outline"
+  1462→                    size="sm"
+  1463→                    onClick={exportCSV}
+  1464→                    className="flex items-center gap-2"
+  1465→                  >
+  1466→                    <Download className="w-4 h-4" />
+  1467→                    Export CSV
+  1468→                  </Button>
+  1469→                </div>
+  1470→                <CardDescription>
+  1471→                  {viewDescriptions[activeView].description}
+  1472→                </CardDescription>
+  1473→              </CardHeader>
+  1474→              <CardContent>
+  1475→                {/* View Selector */}
+  1476→                <div className="flex flex-wrap gap-2 mb-4">
+  1477→                  {(Object.keys(viewDescriptions) as BiplotView[]).map(view => (
+  1478→                    <Button
+  1479→                      key={view}
+  1480→                      variant={activeView === view ? 'default' : 'outline'}
+  1481→                      size="sm"
+  1482→                      onClick={() => setActiveView(view)}
+  1483→                      className="flex items-center gap-2"
+  1484→                    >
+  1485→                      {viewDescriptions[view].icon}
+  1486→                      {viewDescriptions[view].title}
+  1487→                    </Button>
+  1488→                  ))}
+  1489→                </div>
+  1490→                
+  1491→                {/* Biplot SVG */}
+  1492→                <div className="flex justify-center overflow-x-auto py-4">
+  1493→                  {renderBiplot(activeView)}
+  1494→                </div>
+  1495→                
+  1496→                {/* Legend */}
+  1497→                <div className="flex flex-wrap justify-center gap-4 mt-4 pt-4 border-t text-xs text-gray-600">
+  1498→                  <div className="flex items-center gap-1">
+  1499→                    <div className="w-3 h-3 rounded-full bg-red-500" />
+  1500→                    <span>Genotypes</span>
+  1501→                  </div>
+  1502→                  <div className="flex items-center gap-1">
+  1503→                    <div className="w-3 h-3 rounded-full bg-blue-500" />
+  1504→                    <span>Environments</span>
+  1505→                  </div>
+  1506→                  <div className="flex items-center gap-1">
+  1507→                    <div className="w-4 h-0.5 bg-orange-500" />
+  1508→                    <span>Mean Axis</span>
+  1509→                  </div>
+  1510→                  <div className="flex items-center gap-1">
+  1511→                    <div className="w-4 h-0.5 bg-purple-500" />
+  1512→                    <span>Avg-Env Axis</span>
+  1513→                  </div>
+  1514→                </div>
+  1515→              </CardContent>
+  1516→            </Card>
+  1517→
+  1518→            {/* Results Grid */}
+  1519→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  1520→              {/* Genotype Rankings */}
+  1521→              <Card>
+  1522→                <CardHeader className="pb-3">
+  1523→                  <CardTitle className="text-base flex items-center gap-2">
+  1524→                    <TrendingUp className="w-4 h-4 text-green-600" />
+  1525→                    Genotype Performance Ranking
+  1526→                  </CardTitle>
+  1527→                </CardHeader>
+  1528→                <CardContent>
+  1529→                  <div className="max-h-[400px] overflow-y-auto">
+  1530→                    <Table>
+  1531→                      <TableHeader>
+  1532→                        <TableRow>
+  1533→                          <TableHead className="w-12">Rank</TableHead>
+  1534→                          <TableHead>Genotype</TableHead>
+  1535→                          <TableHead className="text-right">Mean Yield</TableHead>
+  1536→                          <TableHead className="text-right">Stability</TableHead>
+  1537→                          <TableHead className="text-right">Ideal Dist.</TableHead>
+  1538→                          <TableHead>Category</TableHead>
+  1539→                        </TableRow>
+  1540→                      </TableHeader>
+  1541→                      <TableBody>
+  1542→                        {[...result.genotypeCoords]
+  1543→                          .sort((a, b) => a.idealDistance - b.idealDistance)
+  1544→                          .slice(0, 15)
+  1545→                          .map((g, i) => (
+  1546→                            <TableRow key={g.genotype}>
+  1547→                              <TableCell className="font-medium">
+  1548→                                {i < 3 ? (
+  1549→                                  <Badge variant={i === 0 ? 'default' : 'secondary'} className={
+  1550→                                    i === 0 ? 'bg-yellow-500 text-yellow-900' :
+  1551→                                    i === 1 ? 'bg-gray-300 text-gray-700' :
+  1552→                                    'bg-amber-600 text-amber-50'
+  1553→                                  }>
+  1554→                                    {i + 1}
+  1555→                                  </Badge>
+  1556→                                ) : (
+  1557→                                  i + 1
+  1558→                                )}
+  1559→                              </TableCell>
+  1560→                              <TableCell className="font-medium">{g.genotype}</TableCell>
+  1561→                              <TableCell className="text-right font-mono">{g.meanYield.toFixed(1)}</TableCell>
+  1562→                              <TableCell className="text-right font-mono">{g.stabilityMeasure.toFixed(1)}</TableCell>
+  1563→                              <TableCell className="text-right font-mono">{g.idealDistance.toFixed(1)}</TableCell>
+  1564→                              <TableCell>
+  1565→                                <Badge 
+  1566→                                  variant="secondary" 
+  1567→                                  className={
+  1568→                                    g.category === 'Very Stable' ? 'bg-green-100 text-green-700' :
+  1569→                                    g.category === 'Stable' ? 'bg-green-50 text-green-600' :
+  1570→                                    g.category === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+  1571→                                    g.category === 'Unstable' ? 'bg-orange-100 text-orange-700' :
+  1572→                                    'bg-red-100 text-red-700'
+  1573→                                  }
+  1574→                                >
+  1575→                                  {g.category}
+  1576→                                </Badge>
+  1577→                              </TableCell>
+  1578→                            </TableRow>
+  1579→                          ))}
+  1580→                      </TableBody>
+  1581→                    </Table>
+  1582→                  </div>
+  1583→                </CardContent>
+  1584→              </Card>
+  1585→
+  1586→              {/* Environment Evaluation */}
+  1587→              <Card>
+  1588→                <CardHeader className="pb-3">
+  1589→                  <CardTitle className="text-base flex items-center gap-2">
+  1590→                    <Compass className="w-4 h-4 text-blue-600" />
+  1591→                    Environment Evaluation
+  1592→                  </CardTitle>
+  1593→                </CardHeader>
+  1594→                <CardContent>
+  1595→                  <div className="max-h-[400px] overflow-y-auto">
+  1596→                    <Table>
+  1597→                      <TableHeader>
+  1598→                        <TableRow>
+  1599→                          <TableHead>Environment</TableHead>
+  1600→                          <TableHead className="text-right">Mean</TableHead>
+  1601→                          <TableHead className="text-right">Discrim.</TableHead>
+  1602→                          <TableHead className="text-right">Repre.</TableHead>
+  1603→                          <TableHead className="text-right">Ideal Dist.</TableHead>
+  1604→                          <TableHead>Rating</TableHead>
+  1605→                        </TableRow>
+  1606→                      </TableHeader>
+  1607→                      <TableBody>
+  1608→                        {[...result.environmentCoords]
+  1609→                          .sort((a, b) => a.idealEnvDistance - b.idealEnvDistance)
+  1610→                          .map(env => (
+  1611→                            <TableRow key={env.environment}>
+  1612→                              <TableCell className="font-medium">{env.environment}</TableCell>
+  1613→                              <TableCell className="text-right font-mono">{env.meanYield.toFixed(1)}</TableCell>
+  1614→                              <TableCell className="text-right">
+  1615→                                <Badge variant="secondary" className={
+  1616→                                  env.discriminatingPower === 'High' ? 'bg-green-100 text-green-700' :
+  1617→                                  env.discriminatingPower === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+  1618→                                  'bg-red-100 text-red-700'
+  1619→                                }>
+  1620→                                  {env.discriminatingPower}
+  1621→                                </Badge>
+  1622→                              </TableCell>
+  1623→                              <TableCell className="text-right font-mono">{env.representativeness.toFixed(3)}</TableCell>
+  1624→                              <TableCell className="text-right font-mono">{env.idealEnvDistance.toFixed(1)}</TableCell>
+  1625→                              <TableCell>
+  1626→                                {env.idealEnvDistance < 50 ? (
+  1627→                                  <CheckCircle2 className="w-4 h-4 text-green-600 inline" />
+  1628→                                ) : (
+  1629→                                  <XCircle className="w-4 h-4 text-red-400 inline" />
+  1630→                                )}
+  1631→                              </TableCell>
+  1632→                            </TableRow>
+  1633→                          ))}
+  1634→                      </TableBody>
+  1635→                    </Table>
+  1636→                  </div>
+  1637→                </CardContent>
+  1638→              </Card>
+  1639→            </div>
+  1640→
+  1641→            {/* Which-Won-Where Table */}
+  1642→            <Card>
+  1643→              <CardHeader className="pb-3">
+  1644→                <CardTitle className="text-base flex items-center gap-2">
+  1645→                  <ScatterChart className="w-4 h-4 text-purple-600" />
+  1646→                  Which-Won-Where Classification
+  1647→                </CardTitle>
+  1648→                <CardDescription>
+  1649→                  Each sector represents a potential mega-environment where specific genotypes perform best
+  1650→                </CardDescription>
+  1651→              </CardHeader>
+  1652→              <CardContent>
+  1653→                <Table>
+  1654→                  <TableHeader>
+  1655→                    <TableRow>
+  1656→                      <TableHead className="w-16">Sector</TableHead>
+  1657→                      <TableHead>Winning Genotype</TableHead>
+  1658→                      <TableHead>Favorable Environments</TableHead>
+  1659→                      <TableHead className="w-24">Count</TableHead>
+  1660→                    </TableRow>
+  1661→                  </TableHeader>
+  1662→                  <TableBody>
+  1663→                    {result.whichWonWhere.map(www => (
+  1664→                      <TableRow key={www.sector}>
+  1665→                        <TableCell>
+  1666→                          <Badge variant="outline" className="font-mono">
+  1667→                            S{www.sector}
+  1668→                          </Badge>
+  1669→                        </TableCell>
+  1670→                        <TableCell className="font-semibold text-purple-700">
+  1671→                          {www.winningGenotype}
+  1672→                        </TableCell>
+  1673→                        <TableCell>
+  1674→                          <div className="flex flex-wrap gap-1">
+  1675→                            {www.environments.map(env => (
+  1676→                              <Badge key={env} variant="secondary" className="text-xs">
+  1677→                                {env}
+  1678→                              </Badge>
+  1679→                            ))}
+  1680→                          </div>
+  1681→                        </TableCell>
+  1682→                        <TableCell>
+  1683→                          <Badge variant="secondary" className="font-mono">
+  1684→                            {www.environments.length}
+  1685→                          </Badge>
+  1686→                        </TableCell>
+  1687→                      </TableRow>
+  1688→                    ))}
+  1689→                  </TableBody>
+  1690→                </Table>
+  1691→              </CardContent>
+  1692→            </Card>
+  1693→
+  1694→            {/* Coordinate Tables for Export */}
+  1695→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  1696→              {/* Genotype Coordinates */}
+  1697→              <Card>
+  1698→                <CardHeader className="pb-3">
+  1699→                  <CardTitle className="text-base">Genotype Coordinates (PC Scores)</CardTitle>
+  1700→                  <CardDescription>
+  1701→                    For external plotting tools (R ggbiplot, Python matplotlib, etc.)
+  1702→                  </CardDescription>
+  1703→                </CardHeader>
+  1704→                <CardContent>
+  1705→                  <div className="max-h-[300px] overflow-y-auto">
+  1706→                    <Table>
+  1707→                      <TableHeader>
+  1708→                        <TableRow>
+  1709→                          <TableHead>Genotype</TableHead>
+  1710→                          <TableHead className="text-right font-mono">PC1</TableHead>
+  1711→                          <TableHead className="text-right font-mono">PC2</TableHead>
+  1712→                          <TableHead className="text-right font-mono">PC3</TableHead>
+  1713→                        </TableRow>
+  1714→                      </TableHeader>
+  1715→                      <TableBody>
+  1716→                        {result.genotypeCoords.map(g => (
+  1717→                          <TableRow key={g.genotype}>
+  1718→                            <TableCell className="font-medium">{g.genotype}</TableCell>
+  1719→                            <TableCell className="text-right font-mono text-xs">{g.pc1.toFixed(4)}</TableCell>
+  1720→                            <TableCell className="text-right font-mono text-xs">{g.pc2.toFixed(4)}</TableCell>
+  1721→                            <TableCell className="text-right font-mono text-xs">{(g.pc3 ?? 0).toFixed(4)}</TableCell>
+  1722→                          </TableRow>
+  1723→                        ))}
+  1724→                      </TableBody>
+  1725→                    </Table>
+  1726→                  </div>
+  1727→                </CardContent>
+  1728→              </Card>
+  1729→
+  1730→              {/* Environment Coordinates */}
+  1731→              <Card>
+  1732→                <CardHeader className="pb-3">
+  1733→                  <CardTitle className="text-base">Environment Coordinates (PC Scores)</CardTitle>
+  1734→                  <CardDescription>
+  1735→                    For external plotting tools (R ggbiplot, Python matplotlib, etc.)
+  1736→                  </CardDescription>
+  1737→                </CardHeader>
+  1738→                <CardContent>
+  1739→                  <div className="max-h-[300px] overflow-y-auto">
+  1740→                    <Table>
+  1741→                      <TableHeader>
+  1742→                        <TableRow>
+  1743→                          <TableHead>Environment</TableHead>
+  1744→                          <TableHead className="text-right font-mono">PC1</TableHead>
+  1745→                          <TableHead className="text-right font-mono">PC2</TableHead>
+  1746→                          <TableHead className="text-right font-mono">PC3</TableHead>
+  1747→                        </TableRow>
+  1748→                      </TableHeader>
+  1749→                      <TableBody>
+  1750→                        {result.environmentCoords.map(e => (
+  1751→                          <TableRow key={e.environment}>
+  1752→                            <TableCell className="font-medium">{e.environment}</TableCell>
+  1753→                            <TableCell className="text-right font-mono text-xs">{e.pc1.toFixed(4)}</TableCell>
+  1754→                            <TableCell className="text-right font-mono text-xs">{e.pc2.toFixed(4)}</TableCell>
+  1755→                            <TableCell className="text-right font-mono text-xs">{(e.pc3 ?? 0).toFixed(4)}</TableCell>
+  1756→                          </TableRow>
+  1757→                        ))}
+  1758→                      </TableBody>
+  1759→                    </Table>
+  1760→                  </div>
+  1761→                </CardContent>
+  1762→              </Card>
+  1763→            </div>
+  1764→
+  1765→            {/* Methodology Reference */}
+  1766→            <Card className="bg-gray-50 border-gray-200">
+  1767→              <CardContent className="pt-4">
+  1768→                <div className="flex gap-3">
+  1769→                  <Info className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+  1770→                  <div className="text-sm text-gray-600 space-y-2">
+  1771→                    <p><strong>Reference:</strong> Yan, W. & Kang, M.S. (2003). GGE Biplot Analysis: A Graphical Tool for Breeders, Geneticists, and Agronomists. CRC Press.</p>
+  1772→                    <p><strong>GGE Concept:</strong> Since genotype main effect (G) and G×E interaction are equally important for cultivar evaluation, they should not be separated. The GGE biplot analyzes G + GE together.</p>
+  1773→                    <p><strong>Data Centering:</strong> Y<sub>ij</sub> - Ȳ<sub>j</sub> (centering by environment means removes environment main effect while preserving G and GE)</p>
+  1774→                    <p><strong>Interpretation:</strong> 
+  1775→                      • <strong>Which-Won-Where:</strong> Polygon view shows best genotype per sector • 
+  1776→                      <strong>Mean vs Stability:</strong> PC1 ≈ mean performance, PC2 ≈ stability • 
+  1777→                      <strong>Ideal Genotype:</strong> Highest mean + most stable (farthest right on average environment axis)
+  1778→                    </p>
+  1779→                  </div>
+  1780→                </div>
+  1781→              </CardContent>
+  1782→            </Card>
+  1783→          </motion.div>
+  1784→        )}
+  1785→      </AnimatePresence>
+  1786→    </div>
+  1787→  )
+  1788→}
+  1789→

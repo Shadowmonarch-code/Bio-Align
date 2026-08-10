@@ -1,0 +1,510 @@
+  1500→                    </CardContent>
+  1501→                  </Card>
+  1502→                </TabsContent>
+  1503→
+  1504→                {/* QTL MAPPING RESULTS */}
+  1505→                <TabsContent value="qtl-mapping">
+  1506→                  <Card>
+  1507→                    <CardHeader>
+  1508→                      <CardTitle>QTL Mapping Results (Single Marker Analysis)</CardTitle>
+  1509→                      <CardDescription>
+  1510→                        ANOVA-based QTL detection per marker with R² and LOD scores
+  1511→                      </CardDescription>
+  1512→                    </CardHeader>
+  1513→                    <CardContent>
+  1514→                      <div className="overflow-x-auto max-h-96">
+  1515→                        <Table>
+  1516→                          <TableHeader>
+  1517→                            <TableRow>
+  1518→                              <TableHead>Marker</TableHead>
+  1519→                              <TableHead>F-statistic</TableHead>
+  1520→                              <TableHead>P-value</TableHead>
+  1521→                              <TableHead>R² (%)</TableHead>
+  1522→                              <TableHead>LOD Score</TableHead>
+  1523→                              <TableHead>Effect</TableHead>
+  1524→                              <TableHead>Significance</TableHead>
+  1525→                            </TableRow>
+  1526→                          </TableHeader>
+  1527→                          <TableBody>
+  1528→                            {results.qtlResults.map((qtl) => (
+  1529→                              <TableRow key={qtl.marker}>
+  1530→                                <TableCell className="font-medium">{qtl.marker}</TableCell>
+  1531→                                <TableCell className="font-mono">{qtl.fStatistic.toFixed(2)}</TableCell>
+  1532→                                <TableCell className="font-mono">{qtl.pValue.toExponential(2)}</TableCell>
+  1533→                                <TableCell>
+  1534→                                  <div className="flex items-center gap-2">
+  1535→                                    <div className="w-16 h-2 rounded-full bg-gray-200 overflow-hidden">
+  1536→                                      <div
+  1537→                                        className="h-full bg-purple-500 rounded-full"
+  1538→                                        style={{ width: `${Math.min(100, qtl.rSquared * 100)}%` }}
+  1539→                                      />
+  1540→                                    </div>
+  1541→                                    <span className="font-mono">{(qtl.rSquared * 100).toFixed(1)}%</span>
+  1542→                                  </div>
+  1543→                                </TableCell>
+  1544→                                <TableCell>
+  1545→                                  <Badge variant={qtl.lodScore >= 3 ? 'default' : 'secondary'}>
+  1546→                                    {qtl.lodScore.toFixed(2)}
+  1547→                                  </Badge>
+  1548→                                </TableCell>
+  1549→                                <TableCell className="font-mono">{qtl.effect.toFixed(3)}</TableCell>
+  1550→                                <TableCell>
+  1551→                                  <Badge className={getSignificanceColor(qtl.significant, qtl.pValue)}>
+  1552→                                    {qtl.significant ? 'Significant' : 'NS'}
+  1553→                                  </Badge>
+  1554→                                </TableCell>
+  1555→                              </TableRow>
+  1556→                            ))}
+  1557→                          </TableBody>
+  1558→                        </Table>
+  1559→                      </div>
+  1560→
+  1561→                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+  1562→                        <h4 className="font-medium mb-2 flex items-center gap-2">
+  1563→                          <Info className="h-4 w-4" />
+  1564→                          QTL Interpretation Guidelines
+  1565→                        </h4>
+  1566→                        <ul className="text-sm space-y-1 text-muted-foreground">
+  1567→                          <li>• <strong>LOD ≥ 3.0:</strong> Suggestive QTL evidence</li>
+  1568→                          <li>• <strong>R² &gt; 15%:</strong> Major effect QTL</li>
+  1569→                          <li>• <strong>R² 5-15%:</strong> Moderate effect QTL</li>
+  1570→                          <li>• <strong>R² &lt; 5%:</strong> Minor effect QTL</li>
+  1571→                        </ul>
+  1572→                      </div>
+  1573→                    </CardContent>
+  1574→                  </Card>
+  1575→                </TabsContent>
+  1576→
+  1577→                {/* ASSOCIATION MAPPING RESULTS */}
+  1578→                <TabsContent value="association">
+  1579→                  <Card>
+  1580→                    <CardHeader>
+  1581→                      <CardTitle>Association Mapping Results</CardTitle>
+  1582→                      <CardDescription>
+  1583→                        GLM and MLM-based association statistics for each marker
+  1584→                      </CardDescription>
+  1585→                    </CardHeader>
+  1586→                    <CardContent>
+  1587→                      <div className="overflow-x-auto max-h-96">
+  1588→                        <Table>
+  1589→                          <TableHeader>
+  1590→                            <TableRow>
+  1591→                              <TableHead>Marker</TableHead>
+  1592→                              <TableHead>GLM P-value</TableHead>
+  1593→                              <TableHead>GLM Effect</TableHead>
+  1594→                              <TableHead>MLM P-value</TableHead>
+  1595→                              <TableHead>MLM Effect</TableHead>
+  1596→                              <TableHead>Status</TableHead>
+  1597→                            </TableRow>
+  1598→                          </TableHeader>
+  1599→                          <TableBody>
+  1600→                            {results.associationResults.map((assoc) => (
+  1601→                              <TableRow key={assoc.marker}>
+  1602→                                <TableCell className="font-medium">{assoc.marker}</TableCell>
+  1603→                                <TableCell className="font-mono">{assoc.glmPvalue.toExponential(2)}</TableCell>
+  1604→                                <TableCell className="font-mono">{assoc.glmEffect.toFixed(4)}</TableCell>
+  1605→                                <TableCell className="font-mono">
+  1606→                                  {assoc.mlmPvalue?.toExponential(2) ?? 'N/A'}
+  1607→                                </TableCell>
+  1608→                                <TableCell className="font-mono">
+  1609→                                  {assoc.mlmEffect?.toFixed(4) ?? 'N/A'}
+  1610→                                </TableCell>
+  1611→                                <TableCell>
+  1612→                                  <Badge className={getSignificanceColor(assoc.significant, assoc.glmPvalue)}>
+  1613→                                    {assoc.significant ? 'Associated' : 'NS'}
+  1614→                                  </Badge>
+  1615→                                </TableCell>
+  1616→                              </TableRow>
+  1617→                            ))}
+  1618→                          </TableBody>
+  1619→                        </Table>
+  1620→                      </div>
+  1621→
+  1622→                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+  1623→                        <h4 className="font-medium mb-2">Model Comparison</h4>
+  1624→                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+  1625→                          <div className="p-3 border rounded">
+  1626→                            <strong>GLM (General Linear Model)</strong>
+  1627→                            <p className="text-muted-foreground mt-1">
+  1628→                              Tests marker-trait association without accounting for population structure.
+  1629→                              May produce false positives if structure exists.
+  1630→                            </p>
+  1631→                          </div>
+  1632→                          <div className="p-3 border rounded">
+  1633→                            <strong>MLM (Mixed Linear Model)</strong>
+  1634→                            <p className="text-muted-foreground mt-1">
+  1635→                              Incorporates kinship matrix (K) and population structure (Q) to control
+  1636→                              for confounding factors. More conservative but more reliable.
+  1637→                            </p>
+  1638→                          </div>
+  1639→                        </div>
+  1640→                      </div>
+  1641→                    </CardContent>
+  1642→                  </Card>
+  1643→                </TabsContent>
+  1644→
+  1645→                {/* MARKER-ASSISTED SELECTION */}
+  1646→                <TabsContent value="mas">
+  1647→                  <Card>
+  1648→                    <CardHeader>
+  1649→                      <CardTitle>Marker-Assisted Selection (MAS) Recommendations</CardTitle>
+  1650→                      <CardDescription>
+  1651→                        Selection efficiency and cost-benefit analysis for marker deployment
+  1652→                      </CardDescription>
+  1653→                    </CardHeader>
+  1654→                    <CardContent>
+  1655→                      <div className="overflow-x-auto max-h-96">
+  1656→                        <Table>
+  1657→                          <TableHeader>
+  1658→                            <TableRow>
+  1659→                              <TableHead>Marker</TableHead>
+  1660→                              <TableHead>Efficiency</TableHead>
+  1661→                              <TableHead>Association</TableHead>
+  1662→                              <TableHead>Exp. Gain</TableHead>
+  1663→                              <TableHead>Recommended</TableHead>
+  1664→                              <TableHead>Action</TableHead>
+  1665→                            </TableRow>
+  1666→                          </TableHeader>
+  1667→                          <TableBody>
+  1668→                            {results.masResults.map((mas) => (
+  1669→                              <TableRow key={mas.marker}>
+  1670→                                <TableCell className="font-medium">{mas.marker}</TableCell>
+  1671→                                <TableCell>
+  1672→                                  <div className="flex items-center gap-2">
+  1673→                                    <div className="w-16 h-2 rounded-full bg-gray-200 overflow-hidden">
+  1674→                                      <div
+  1675→                                        className="h-full bg-green-500 rounded-full"
+  1676→                                        style={{ width: `${mas.selectionEfficiency * 100}%` }}
+  1677→                                      />
+  1678→                                    </div>
+  1679→                                    <span className="font-mono text-sm">
+  1680→                                      {(mas.selectionEfficiency * 100).toFixed(1)}%
+  1681→                                    </span>
+  1682→                                  </div>
+  1683→                                </TableCell>
+  1684→                                <TableCell>
+  1685→                                  <Badge
+  1686→                                    variant={
+  1687→                                      mas.associationStrength === 'Very Strong' ||
+  1688→                                      mas.associationStrength === 'Strong'
+  1689→                                        ? 'default'
+  1690→                                        : mas.associationStrength === 'Moderate'
+  1691→                                        ? 'secondary'
+  1692→                                        : 'outline'
+  1693→                                    }
+  1694→                                  >
+  1695→                                    {mas.associationStrength}
+  1696→                                  </Badge>
+  1697→                                </TableCell>
+  1698→                                <TableCell className="font-mono">
+  1699→                                  {mas.expectedGain.toFixed(3)}
+  1700→                                </TableCell>
+  1701→                                <TableCell>
+  1702→                                  {mas.recommended ? (
+  1703→                                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+  1704→                                  ) : (
+  1705→                                    <XCircle className="h-5 w-5 text-gray-400" />
+  1706→                                  )}
+  1707→                                </TableCell>
+  1708→                                <TableCell>
+  1709→                                  <Badge
+  1710→                                    className={
+  1711→                                      mas.costBenefit === 'Highly Recommended'
+  1712→                                        ? 'bg-green-100 text-green-800'
+  1713→                                        : mas.costBenefit === 'Recommended'
+  1714→                                        ? 'bg-blue-100 text-blue-800'
+  1715→                                        : mas.costBenefit === 'Optional'
+  1716→                                        ? 'bg-yellow-100 text-yellow-800'
+  1717→                                        : 'bg-gray-100 text-gray-800'
+  1718→                                    }
+  1719→                                  >
+  1720→                                    {mas.costBenefit}
+  1721→                                  </Badge>
+  1722→                                </TableCell>
+  1723→                              </TableRow>
+  1724→                            ))}
+  1725→                          </TableBody>
+  1726→                        </Table>
+  1727→                      </div>
+  1728→
+  1729→                      {/* Cost-Benefit Summary */}
+  1730→                      <div className="mt-6 p-4 border rounded-lg">
+  1731→                        <h4 className="font-medium mb-3">MAS Cost-Benefit Summary</h4>
+  1732→                        <div className="overflow-x-auto">
+  1733→                          <Table>
+  1734→                            <TableHeader>
+  1735→                              <TableRow>
+  1736→                                <TableHead>Category</TableHead>
+  1737→                                <TableHead>Criteria</TableHead>
+  1738→                                <TableHead>Recommendation</TableHead>
+  1739→                              </TableRow>
+  1740→                            </TableHeader>
+  1741→                            <TableBody>
+  1742→                              <TableRow>
+  1743→                                <TableCell>High Priority Markers</TableCell>
+  1744→                                <TableCell>R² &gt; 15%, P &lt; α</TableCell>
+  1745→                                <TableCell>
+  1746→                                  <Badge className="bg-green-100 text-green-800">
+  1747→                                    Deploy Immediately
+  1748→                                  </Badge>
+  1749→                                </TableCell>
+  1750→                              </TableRow>
+  1751→                              <TableRow>
+  1752→                                <TableCell>Medium Priority Markers</TableCell>
+  1753→                                <TableCell>R² 8-15%, P &lt; α</TableCell>
+  1754→                                <TableCell>
+  1755→                                  <Badge className="bg-blue-100 text-blue-800">
+  1756→                                    Deploy in Selection Program
+  1757→                                  </Badge>
+  1758→                                </TableCell>
+  1759→                              </TableRow>
+  1760→                              <TableRow>
+  1761→                                <TableCell>Low Priority Markers</TableCell>
+  1762→                                <TableCell>R² 3-8%</TableCell>
+  1763→                                <TableCell>
+  1764→                                  <Badge className="bg-yellow-100 text-yellow-800">
+  1765→                                    Optional Use
+  1766→                                  </Badge>
+  1767→                                </TableCell>
+  1768→                              </TableRow>
+  1769→                              <TableRow>
+  1770→                                <TableCell>Not Recommended</TableCell>
+  1771→                                <TableCell>R² &lt; 3%</TableCell>
+  1772→                                <TableCell>
+  1773→                                  <Badge className="bg-gray-100 text-gray-800">
+  1774→                                    Skip for Now
+  1775→                                  </Badge>
+  1776→                                </TableCell>
+  1777→                              </TableRow>
+  1778→                            </TableBody>
+  1779→                          </Table>
+  1780→                        </div>
+  1781→                      </div>
+  1782→                    </CardContent>
+  1783→                  </Card>
+  1784→                </TabsContent>
+  1785→
+  1786→                {/* GENETIC DISTANCE & SIMILARITY */}
+  1787→                <TabsContent value="genetic-dist">
+  1788→                  <Card>
+  1789→                    <CardHeader>
+  1790→                      <CardTitle>Genetic Distance & Similarity Matrix</CardTitle>
+  1791→                      <CardDescription>
+  1792→                        Pairwise distances between samples using multiple metrics (Nei, 1972; Rogers, 1972)
+  1793→                      </CardDescription>
+  1794→                    </CardHeader>
+  1795→                    <CardContent>
+  1796→                      <div className="overflow-x-auto max-h-96">
+  1797→                        <Table>
+  1798→                          <TableHeader>
+  1799→                            <TableRow>
+  1800→                              <TableHead>Pair</TableHead>
+  1801→                              <TableHead>Rogers&apos; Distance</TableHead>
+  1802→                              <TableHead>Jaccard Similarity</TableHead>
+  1803→                              <TableHead>Nei&apos;s Distance</TableHead>
+  1804→                              <TableHead>Relationship</TableHead>
+  1805→                            </TableRow>
+  1806→                          </TableHeader>
+  1807→                          <TableBody>
+  1808→                            {results.geneticDistances.slice(0, 30).map((gd, idx) => (
+  1809→                              <TableRow key={idx}>
+  1810→                                <TableCell className="font-mono text-sm">
+  1811→                                  {gd.sample1} ↔ {gd.sample2}
+  1812→                                </TableCell>
+  1813→                                <TableCell>
+  1814→                                  <div className="flex items-center gap-2">
+  1815→                                    <div className="w-16 h-2 rounded-full bg-gray-200 overflow-hidden">
+  1816→                                      <div
+  1817→                                        className="h-full bg-red-500 rounded-full"
+  1818→                                        style={{
+  1819→                                          width: `${Math.min(100, gd.rogersDistance * 100)}%`
+  1820→                                        }}
+  1821→                                      />
+  1822→                                    </div>
+  1823→                                    <span className="font-mono text-sm">
+  1824→                                      {gd.rogersDistance.toFixed(4)}
+  1825→                                    </span>
+  1826→                                  </div>
+  1827→                                </TableCell>
+  1828→                                <TableCell>
+  1829→                                  <div className="flex items-center gap-2">
+  1830→                                    <div className="w-16 h-2 rounded-full bg-gray-200 overflow-hidden">
+  1831→                                      <div
+  1832→                                        className="h-full bg-green-500 rounded-full"
+  1833→                                        style={{
+  1834→                                          width: `${gd.jaccardSimilarity * 100}%`
+  1835→                                        }}
+  1836→                                      />
+  1837→                                    </div>
+  1838→                                    <span className="font-mono text-sm">
+  1839→                                      {gd.jaccardSimilarity.toFixed(4)}
+  1840→                                    </span>
+  1841→                                  </div>
+  1842→                                </TableCell>
+  1843→                                <TableCell className="font-mono">
+  1844→                                  {gd.neiDistance.toFixed(4)}
+  1845→                                </TableCell>
+  1846→                                <TableCell>
+  1847→                                  <Badge
+  1848→                                    variant={
+  1849→                                      gd.rogersDistance < 0.2
+  1850→                                        ? 'default'
+  1851→                                        : gd.rogersDistance < 0.4
+  1852→                                        ? 'secondary'
+  1853→                                        : 'outline'
+  1854→                                    }
+  1855→                                  >
+  1856→                                    {gd.rogersDistance < 0.2
+  1857→                                      ? 'Very Close'
+  1858→                                      : gd.rogersDistance < 0.4
+  1859→                                      ? 'Related'
+  1860→                                      : 'Distant'}
+  1861→                                  </Badge>
+  1862→                                </TableCell>
+  1863→                              </TableRow>
+  1864→                            ))}
+  1865→                          </TableBody>
+  1866→                        </Table>
+  1867→                      </div>
+  1868→
+  1869→                      {results.geneticDistances.length > 30 && (
+  1870→                        <p className="text-sm text-muted-foreground mt-2 text-center">
+  1871→                          Showing 30 of {results.geneticDistances.length} pairs
+  1872→                        </p>
+  1873→                      )}
+  1874→
+  1875→                      {/* UPGMA Clustering Input Data */}
+  1876→                      <div className="mt-6 p-4 border rounded-lg">
+  1877→                        <h4 className="font-medium mb-3">UPGMA Clustering Information</h4>
+  1878→                        <p className="text-sm text-muted-foreground mb-3">
+  1879→                          The Rogers&apos; distance matrix can be used as input for UPGMA hierarchical clustering:
+  1880→                        </p>
+  1881→                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+  1882→                          <div className="p-2 bg-gray-50 rounded">
+  1883→                            <span className="text-muted-foreground">Min Distance:</span>{' '}
+  1884→                            <span className="font-semibold">
+  1885→                              {Math.min(...results.geneticDistances.map(d => d.rogersDistance)).toFixed(4)}
+  1886→                            </span>
+  1887→                          </div>
+  1888→                          <div className="p-2 bg-gray-50 rounded">
+  1889→                            <span className="text-muted-foreground">Max Distance:</span>{' '}
+  1890→                            <span className="font-semibold">
+  1891→                              {Math.max(...results.geneticDistances.map(d => d.rogersDistance)).toFixed(4)}
+  1892→                            </span>
+  1893→                          </div>
+  1894→                          <div className="p-2 bg-gray-50 rounded">
+  1895→                            <span className="text-muted-foreground">Mean Distance:</span>{' '}
+  1896→                            <span className="font-semibold">
+  1897→                              {(mean(results.geneticDistances.map(d => d.rogersDistance))).toFixed(4)}
+  1898→                            </span>
+  1899→                          </div>
+  1900→                          <div className="p-2 bg-gray-50 rounded">
+  1901→                            <span className="text-muted-foreground">SD:</span>{' '}
+  1902→                            <span className="font-semibold">
+  1903→                              {stddev(results.geneticDistances.map(d => d.rogersDistance)).toFixed(4)}
+  1904→                            </span>
+  1905→                          </div>
+  1906→                        </div>
+  1907→                      </div>
+  1908→                    </CardContent>
+  1909→                  </Card>
+  1910→                </TabsContent>
+  1911→              </Tabs>
+  1912→            </motion.div>
+  1913→          )}
+  1914→        </TabsContent>
+  1915→
+  1916→        {/* EXPORT TAB */}
+  1917→        <TabsContent value="export">
+  1918→          {results && (
+  1919→            <motion.div
+  1920→              initial={{ opacity: 0, y: 20 }}
+  1921→              animate={{ opacity: 1, y: 0 }}
+  1922→            >
+  1923→              <Card>
+  1924→                <CardHeader>
+  1925→                  <CardTitle className="flex items-center gap-2">
+  1926→                    <Download className="h-5 w-5" />
+  1927→                    Export Results
+  1928→                  </CardTitle>
+  1929→                  <CardDescription>
+  1930→                    Export all analysis results as CSV files for further processing
+  1931→                  </CardDescription>
+  1932→                </CardHeader>
+  1933→                <CardContent className="space-y-6">
+  1934→                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  1935→                    <div className="p-4 border rounded-lg space-y-3">
+  1936→                      <h4 className="font-semibold">Complete Results Export</h4>
+  1937→                      <p className="text-sm text-muted-foreground">
+  1938→                        Export all analysis results including marker statistics, LD, QTL mapping,
+  1939→                        association analysis, MAS recommendations, and genetic distances.
+  1940→                      </p>
+  1941→                      <Button onClick={exportCSV} className="w-full">
+  1942→                        <Download className="mr-2 h-4 w-4" />
+  1943→                        Download Full Report (CSV)
+  1944→                      </Button>
+  1945→                    </div>
+  1946→
+  1947→                    <div className="p-4 border rounded-lg space-y-3">
+  1948→                      <h4 className="font-semibold">Export Summary</h4>
+  1949→                      <div className="space-y-2 text-sm">
+  1950→                        <div className="flex justify-between">
+  1951→                          <span>Total Markers Analyzed:</span>
+  1952→                          <span className="font-semibold">{results.summary.totalMarkers}</span>
+  1953→                        </div>
+  1954→                        <div className="flex justify-between">
+  1955→                          <span>Polymorphic Markers:</span>
+  1956→                          <span className="font-semibold">{results.summary.polymorphicMarkers}</span>
+  1957→                        </div>
+  1958→                        <div className="flex justify-between">
+  1959→                          <span>Average PIC:</span>
+  1960→                          <span className="font-semibold">{results.summary.avgPic.toFixed(4)}</span>
+  1961→                        </div>
+  1962→                        <div className="flex justify-between">
+  1963→                          <span>Average H<sub>e</sub>:</span>
+  1964→                          <span className="font-semibold">{results.summary.avgHe.toFixed(4)}</span>
+  1965→                        </div>
+  1966→                        <div className="flex justify-between">
+  1967→                          <span>Significant LD Pairs:</span>
+  1968→                          <span className="font-semibold">{results.summary.significantLDPairs}</span>
+  1969→                        </div>
+  1970→                        <div className="flex justify-between">
+  1971→                          <span>Significant QTLs:</span>
+  1972→                          <span className="font-semibold">{results.summary.significantQTLs}</span>
+  1973→                        </div>
+  1974→                      </div>
+  1975→                    </div>
+  1976→                  </div>
+  1977→
+  1978→                  {/* Methodology Reference */}
+  1979→                  <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+  1980→                    <h4 className="font-medium mb-3">Methodology References</h4>
+  1981→                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+  1982→                      <div>
+  1983→                        <p className="font-medium text-foreground">PIC Calculation</p>
+  1984→                        <p>Botstein et al. (1980). Construction of a genetic linkage map using restriction fragment length polymorphisms.</p>
+  1985→                      </div>
+  1986→                      <div>
+  1987→                        <p className="font-medium text-foreground">LD Measures</p>
+  1988→                        <p>Hill & Weir (1988). Linkage disequilibrium and recombination in finite populations.</p>
+  1989→                      </div>
+  1990→                      <div>
+  1991→                        <p className="font-medium text-foreground">Genetic Distance</p>
+  1992→                        <p>Nei (1972). Genetic distance between populations.</p>
+  1993→                      </div>
+  1994→                      <div>
+  1995→                        <p className="font-medium text-foreground">Rogers' Distance</p>
+  1996→                        <p>Rogers (1972). Measures of genetic similarity and genetic distance.</p>
+  1997→                      </div>
+  1998→                    </div>
+  1999→                  </div>
+  2000→                </CardContent>
+  2001→              </Card>
+  2002→            </motion.div>
+  2003→          )}
+  2004→        </TabsContent>
+  2005→      </Tabs>
+  2006→    </div>
+  2007→  )
+  2008→}
+  2009→

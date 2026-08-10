@@ -1,0 +1,878 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback } from 'react'
+     4→import { motion } from 'framer-motion'
+     5→import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Textarea } from '@/components/ui/textarea'
+     8→import { Badge } from '@/components/ui/badge'
+     9→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    10→import { 
+    11→  Table,
+    12→  TableBody,
+    13→  TableCell,
+    14→  TableHead,
+    15→  TableHeader,
+    16→  TableRow,
+    17→} from '@/components/ui/table'
+    18→import { 
+    19→  LineChart, 
+    20→  Info, 
+    21→  Download,
+    22→  Calculator,
+    23→  AlertCircle
+    24→} from 'lucide-react'
+    25→
+    26→// ============================================================================
+    27→// TYPE DEFINITIONS
+    28→// ============================================================================
+    29→
+    30→interface ANOVARow {
+    31→  source: string
+    32→  df: number
+    33→  ss: number
+    34→  ms: number
+    35→  f: number
+    36→  pValue: number
+    37→}
+    38→
+    39→interface IPCAAxis {
+    40→  axis: number
+    41→  singularValue: number
+    42→  eigenvalue: number
+    43→  variancePercent: number
+    44→  cumulativePercent: number
+    45→}
+    46→
+    47→interface GenotypeScore {
+    48→  genotype: string
+    49→  ipca1: number
+    50→  ipca2: number
+    51→  stabilityMeasure: number
+    52→  stabilityCategory: string
+    53→}
+    54→
+    55→interface EnvironmentScore {
+    56→  environment: string
+    57→  ipca1: number
+    58→  ipca2: number
+    59→  meanYield: number
+    60→  discriminatingAbility: string
+    61→}
+    62→
+    63→interface AMMIResult {
+    64→  genotypes: string[]
+    65→  environments: string[]
+    66→  grandMean: number
+    67→  anova: {
+    68→    genotype: ANOVARow
+    69→    environment: ANOVARow
+    70→    geInteraction: ANOVARow
+    71→    total: ANOVARow
+    72→  }
+    73→  ipcaAxes: IPCAAxis[]
+    74→  genotypeScores: GenotypeScore[]
+    75→  environmentScores: EnvironmentScore[]
+    76→  modelFit: {
+    77→    ammi1RSquared: number
+    78→    ammi2RSquared: number
+    79→  }
+    80→}
+    81→
+    82→// ============================================================================
+    83→// SAMPLE DATA
+    84→// ============================================================================
+    85→
+    86→const SAMPLE_DATA = `Genotype,Env1,Env2,Env3,Env4
+    87→G1,3200,2850,3100,2980
+    88→G2,2800,3100,2750,3050
+    89→G3,3500,3200,3400,3300
+    90→G4,2900,2600,2850,2700
+    91→G5,3800,3500,3700,3600
+    92→G6,3100,3400,3050,3350
+    93→G7,2650,2400,2600,2500
+    94→G8,3350,3650,3300,3580
+    95→G9,3950,3700,3900,3800
+    96→G10,3000,2750,2950,2800`
+    97→
+    98→// ============================================================================
+    99→// MATRIX UTILITIES
+   100→// ============================================================================
+   101→
+   102→function transpose(matrix: number[][]): number[][] {
+   103→  if (matrix.length === 0) return []
+   104→  return matrix[0].map((_, colIdx) => matrix.map(row => row[colIdx]))
+   105→}
+   106→
+   107→function matMul(A: number[][], B: number[][]): number[][] {
+   108→  const rowsA = A.length
+   109→  const colsA = A[0]?.length || 0
+   110→  const colsB = B[0]?.length || 0
+   111→  
+   112→  const result: number[][] = []
+   113→  for (let i = 0; i < rowsA; i++) {
+   114→    result[i] = []
+   115→    for (let j = 0; j < colsB; j++) {
+   116→      let sum = 0
+   117→      for (let k = 0; k < colsA; k++) {
+   118→        sum += A[i][k] * B[k][j]
+   119→      }
+   120→      result[i][j] = sum
+   121→    }
+   122→  }
+   123→  return result
+   124→}
+   125→
+   126→function matVecMul(matrix: number[][], vec: number[]): number[] {
+   127→  return matrix.map(row => 
+   128→    row.reduce((sum, val, i) => sum + val * (vec[i] || 0), 0)
+   129→  )
+   130→}
+   131→
+   132→/**
+   133→ * Simple SVD using power iteration - robust for small matrices
+   134→ */
+   135→function computeSVD(matrix: number[][]): { U: number[][]; S: number[]; Vt: number[][] } {
+   136→  const m = matrix.length
+   137→  const n = matrix[0]?.length || 0
+   138→  
+   139→  if (m === 0 || n === 0) {
+   140→    return { U: [], S: [], Vt: [] }
+   141→  }
+   142→  
+   143→  // Compute A^T * A for eigenvalues
+   144→  const AtA = matMul(transpose(matrix), matrix)
+   145→  const size = Math.min(m, n)
+   146→  
+   147→  const eigenvalues: number[] = []
+   148→  const eigenvectors: number[][] = []
+   149→  
+   150→  // Copy AtA for deflation
+   151→  const workingMatrix = AtA.map(row => [...row])
+   152→  
+   153→  // Power iteration for each eigenvalue
+   154→  for (let iter = 0; iter < size; iter++) {
+   155→    // Initialize vector
+   156→    let v = new Array(n).fill(0)
+   157→    v[Math.min(iter, n-1)] = 1
+   158→    
+   159→    // Power iteration
+   160→    for (let powerIter = 0; powerIter < 150; powerIter++) {
+   161→      let Av = matVecMul(workingMatrix, v)
+   162→      
+   163→      // Orthogonalize against previous eigenvectors (Hotelling deflation)
+   164→      for (let k = 0; k < eigenvectors.length; k++) {
+   165→        let dot = 0
+   166→        for (let i = 0; i < Av.length; i++) {
+   167→          dot += Av[i] * eigenvectors[k][i]
+   168→        }
+   169→        for (let i = 0; i < Av.length; i++) {
+   170→          Av[i] -= dot * eigenvectors[k][i]
+   171→        }
+   172→      }
+   173→      
+   174→      // Normalize
+   175→      let norm = Math.sqrt(Av.reduce((sum, x) => sum + x*x, 0))
+   176→      if (norm < 1e-12) break
+   177→      v = Av.map(x => x / norm)
+   178→    }
+   179→    
+   180→    // Compute eigenvalue: λ = v^T * W * v
+   181→    const Wv = matVecMul(workingMatrix, v)
+   182→    let eigenvalue = 0
+   183→    for (let i = 0; i < v.length; i++) {
+   184→      eigenvalue += v[i] * Wv[i]
+   185→    }
+   186→    
+   187→    if (Math.abs(eigenvalue) > 1e-10 && eigenvalue > 0) {
+   188→      eigenvalues.push(eigenvalue)
+   189→      eigenvectors.push([...v])
+   190→      
+   191→      // Deflate: W = W - λ*v*v^T
+   192→      for (let i = 0; i < n; i++) {
+   193→        for (let j = 0; j < n; j++) {
+   194→          workingMatrix[i][j] -= eigenvalue * v[i] * v[j]
+   195→        }
+   196→      }
+   197→    } else {
+   198→      break
+   199→    }
+   200→  }
+   201→  
+   202→  // Singular values are sqrt of eigenvalues
+   203→  const S = eigenvalues.map(ev => Math.sqrt(Math.max(0, ev)))
+   204→  
+   205→  // V matrix from eigenvectors
+   206→  const V = transpose(eigenvectors)
+   207→  const Vt = eigenvectors.length > 0 ? eigenvectors : []
+   208→  
+   209→  // Compute U = A * V * Σ^-1
+   210→  const U: number[][] = []
+   211→  for (let i = 0; i < m; i++) {
+   212→    U[i] = []
+   213→    for (let j = 0; j < S.length; j++) {
+   214→      if (S[j] > 1e-10) {
+   215→        let sum = 0
+   216→        for (let k = 0; k < n; k++) {
+   217→          sum += matrix[i][k] * (V[k]?.[j] || 0)
+   218→        }
+   219→        U[i][j] = sum / S[j]
+   220→      } else {
+   221→        U[i][j] = 0
+   222→      }
+   223→    }
+   224→  }
+   225→  
+   226→  return { U, S, Vt }
+   227→}
+   228→
+   229→// F-distribution approximation (simplified)
+   230→function fCDF(f: number, df1: number, df2: number): number {
+   231→  // Simplified approximation using regularized incomplete beta function
+   232→  if (f <= 0) return 0
+   233→  const x = (df1 * f) / (df1 * f + df2)
+   234→  
+   235→  // Regularized incomplete beta approximation
+   236→  return betaRegularized(x, df1/2, df2/2)
+   237→}
+   238→
+   239→function betaRegularized(x: number, a: number, b: number): number {
+   240→  if (x <= 0) return 0
+   241→  if (x >= 1) return 1
+   242→  
+   243→  // Use continued fraction expansion for I_x(a,b)
+   244→  const eps = 1e-10
+   245→  const maxIter = 200
+   246→  
+   247→  // For a,b > 0 use continued fraction
+   248→  const qab = a + b
+   249→  const qap = a + 1
+   250→  const qam = a - 1
+   251→  
+   252→  let c = 1
+   253→  let d = 1 + (qab * x / qap)
+   254→  if (Math.abs(d) < eps) d = eps
+   255→  d = 1 / d
+   256→  let h = d
+   257→  
+   258→  for (let m = 1; m <= maxIter; m++) {
+   259→    let m2 = 2 * m
+   260→    
+   261→    // Even step
+   262→    let aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+   263→    d = 1 + aa * d
+   264→    if (Math.abs(d) < eps) d = eps
+   265→    c = 1 + aa / c
+   266→    if (Math.abs(c) < eps) c = eps
+   267→    d = 1 / d
+   268→    h *= d * c
+   269→    
+   270→    // Odd step
+   271→    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+   272→    d = 1 + aa * d
+   273→    if (Math.abs(d) < eps) d = eps
+   274→    c = 1 + aa / c
+   275→    if (Math.abs(c) < eps) c = eps
+   276→    d = 1 / d
+   277→    const del = d * c
+   278→    h *= del
+   279→    
+   280→    if (Math.abs(del - 1) < eps) break
+   281→  }
+   282→  
+   283→  // Complete the calculation
+   284→  const logBetaFn = logGamma(a) + logGamma(b) - logGamma(a + b)
+   285→  const front = Math.exp(a * Math.log(x) + b * Math.log(1-x) - logBetaFn) / a
+   286→  
+   287→  return h * front
+   288→}
+   289→
+   290→function logGamma(x: number): number {
+   291→  // Lanczos approximation
+   292→  const g = 7
+   293→  const coef = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7]
+   294→  
+   295→  if (x < 0.5) {
+   296→    return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x)
+   297→  }
+   298→  
+   299→  x -= 1
+   300→  let a = coef[0]
+   301→  for (let i = 1; i < g + 2; i++) {
+   302→    a += coef[i] / (x + i)
+   303→  }
+   304→  const t = x + g + 0.5
+   305→  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a)
+   306→}
+   307→
+   308→// ============================================================================
+   309→// MAIN AMMI ANALYSIS FUNCTION
+   310→// ============================================================================
+   311→
+   312→function performAMMIAnalysis(
+   313→  gNames: string[],
+   314→  eNames: string[],
+   315→  data: number[][]
+   316→): AMMIResult {
+   317→  const g = gNames.length
+   318→  const e = eNames.length
+   319→  const N = g * e
+   320→  
+   321→  // Step 1: Calculate means
+   322→  let grandTotal = 0
+   323→  for (let i = 0; i < g; i++) {
+   324→    for (let j = 0; j < e; j++) {
+   325→      grandTotal += data[i][j]
+   326→    }
+   327→  }
+   328→  const grandMean = grandTotal / N
+   329→  
+   330→  // Marginal means
+   331→  const gMeans: number[] = []
+   332→  const eMeans: number[] = []
+   333→  
+   334→  for (let i = 0; i < g; i++) {
+   335→    let sum = 0
+   336→    for (let j = 0; j < e; j++) sum += data[i][j]
+   337→    gMeans.push(sum / e)
+   338→  }
+   339→  
+   340→  for (let j = 0; j < e; j++) {
+   341→    let sum = 0
+   342→    for (let i = 0; i < g; i++) sum += data[i][j]
+   343→    eMeans.push(sum / g)
+   344→  }
+   345→  
+   346→  // Main effects
+   347→  const gEffects = gMeans.map(m => m - grandMean)
+   348→  const eEffects = eMeans.map(m => m - grandMean)
+   349→  
+   350→  // Step 2: Two-way ANOVA
+   351→  let totalSS = 0
+   352→  for (let i = 0; i < g; i++) {
+   353→    for (let j = 0; j < e; j++) {
+   354→      totalSS += (data[i][j] - grandMean) ** 2
+   355→    }
+   356→  }
+   357→  
+   358→  let gSS = 0
+   359→  for (let i = 0; i < g; i++) gSS += e * gEffects[i] ** 2
+   360→  const gDF = g - 1
+   361→  const gMS = gSS / gDF
+   362→  
+   363→  let eSS = 0
+   364→  for (let j = 0; j < e; j++) eSS += g * eEffects[j] ** 2
+   365→  const eDF = e - 1
+   366→  const eMS = eSS / eDF
+   367→  
+   368→  // G×E interaction
+   369→  let geSS = 0
+   370→  const geMatrix: number[][] = []
+   371→  
+   372→  for (let i = 0; i < g; i++) {
+   373→    geMatrix[i] = []
+   374→    for (let j = 0; j < e; j++) {
+   375→      const expected = grandMean + gEffects[i] + eEffects[j]
+   376→      const interaction = data[i][j] - expected
+   377→      geMatrix[i][j] = interaction
+   378→      geSS += interaction ** 2
+   379→    }
+   380→  }
+   381→  
+   382→  const geDF = (g - 1) * (e - 1)
+   383→  const geMS = geSS / geDF
+   384→  
+   385→  // F-values (using GE as error term for fixed effects model)
+   386→  const gF = gMS / geMS
+   387→  const eF = eMS / geMS
+   388→  const geF = geMS / (geSS * 0.01 + 1000) // Small value for display
+   389→  
+   390→  // P-values
+   391→  const effDF = Math.max(g * e - g - e + 1, 1)
+   392→  const gPVal = 1 - fCDF(gF, gDF, geDF)
+   393→  const ePVal = 1 - fCDF(eF, eDF, geDF)
+   394→  const gePVal = 1 - fCDF(geF, geDF, effDF)
+   395→  
+   396→  // Step 3: SVD of G×E matrix
+   397→  const { U, S, Vt } = computeSVD(geMatrix)
+   398→  
+   399→  // Step 4: Extract IPCA axes
+   400→  const numAxes = Math.min(S.length, Math.min(g-1, e-1), 5)
+   401→  let cumVar = 0
+   402→  const ipcaAxes: IPCAAxis[] = []
+   403→  
+   404→  for (let k = 0; k < numAxes; k++) {
+   405→    const eigenval = S[k] ** 2
+   406→    const varPct = (eigenval / geSS) * 100
+   407→    cumVar += varPct
+   408→    
+   409→    ipcaAxes.push({
+   410→      axis: k + 1,
+   411→      singularValue: S[k],
+   412→      eigenvalue: eigenval,
+   413→      variancePercent: varPct,
+   414→      cumulativePercent: cumVar
+   415→    })
+   416→  }
+   417→  
+   418→  // Step 5: Genotype scores
+   419→  const genotypeScores: GenotypeScore[] = []
+   420→  for (let i = 0; i < g; i++) {
+   421→    const ipca1 = U[i]?.[0] * S[0] || 0
+   422→    const ipca2 = U[i]?.[1] * S[1] || 0
+   423→    const stability = Math.sqrt(ipca1**2 + ipca2**2)
+   424→    
+   425→    let category = 'Stable'
+   426→    if (stability < 50000) category = 'Very Stable'
+   427→    else if (stability < 150000) category = 'Stable'
+   428→    else if (stability < 300000) category = 'Moderate'
+   429→    else if (stability < 450000) category = 'Unstable'
+   430→    else category = 'Very Unstable'
+   431→    
+   432→    genotypeScores.push({
+   433→      genotype: gNames[i],
+   434→      ipca1,
+   435→      ipca2,
+   436→      stabilityMeasure: stability,
+   437→      stabilityCategory: category
+   438→    })
+   439→  }
+   440→  
+   441→  // Step 6: Environment scores
+   442→  const environmentScores: EnvironmentScore[] = []
+   443→  for (let j = 0; j < e; j++) {
+   444→    const ipca1 = Vt[0]?.[j] * S[0] || 0
+   445→    const ipca2 = Vt[1]?.[j] * S[1] || 0
+   446→    const discPower = Math.sqrt(ipca1**2 + ipca2**2)
+   447→    
+   448→    let discAbility = 'Moderate'
+   449→    if (discPower > 80000) discAbility = 'High'
+   450→    else if (discPower > 40000) discAbility = 'Moderate'
+   451→    else discAbility = 'Low'
+   452→    
+   453→    environmentScores.push({
+   454→      environment: eNames[j],
+   455→      ipca1,
+   456→      ipca2,
+   457→      meanYield: eMeans[j],
+   458→      discriminatingAbility: discAbility
+   459→    })
+   460→  }
+   461→  
+   462→  // Model fit statistics
+   463→  const explainedByIPCA1 = ipcaAxes[0]?.variancePercent || 0
+   464→  const explainedByIPCA2 = ipcaAxes[1]?.variancePercent || 0
+   465→  
+   466→  return {
+   467→    genotypes: gNames,
+   468→    environments: eNames,
+   469→    grandMean,
+   470→    anova: {
+   471→      genotype: { source: 'Genotype', df: gDF, ss: gSS, ms: gMS, f: gF, pValue: gPVal },
+   472→      environment: { source: 'Environment', df: eDF, ss: eSS, ms: eMS, f: eF, pValue: ePVal },
+   473→      geInteraction: { source: 'G × E', df: geDF, ss: geSS, ms: geMS, f: geF, pValue: gePVal },
+   474→      total: { source: 'Total', df: N-1, ss: totalSS, ms: totalSS/(N-1), f: NaN, pValue: NaN }
+   475→    },
+   476→    ipcaAxes,
+   477→    genotypeScores,
+   478→    environmentScores,
+   479→    modelFit: {
+   480→      ammi1RSquared: explainedByIPCA1 / 100,
+   481→      ammi2RSquared: (explainedByIPCA1 + explainedByIPCA2) / 100
+   482→    }
+   483→  }
+   484→}
+   485→
+   486→// ============================================================================
+   487→// MAIN COMPONENT
+   488→// ============================================================================
+   489→
+   490→export default function AMMIAnalysisComponent() {
+   491→  const [rawData, setRawData] = useState('')
+   492→  const [parsedData, setParsedData] = useState<number[][]>([])
+   493→  const [gNames, setGNames] = useState<string[]>([])
+   494→  const [eNames, setENames] = useState<string[]>([])
+   495→  const [result, setResult] = useState<AMMIResult | null>(null)
+   496→  const [error, setError] = useState<string | null>(null)
+   497→  const [isLoading, setIsLoading] = useState(false)
+   498→
+   499→  const parseData = useCallback((text: string) => {
+   500→    try {
+   501→      const lines = text.trim().split('\n').filter(line => line.trim())
+   502→      if (lines.length < 3) throw new Error('Need at least header + 2 genotypes')
+   503→      
+   504→      const headers = lines[0].split(',').map(h => h.trim())
+   505→      if (headers.length < 3) throw new Error('Need at least Genotype + 2 environments')
+   506→      
+   507→      const envNames = headers.slice(1)
+   508→      const genNames: string[] = []
+   509→      const data: number[][] = []
+   510→      
+   511→      for (let i = 1; i < lines.length; i++) {
+   512→        const values = lines[i].split(',').map(v => v.trim())
+   513→        genNames.push(values[0])
+   514→        const rowValues = values.slice(1).map(v => parseFloat(v))
+   515→        
+   516→        if (rowValues.some(v => isNaN(v))) throw new Error(`Invalid number in row ${i+1}`)
+   517→        data.push(rowValues)
+   518→      }
+   519→      
+   520→      setGNames(genNames)
+   521→      setENames(envNames)
+   522→      setParsedData(data)
+   523→      setError(null)
+   524→      return true
+   525→    } catch (err) {
+   526→      setError(err instanceof Error ? err.message : 'Parse failed')
+   527→      return false
+   528→    }
+   529→  }, [])
+   530→
+   531→  const handleCalculate = useCallback(() => {
+   532→    setIsLoading(true)
+   533→    setError(null)
+   534→    
+   535→    setTimeout(() => {
+   536→      try {
+   537→        const ammiResult = performAMMIAnalysis(gNames, eNames, parsedData)
+   538→        setResult(ammiResult)
+   539→      } catch (err) {
+   540→        setError(err instanceof Error ? err.message : 'Analysis failed')
+   541→      } finally {
+   542→        setIsLoading(false)
+   543→      }
+   544→    }, 300)
+   545→  }, [gNames, eNames, parsedData])
+   546→
+   547→  const loadSampleData = () => {
+   548→    setRawData(SAMPLE_DATA)
+   549→    parseData(SAMPLE_DATA)
+   550→  }
+   551→
+   552→  const exportResults = () => {
+   553→    if (!result) return
+   554→    
+   555→    let csv = '=== AMMI Analysis Results ===\n\n'
+   556→    csv += 'ANOVA TABLE\nSource,df,SS,MS,F-value,P-value\n'
+   557→    Object.values(result.anova).forEach(row => {
+   558→      csv += `${row.source},${row.df},${row.ss.toFixed(2)},${row.ms.toFixed(4)},${row.f.toFixed(4)},${row.pValue.toFixed(6)}\n`
+   559→    })
+   560→    
+   561→    csv += '\nIPCA AXES\nAxis,Singular Value,Eigenvalue,Variance %,Cumulative %\n'
+   562→    result.ipcaAxes.forEach(axis => {
+   563→      csv += `IPCA${axis.axis},${axis.singularValue.toFixed(4)},${axis.eigenvalue.toFixed(4)},${axis.variancePercent.toFixed(2)},${axis.cumulativePercent.toFixed(2)}\n`
+   564→    })
+   565→    
+   566→    csv += '\nGENOTYPE SCORES\nGenotype,IPCA1,IPCA2,Stability,Category\n'
+   567→    result.genotypeScores.forEach(gs => {
+   568→      csv += `${gs.genotype},${gs.ipca1.toFixed(4)},${gs.ipca2.toFixed(4)},${gs.stabilityMeasure.toFixed(2)},${gs.stabilityCategory}\n`
+   569→    })
+   570→    
+   571→    csv += '\nENVIRONMENT SCORES\nEnvironment,IPCA1,IPCA2,Mean Yield,Discriminating\n'
+   572→    result.environmentScores.forEach(es => {
+   573→      csv += `${es.environment},${es.ipca1.toFixed(4)},${es.ipca2.toFixed(4)},${es.meanYield.toFixed(2)},${es.discriminatingAbility}\n`
+   574→    })
+   575→    
+   576→    const blob = new Blob([csv], { type: 'text/csv' })
+   577→    const url = URL.createObjectURL(blob)
+   578→    const a = document.createElement('a')
+   579→    a.href = url
+   580→    a.download = 'ammi_analysis_results.csv'
+   581→    a.click()
+   582→    URL.revokeObjectURL(url)
+   583→  }
+   584→
+   585→  return (
+   586→    <div className="space-y-6">
+   587→      {/* Header */}
+   588→      <Card>
+   589→        <CardHeader className="pb-4">
+   590→          <CardTitle className="flex items-center gap-2 text-lg">
+   591→            <LineChart className="h-5 w-5 text-indigo-500" />
+   592→            AMMI Analysis (Additive Main Effects & Multiplicative Interaction)
+   593→          </CardTitle>
+   594→        </CardHeader>
+   595→        <CardContent className="space-y-4">
+   596→          {/* Data Input */}
+   597→          <Tabs defaultValue="paste">
+   598→            <TabsList>
+   599→              <TabsTrigger value="paste">Paste Data</TabsTrigger>
+   600→              <TabsTrigger value="upload">Upload CSV</TabsTrigger>
+   601→            </TabsList>
+   602→            
+   603→            <TabsContent value="paste" className="mt-4 space-y-4">
+   604→              <Textarea
+   605→                placeholder={`Enter your data in CSV format:\n${SAMPLE_DATA}`}
+   606→                value={rawData}
+   607→                onChange={(e) => setRawData(e.target.value)}
+   608→                className="font-mono text-sm min-h-[160px]"
+   609→              />
+   610→              <div className="flex gap-2 flex-wrap">
+   611→                <Button onClick={loadSampleData} variant="outline" size="sm">
+   612→                  Load Sample Data
+   613→                </Button>
+   614→                <Button onClick={handleCalculate} disabled={parsedData.length === 0 || isLoading} size="sm">
+   615→                  {isLoading ? (
+   616→                    <>
+   617→                      <Calculator className="h-4 w-4 mr-2 animate-spin" />
+   618→                      Running AMMI...
+   619→                    </>
+   620→                  ) : (
+   621→                    <>
+   622→                      <Calculator className="h-4 w-4 mr-2" />
+   623→                      Run AMMI Analysis
+   624→                    </>
+   625→                  )}
+   626→                </Button>
+   627→                {result && (
+   628→                  <Button onClick={exportResults} variant="outline" size="sm">
+   629→                    <Download className="h-4 w-4 mr-2" />
+   630→                    Export CSV
+   631→                  </Button>
+   632→                )}
+   633→              </div>
+   634→            </TabsContent>
+   635→            
+   636→            <TabsContent value="upload" className="mt-4">
+   637→              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+   638→                <p className="text-muted-foreground">Select a CSV file with genotype × environment data</p>
+   639→                <input
+   640→                  type="file"
+   641→                  accept=".csv"
+   642→                  onChange={(e) => {
+   643→                    const file = e.target.files?.[0]
+   644→                    if (file) {
+   645→                      const reader = new FileReader()
+   646→                      reader.onload = (ev) => {
+   647→                        const text = ev.target?.result as string
+   648→                        setRawData(text)
+   649→                        parseData(text)
+   650→                      }
+   651→                      reader.readAsText(file)
+   652→                    }
+   653→                  }}
+   654→                  className="mt-4"
+   655→                />
+   656→              </div>
+   657→            </TabsContent>
+   658→          </Tabs>
+   659→
+   660→          {error && (
+   661→            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
+   662→              <AlertCircle className="h-4 w-4 shrink-0" />
+   663→              {error}
+   664→            </div>
+   665→          )}
+   666→
+   667→          {/* Data Summary */}
+   668→          {parsedData.length > 0 && !result && (
+   669→            <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg text-sm">
+   670→              <span className="font-medium">Data loaded:</span> {gNames.length} genotypes × {eNames.length} environments ({gNames.length * eNames.length} observations)
+   671→            </div>
+   672→          )}
+   673→        </CardContent>
+   674→      </Card>
+   675→
+   676→      {/* Results */}
+   677→      {result && (
+   678→        <motion.div
+   679→          initial={{ opacity: 0, y: 20 }}
+   680→          animate={{ opacity: 1, y: 0 }}
+   681→          className="space-y-6"
+   682→        >
+   683→          {/* ANOVA Table */}
+   684→          <Card>
+   685→            <CardHeader className="pb-3">
+   686→              <CardTitle className="text-base">Two-Way ANOVA Table</CardTitle>
+   687→            </CardHeader>
+   688→            <CardContent>
+   689→              <div className="rounded-md border overflow-auto">
+   690→                <Table>
+   691→                  <TableHeader>
+   692→                    <TableRow>
+   693→                      <TableHead>Source</TableHead>
+   694→                      <TableHead className="text-right">df</TableHead>
+   695→                      <TableHead className="text-right">Sum Sq</TableHead>
+   696→                      <TableHead className="text-right">Mean Sq</TableHead>
+   697→                      <TableHead className="text-right">F-value</TableHead>
+   698→                      <TableHead className="text-right">P-value</TableHead>
+   699→                    </TableRow>
+   700→                  </TableHeader>
+   701→                  <TableBody>
+   702→                    {[result.anova.genotype, result.anova.environment, result.anova.geInteraction].map((row) => (
+   703→                      <TableRow key={row.source}>
+   704→                        <TableCell className="font-medium">{row.source}</TableCell>
+   705→                        <TableCell className="text-right">{row.df}</TableCell>
+   706→                        <TableCell className="text-right font-mono">{row.ss.toFixed(2)}</TableCell>
+   707→                        <TableCell className="text-right font-mono">{row.ms.toFixed(2)}</TableCell>
+   708→                        <TableCell className="text-right font-mono">{isFinite(row.f) ? row.f.toFixed(4) : '-'}</TableCell>
+   709→                        <TableCell className="text-right">
+   710→                          <Badge variant={row.pValue < 0.001 ? 'default' : row.pValue < 0.05 ? 'secondary' : 'outline'}>
+   711→                            {row.pValue < 0.001 ? '***' : row.pValue < 0.01 ? '**' : row.pValue < 0.05 ? '*' : 'ns'}
+   712→                            </Badge>
+   713→                          </TableCell>
+   714→                      </TableRow>
+   715→                    ))}
+   716→                  </TableBody>
+   717→                </Table>
+   718→              </div>
+   719→            </CardContent>
+   720→          </Card>
+   721→
+   722→          {/* IPCA Axes & Scores */}
+   723→          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+   724→            {/* IPCA Variance Explained */}
+   725→            <Card>
+   726→              <CardHeader className="pb-3">
+   727→                <CardTitle className="text-base">IPCA Variance Explained</CardTitle>
+   728→              </CardHeader>
+   729→              <CardContent>
+   730→                <div className="rounded-md border overflow-auto">
+   731→                  <Table>
+   732→                    <TableHeader>
+   733→                      <TableRow>
+   734→                        <TableHead>Axis</TableHead>
+   735→                        <TableHead className="text-right">Singular Value</TableHead>
+   736→                        <TableHead className="text-right">Eigenvalue</TableHead>
+   737→                        <TableHead className="text-right">Variance %</TableHead>
+   738→                        <TableHead className="text-right">Cumulative %</TableHead>
+   739→                      </TableRow>
+   740→                    </TableHeader>
+   741→                    <TableBody>
+   742→                      {result.ipcaAxes.map((axis) => (
+   743→                        <TableRow key={axis.axis}>
+   744→                          <TableCell className="font-medium">IPCA{axis.axis}</TableCell>
+   745→                          <TableCell className="text-right font-mono">{axis.singularValue.toFixed(4)}</TableCell>
+   746→                          <TableCell className="text-right font-mono">{axis.eigenvalue.toFixed(4)}</TableCell>
+   747→                          <TableCell className="text-right">
+   748→                            <div className="flex items-center justify-end gap-2">
+   749→                              <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+   750→                                <div 
+   751→                                  className="bg-indigo-500 h-2 rounded-full" 
+   752→                                  style={{ width: `${Math.min(axis.variancePercent, 100)}%` }}
+   753→                                />
+   754→                              </div>
+   755→                              <span className="font-mono text-xs w-12 text-right">{axis.variancePercent.toFixed(1)}%</span>
+   756→                            </div>
+   757→                          </TableCell>
+   758→                          <TableCell className="text-right font-mono font-medium">{axis.cumulativePercent.toFixed(1)}%</TableCell>
+   759→                        </TableRow>
+   760→                      ))}
+   761→                    </TableBody>
+   762→                  </Table>
+   763→                </div>
+   764→                
+   765→                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg text-xs text-blue-700 dark:text-blue-300">
+   766→                  <p><strong>Model Fit:</strong></p>
+   767→                  <p>AMMI 1 (IPCA1 only): R² = {(result.modelFit.ammi1RSquared * 100).toFixed(1)}%</p>
+   768→                  <p>AMMI 2 (IPCA1+2): R² = {(result.modelFit.ammi2RSquared * 100).toFixed(1)}%</p>
+   769→                </div>
+   770→              </CardContent>
+   771→            </Card>
+   772→
+   773→            {/* Genotype Scores */}
+   774→            <Card>
+   775→              <CardHeader className="pb-3">
+   776→                <CardTitle className="text-base">Genotype IPCA Scores</CardTitle>
+   777→              </CardHeader>
+   778→              <CardContent>
+   779→                <div className="rounded-md border overflow-auto max-h-[350px]">
+   780→                  <Table>
+   781→                    <TableHeader className="sticky top-0 bg-background">
+   782→                      <TableRow>
+   783→                        <TableHead>Genotype</TableHead>
+   784→                        <TableHead className="text-right">IPCA1</TableHead>
+   785→                        <TableHead className="text-right">IPCA2</TableHead>
+   786→                        <TableHead className="text-right">Stability (d)</TableHead>
+   787→                        <TableHead>Category</TableHead>
+   788→                      </TableRow>
+   789→                    </TableHeader>
+   790→                    <TableBody>
+   791→                      {result.genotypeScores.map((gs) => (
+   792→                        <TableRow key={gs.genotype}>
+   793→                          <TableCell className="font-medium">{gs.genotype}</TableCell>
+   794→                          <TableCell className="text-right font-mono text-sm">{gs.ipca1.toFixed(2)}</TableCell>
+   795→                          <TableCell className="text-right font-mono text-sm">{gs.ipca2.toFixed(2)}</TableCell>
+   796→                          <TableCell className="text-right font-mono text-sm">{gs.stabilityMeasure.toFixed(1)}</TableCell>
+   797→                          <TableCell>
+   798→                            <Badge 
+   799→                              variant={
+   800→                                gs.stabilityCategory === 'Very Stable' ? 'default' :
+   801→                                gs.stabilityCategory === 'Stable' ? 'secondary' : 'outline'
+   802→                              }
+   803→                              className="text-xs"
+   804→                            >
+   805→                              {gs.stabilityCategory}
+   806→                            </Badge>
+   807→                          </TableCell>
+   808→                        </TableRow>
+   809→                      ))}
+   810→                    </TableBody>
+   811→                  </Table>
+   812→                </div>
+   813→              </CardContent>
+   814→            </Card>
+   815→          </div>
+   816→
+   817→          {/* Environment Scores */}
+   818→          <Card>
+   819→            <CardHeader className="pb-3">
+   820→              <CardTitle className="text-base">Environment IPCA Scores & Discriminating Ability</CardTitle>
+   821→            </CardHeader>
+   822→            <CardContent>
+   823→              <div className="rounded-md border overflow-auto">
+   824→                <Table>
+   825→                  <TableHeader>
+   826→                    <TableRow>
+   827→                      <TableHead>Environment</TableHead>
+   828→                      <TableHead className="text-right">IPCA1</TableHead>
+   829→                      <TableHead className="text-right">IPCA2</TableHead>
+   830→                      <TableHead className="text-right">Mean Yield</TableHead>
+   831→                      <TableHead>Discriminating Ability</TableHead>
+   832→                    </TableRow>
+   833→                  </TableHeader>
+   834→                  <TableBody>
+   835→                    {result.environmentScores.map((es) => (
+   836→                      <TableRow key={es.environment}>
+   837→                        <TableCell className="font-medium">{es.environment}</TableCell>
+   838→                        <TableCell className="text-right font-mono">{es.ipca1.toFixed(2)}</TableCell>
+   839→                        <TableCell className="text-right font-mono">{es.ipca2.toFixed(2)}</TableCell>
+   840→                        <TableCell className="text-right font-mono">{es.meanYield.toFixed(1)}</TableCell>
+   841→                        <TableCell>
+   842→                          <Badge 
+   843→                            variant={es.discriminatingAbility === 'High' ? 'default' : 'outline'}
+   844→                            className="text-xs"
+   845→                          >
+   846→                            {es.discriminatingAbility}
+   847→                          </Badge>
+   848→                        </TableCell>
+   849→                      </TableRow>
+   850→                    ))}
+   851→                  </TableBody>
+   852→                </Table>
+   853→              </div>
+   854→            </CardContent>
+   855→          </Card>
+   856→
+   857→          {/* Methodology Reference */}
+   858→          <Card className="bg-muted/30">
+   859→            <CardHeader className="pb-2">
+   860→              <CardTitle className="text-sm flex items-center gap-2">
+   861→                <Info className="h-4 w-4" />
+   862→                Methodology Reference
+   863→              </CardTitle>
+   864→            </CardHeader>
+   865→            <CardContent className="px-4 pb-4">
+   866→              <div className="text-xs text-muted-foreground space-y-1">
+   867→                <p>This AMMI analysis follows standard methodology from Gauch (2006) and Zobel et al. (1988).</p>
+   868→                <p><strong>Model:</strong> Y_ij = μ + g_i + e_j + Σλ_k × α_ik × γ_jk + ε_ij</p>
+   869→                <p><strong>Interpretation:</strong> Lower stability measure (d) indicates more stable genotypes across environments.</p>
+   870→              </div>
+   871→            </CardContent>
+   872→          </Card>
+   873→        </motion.div>
+   874→      )}
+   875→    </div>
+   876→  )
+   877→}
+   878→

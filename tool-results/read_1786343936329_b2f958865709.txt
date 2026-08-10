@@ -1,0 +1,1392 @@
+     1→'use client'
+     2→
+     3→import React, { useState, useCallback } from 'react'
+     4→import { motion } from 'framer-motion'
+     5→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+     6→import { Button } from '@/components/ui/button'
+     7→import { Input } from '@/components/ui/input'
+     8→import { Label } from '@/components/ui/label'
+     9→import { Textarea } from '@/components/ui/textarea'
+    10→import { Badge } from '@/components/ui/badge'
+    11→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    12→import { 
+    13→  Table,
+    14→  TableBody,
+    15→  TableCell,
+    16→  TableHead,
+    17→  TableHeader,
+    18→  TableRow,
+    19→} from '@/components/ui/table'
+    20→import { 
+    21→  Activity, 
+    22→  BarChart3, 
+    23→  TrendingUp, 
+    24→  Info, 
+    25→  Upload, 
+    26→  Download, 
+    27→  Calculator,
+    28→  AlertCircle
+    29→} from 'lucide-react'
+    30→import { 
+    31→  mean, 
+    32→  variance, 
+    33→  simpleLinearRegression, 
+    34→  fDistributionCDF,
+    35→  pValueFromF,
+    36→  sumOfSquares
+    37→} from '@/lib/statistics-engine'
+    38→
+    39→// ============================================================================
+    40→// TYPE DEFINITIONS
+    41→// ============================================================================
+    42→
+    43→interface ANOVARow {
+    44→  source: string
+    45→  df: number
+    46→  ss: number
+    47→  ms: number
+    48→  f: number
+    49→  pValue: number
+    50→  significance: string
+    51→}
+    52→
+    53→interface StabilityResult {
+    54→  genotype: string
+    55→  meanYield: number
+    56→  // Finlay-Wilkinson parameters
+    57→  regressionCoeff: number       // b_i
+    58→  deviationMS: number           // S²d_i
+    59→  rSquared: number              // R²
+    60→  // Eberhart-Russell parameters
+    61→  erClassification: string      // Based on b_i and S²d_i
+    62→  s2dFValue: number             // F-test for S²d significance
+    63→  s2dSignificance: string       // Significance of S²d
+    64→  // Shukla's stability variance
+    65→  shuklaVariance: number        // σ²_i
+    66→  // Wricke's ecovalence
+    67→  ecovalence: number            // W_i
+    68→  ecovalencePercent: number     // % contribution to G×E SS
+    69→  // AMMI Stability Value
+    70→  asv: number                   // ASV value
+    71→  // Overall ranking
+    72→  overallRank: number
+    73→  stabilityClass: 'Very Stable' | 'Stable' | 'Moderate' | 'Unstable' | 'Very Unstable'
+    74→}
+    75→
+    76→interface EnvironmentIndex {
+    77→  environment: string
+    78→  index: number                 // Environmental index
+    79→  meanYield: number
+    80→  rank: number
+    81→}
+    82→
+    83→interface GEXEResult {
+    84→  // Data info
+    85→  genotypes: string[]
+    86→  environments: string[]
+    87→  dataMatrix: number[][]
+    88→  
+    89→  // Basic statistics
+    90→  grandMean: number
+    91→  genotypeMeans: number[]
+    92→  environmentMeans: number[]
+    93→  
+    94→  // ANOVA results
+    95→  anova: ANOVARow[]
+    96→  
+    97→  // Environmental indices
+    98→  environmentalIndices: EnvironmentIndex[]
+    99→  
+   100→  // Stability results
+   101→  stabilityResults: StabilityResult[]
+   102→  
+   103→  // Summary statistics
+   104→  summary: {
+   105→    totalGenotypes: number
+   106→    totalEnvironments: number
+   107→    geSignificant: boolean
+   108→    mostStableGenotype: string
+   109→    mostResponsiveGenotype: string
+   110→  }
+   111→}
+   112→
+   113→// ============================================================================
+   114→// SAMPLE DATA
+   115→// ============================================================================
+   116→
+   117→const SAMPLE_DATA = `Genotype,Env1,Env2,Env3,Env4
+   118→G1,3200,2850,3100,2980
+   119→G2,2800,3100,2750,3050
+   120→G3,3500,3200,3400,3300
+   121→G4,2900,2600,2850,2700
+   122→G5,3800,3500,3700,3600
+   123→G6,3100,3400,3050,3350
+   124→G7,2650,2400,2600,2500
+   125→G8,3350,3650,3300,3580
+   126→G9,3950,3700,3900,3800
+   127→G10,3000,2750,2950,2800`
+   128→
+   129→// ============================================================================
+   130→// PARSING AND DATA UTILITIES
+   131→// ============================================================================
+   132→
+   133→function parseCSVData(csvText: string): { genotypes: string[], environments: string[], dataMatrix: number[][] } | null {
+   134→  const lines = csvText.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0)
+   135→  
+   136→  if (lines.length < 2) return null
+   137→  
+   138→  const headers = lines[0].split(',').map(h => h.trim())
+   139→  
+   140→  // First column is genotype names, rest are environments
+   141→  const environments = headers.slice(1)
+   142→  const genotypes: string[] = []
+   143→  const dataMatrix: number[][] = []
+   144→  
+   145→  for (let i = 1; i < lines.length; i++) {
+   146→    const values = lines[i].split(',').map(v => v.trim())
+   147→    
+   148→    if (values.length !== headers.length) continue
+   149→    
+   150→    const genotypeName = values[0]
+   151→    const yields = values.slice(1).map(v => parseFloat(v))
+   152→    
+   153→    // Validate all values are numbers
+   154→    if (yields.some(y => isNaN(y))) continue
+   155→    
+   156→    genotypes.push(genotypeName)
+   157→    dataMatrix.push(yields)
+   158→  }
+   159→  
+   160→  if (genotypes.length === 0 || environments.length === 0) return null
+   161→  
+   162→  return { genotypes, environments, dataMatrix }
+   163→}
+   164→
+   165→// ============================================================================
+   166→// MATRIX OPERATIONS FOR SVD/AMMI
+   167→// ============================================================================
+   168→
+   169→function matrixTranspose(matrix: number[][]): number[][] {
+   170→  if (matrix.length === 0) return []
+   171→  return matrix[0].map((_, colIdx) => matrix.map(row => row[colIdx]))
+   172→}
+   173→
+   174→function matrixMultiply(A: number[][], B: number[][]): number[][] {
+   175→  const rowsA = A.length
+   176→  const colsA = A[0]?.length || 0
+   177→  const colsB = B[0]?.length || 0
+   178→  
+   179→  const result: number[][] = []
+   180→  for (let i = 0; i < rowsA; i++) {
+   181→    result[i] = []
+   182→    for (let j = 0; j < colsB; j++) {
+   183→      let sum = 0
+   184→      for (let k = 0; k < colsA; k++) {
+   185→        sum += A[i][k] * B[k][j]
+   186→      }
+   187→      result[i][j] = sum
+   188→    }
+   189→  }
+   190→  return result
+   191→}
+   192→
+   193→function copyMatrix(mat: number[][]): number[][] {
+   194→  return mat.map(row => [...row])
+   195→}
+   196→
+   197→function matrixMultiplyVector(matrix: number[][], vec: number[]): number[] {
+   198→  return matrix.map(row => 
+   199→    row.reduce((sum, val, i) => sum + val * (vec[i] || 0), 0)
+   200→  )
+   201→}
+   202→
+   203→/**
+   204→ * Compute SVD using power iteration method for AMMI analysis
+   205→ */
+   206→function computeSVD(matrix: number[][]): { U: number[][]; S: number[]; Vt: number[][] } {
+   207→  const m = matrix.length
+   208→  const n = matrix[0]?.length || 0
+   209→  
+   210→  if (m === 0 || n === 0) {
+   211→    return { U: [], S: [], Vt: [] }
+   212→  }
+   213→  
+   214→  const AtA = matrixMultiply(matrixTranspose(matrix), matrix)
+   215→  const size = Math.min(m, n)
+   216→  
+   217→  const eigenvalues: number[] = []
+   218→  const eigenvectors: number[][] = []
+   219→  
+   220→  let workingMatrix = copyMatrix(AtA)
+   221→  
+   222→  for (let iter = 0; iter < size; iter++) {
+   223→    let v = new Array(n).fill(0)
+   224→    v[iter < n ? iter : 0] = 1
+   225→    
+   226→    for (let powerIter = 0; powerIter < 100; powerIter++) {
+   227→      let Av = matrixMultiplyVector(workingMatrix, v)
+   228→      
+   229→      // Orthogonalize against previous eigenvectors
+   230→      for (const prevVec of eigenvectors) {
+   231→        const dot = v.reduce((sum, vi, i) => sum + vi * prevVec[i], 0)
+   232→        Av = Av.map((val, i) => val - dot * prevVec[i])
+   233→      }
+   234→      
+   235→      const norm = Math.sqrt(Av.reduce((sum, x) => sum + x * x, 0))
+   236→      if (norm < 1e-10) break
+   237→      
+   238→      v = Av.map(x => x / norm)
+   239→    }
+   240→    
+   241→    const Av = matrixMultiplyVector(workingMatrix, v)
+   242→    const eigenvalue = v.reduce((sum, vi, i) => sum + vi * Av[i], 0)
+   243→    
+   244→    if (eigenvalue > 1e-10) {
+   245→      eigenvalues.push(Math.max(0, eigenvalue))
+   246→      eigenvectors.push([...v])
+   247→      
+   248→      for (let i = 0; i < n; i++) {
+   249→        for (let j = 0; j < n; j++) {
+   250→          workingMatrix[i][j] -= eigenvalue * v[i] * v[j]
+   251→        }
+   252→      }
+   253→    } else {
+   254→      break
+   255→    }
+   256→  }
+   257→  
+   258→  const S = eigenvalues.map(ev => Math.sqrt(ev))
+   259→  const V = eigenvectors.length > 0 ? matrixTranspose(eigenvectors) : []
+   260→  const Vt = matrixTranspose(V)
+   261→  
+   262→  const U: number[][] = []
+   263→  for (let i = 0; i < m; i++) {
+   264→    U[i] = []
+   265→    for (let j = 0; j < S.length; j++) {
+   266→      if (S[j] > 1e-10) {
+   267→        let sum = 0
+   268→        for (let k = 0; k < n; k++) {
+   269→          sum += matrix[i][k] * (V[k]?.[j] || 0)
+   270→        }
+   271→        U[i][j] = sum / S[j]
+   272→      } else {
+   273→        U[i][j] = 0
+   274→      }
+   275→    }
+   276→  }
+   277→  
+   278→  return { U, S, Vt }
+   279→}
+   280→
+   281→// ============================================================================
+   282→// G×E ANALYSIS FUNCTIONS
+   283→// ============================================================================
+   284→
+   285→/**
+   286→ * Perform comprehensive Genotype × Environment Interaction Analysis
+   287→ * Implements multiple stability analysis methods:
+   288→ * - Finlay-Wilkinson (1963) Joint Regression Analysis
+   289→ * - Eberhart-Russell (1966) Stability Parameters
+   290→ * - Shukla (1972) Stability Variance
+   291→ * - Wricke (1962) Ecovalence
+   292→ * - AMMI Stability Value (ASV)
+   293→ */
+   294→function performGXEAnalysis(
+   295→  genotypeNames: string[],
+   296→  environmentNames: string[],
+   297→  dataMatrix: number[][]
+   298→): GEXEResult {
+   299→  const g = genotypeNames.length   // Number of genotypes
+   300→  const e = environmentNames.length // Number of environments
+   301→  const N = g * e                  // Total observations
+   302→  
+   303→  // ========================================================================
+   304→  // BASIC STATISTICS
+   305→  // ========================================================================
+   306→  
+   307→  // Calculate grand mean
+   308→  const allValues = dataMatrix.flat()
+   309→  const grandMean = mean(allValues)
+   310→  
+   311→  // Calculate genotype means (row means)
+   312→  const genotypeMeans = dataMatrix.map(row => mean(row))
+   313→  
+   314→  // Calculate environment means (column means)
+   315→  const environmentMeans: number[] = []
+   316→  for (let j = 0; j < e; j++) {
+   317→    const colValues = dataMatrix.map(row => row[j])
+   318→    environmentMeans.push(mean(colValues))
+   319→  }
+   320→  
+   321→  // ========================================================================
+   322→  // TWO-WAY ANOVA FOR G×E INTERACTION
+   323→  // ========================================================================
+   324→  
+   325→  // Sum of Squares calculations
+   326→  // Total SS
+   327→  const totalSS = sumOfSquares(allValues) - (Math.pow(allValues.reduce((a, b) => a + b, 0), 2) / N)
+   328→  
+   329→  // Genotype SS
+   330→  let genotypeSS = 0
+   331→  for (let i = 0; i < g; i++) {
+   332→    genotypeSS += e * Math.pow(genotypeMeans[i] - grandMean, 2)
+   333→  }
+   334→  
+   335→  // Environment SS
+   336→  let environmentSS = 0
+   337→  for (let j = 0; j < e; j++) {
+   338→    environmentSS += g * Math.pow(environmentMeans[j] - grandMean, 2)
+   339→  }
+   340→  
+   341→  // G×E Interaction SS (calculated as residual after main effects)
+   342→  let geSS = 0
+   343→  for (let i = 0; i < g; i++) {
+   344→    for (let j = 0; j < e; j++) {
+   345→      const observed = dataMatrix[i][j]
+   346→      const expected = grandMean + (genotypeMeans[i] - grandMean) + (environmentMeans[j] - grandMean)
+   347→      geSS += Math.pow(observed - expected, 2)
+   348→    }
+   349→  }
+   350→  
+   351→  // Degrees of freedom
+   352→  const dfGenotype = g - 1
+   353→  const dfEnvironment = e - 1
+   354→  const dfGE = (g - 1) * (e - 1)
+   355→  const dfTotal = N - 1
+   356→  
+   357→  // Mean Squares
+   358→  const MSgenotype = genotypeSS / dfGenotype
+   359→  const MSenvironment = environmentSS / dfEnvironment
+   360→  const MSge = geSS / dfGE
+   361→  
+   362→  // F-values (using GE MS as error term for this combined model)
+   363→  const Fgenotype = MSgenotype / MSge
+   364→  const Fenvironment = MSenvironment / MSge
+   365→  
+   366→  // P-values
+   367→  const pValueGenotype = 1 - fDistributionCDF(Fgenotype, dfGenotype, dfGE)
+   368→  const pValueEnvironment = 1 - fDistributionCDF(Fenvironment, dfEnvironment, dfGE)
+   369→  
+   370→  function getSignificance(p: number): string {
+   371→    if (p < 0.001) return '***'
+   372→    if (p < 0.01) return '**'
+   373→    if (p < 0.05) return '*'
+   374→    if (p < 0.1) return '.'
+   375→    return 'ns'
+   376→  }
+   377→  
+   378→  const anova: ANOVARow[] = [
+   379→    {
+   380→      source: 'Genotype',
+   381→      df: dfGenotype,
+   382→      ss: genotypeSS,
+   383→      ms: MSgenotype,
+   384→      f: Fgenotype,
+   385→      pValue: pValueGenotype,
+   386→      significance: getSignificance(pValueGenotype)
+   387→    },
+   388→    {
+   389→      source: 'Environment',
+   390→      df: dfEnvironment,
+   391→      ss: environmentSS,
+   392→      ms: MSenvironment,
+   393→      f: Fenvironment,
+   394→      pValue: pValueEnvironment,
+   395→      significance: getSignificance(pValueEnvironment)
+   396→    },
+   397→    {
+   398→      source: 'G × E Interaction',
+   399→      df: dfGE,
+   400→      ss: geSS,
+   401→      ms: MSge,
+   402→      f: NaN,  // No F-test for interaction without error term
+   403→      pValue: NaN,
+   404→      significance: '-'
+   405→    },
+   406→    {
+   407→      source: 'Total',
+   408→      df: dfTotal,
+   409→      ss: totalSS,
+   410→      ms: NaN,
+   411→      f: NaN,
+   412→      pValue: NaN,
+   413→      significance: '-'
+   414→    }
+   415→  ]
+   416→  
+   417→  // ========================================================================
+   418→  // ENVIRONMENTAL INDICES
+   419→  // ========================================================================
+   420→  
+   421→  // Environmental Index (I_j) = EnvMean_j - GrandMean
+   422→  const envIndices: EnvironmentIndex[] = environmentNames.map((name, idx) => ({
+   423→    environment: name,
+   424→    index: environmentMeans[idx] - grandMean,
+   425→    meanYield: environmentMeans[idx],
+   426→    rank: 1  // Will be updated below
+   427→  }))
+   428→  
+   429→  // Rank by environmental index (descending)
+   430→  envIndices.sort((a, b) => b.index - a.index)
+   431→  envIndices.forEach((env, idx) => env.rank = idx + 1)
+   432→  
+   433→  // Restore original order
+   434→  envIndices.sort((a, b) => 
+   435→    environmentNames.indexOf(a.environment) - environmentNames.indexOf(b.environment)
+   436→  )
+   437→  
+   438→  // ========================================================================
+   439→  // FINLAY-WILKINSON REGRESSION ANALYSIS (1963)
+   440→  // Regress each genotype's yield on environmental index
+   441→  // ========================================================================
+   442→  
+   443→  const finlayWilkinsonResults: Array<{
+   444→    b: number         // Regression coefficient
+   445→    s2d: number       // Deviation from regression (S²d)
+   446→    rSquared: number  // R² value
+   447→    intercept: number
+   448→  }> = []
+   449→  
+   450→  for (let i = 0; i < g; i++) {
+   451→    // X = environmental indices, Y = genotype yields across environments
+   452→    const xValues = environmentMeans.map(em => em - grandMean)  // Environmental indices
+   453→    const yValues = dataMatrix[i]  // Genotype i yields in each environment
+   454→    
+   455→    const regression = simpleLinearRegression(xValues, yValues)
+   456→    
+   457→    // Calculate deviation from regression (S²d)
+   458→    // S²d = Σ(Y_ij - Ŷ_ij)² / (e - 2)
+   459→    let devSumSq = 0
+   460→    for (let j = 0; j < e; j++) {
+   461→      const predicted = regression.coefficients[0] + regression.coefficients[1] * xValues[j]
+   462→      devSumSq += Math.pow(yValues[j] - predicted, 2)
+   463→    }
+   464→    const s2d = devSumSq / Math.max(1, e - 2)
+   465→    
+   466→    finlayWilkinsonResults.push({
+   467→      b: regression.coefficients[1],  // Slope = regression coefficient
+   468→      s2d: s2d,
+   469→      rSquared: regression.rSquared,
+   470→      intercept: regression.coefficients[0]
+   471→    })
+   472→  }
+   473→  
+   474→  // ========================================================================
+   475→  // EBERHART-RUSSELL STABILITY ANALYSIS (1966)
+   476→  // Uses same regression but adds interpretation framework
+   477→  // Ideal: b_i ≈ 1 and S²d_i not significantly different from 0
+   478→  // ========================================================================
+   479→  
+   480→  // Pooled deviation MS (error estimate)
+   481→  const pooledDevMS = finlayWilkinsonResults.reduce((sum, r) => sum + r.s2d, 0) / g
+   482→  const dfDeviation = g * (e - 2)  // Total df for deviations
+   483→  
+   484→  function getERClassification(b: number, s2d: number): string {
+   485→    const bCloseToOne = Math.abs(b - 1) < 0.2
+   486→    const s2dSmall = s2d < pooledDevMS * 2  // Less than 2x pooled MS
+   487→    
+   488→    if (bCloseToOne && s2dSmall) return 'Average stability, predictable'
+   489→    if (b < 0.8 && s2dSmall) return 'High stability, poor env specific'
+   490→    if (b > 1.2 && s2dSmall) return 'Low stability, responsive to good env'
+   491→    if (bCloseToOne && !s2dSmall) return 'Average response, unpredictable'
+   492→    if (b < 0.8 && !s2dSmall) return 'Below average, unstable'
+   493→    return 'Above average, unstable'
+   494→  }
+   495→  
+   496→  // ========================================================================
+   497→  // SHUKLA'S STABILITY VARIANCE (1972)
+   498→  // σ²_i = [(n-1)/(g-1)(n-2)] * ΣΣ(Y_ij - Ȳ_i. - Ȳ_.j + Ȳ..)²
+   499→  // Lower values indicate more stable genotypes
+   500→  // ========================================================================
+   501→  
+   502→  const shuklaFactor = ((e - 1) / ((g - 1) * (e - 2)))
+   503→  const shukaVariances: number[] = []
+   504→  
+   505→  for (let i = 0; i < g; i++) {
+   506→    let shuklaSum = 0
+   507→    for (let j = 0; j < e; j++) {
+   508→      const cellMean = dataMatrix[i][j]
+   509→      const genoMean = genotypeMeans[i]
+   510→      const envMean = environmentMeans[j]
+   511→      // Interaction effect for this cell
+   512→      const interactionEffect = cellMean - genoMean - envMean + grandMean
+   513→      shuklaSum += Math.pow(interactionEffect, 2)
+   514→    }
+   515→    shukaVariances.push(shuklaFactor * shuklaSum)
+   516→  }
+   517→  
+   518→  // ========================================================================
+   519→  // WRICKE'S ECOVALENCE (1962)
+   520→  // W_i = Σ_j(Ȳ_ij - Ȳ_i. - Ȳ_.j + Ȳ..)²
+   521→  // Contribution of each genotype to G×E sum of squares
+   522→  // ========================================================================
+   523→  
+   524→  const ecovalences: number[] = []
+   525→  
+   526→  for (let i = 0; i < g; i++) {
+   527→    let wSum = 0
+   528→    for (let j = 0; j < e; j++) {
+   529→      const cellMean = dataMatrix[i][j]
+   530→      const genoMean = genotypeMeans[i]
+   531→      const envMean = environmentMeans[j]
+   532→      const interactionEffect = cellMean - genoMean - envMean + grandMean
+   533→      wSum += Math.pow(interactionEffect, 2)
+   534→    }
+   535→    ecovalences.push(wSum)
+   536→  }
+   537→  
+   538→  // Calculate percentage contribution to G×E SS
+   539→  const totalEcovalence = ecovalences.reduce((a, b) => a + b, 0)
+   540→  const ecovalencePercents = ecovalences.map(w => (w / totalEcovalence) * 100)
+   541→  
+   542→  // ========================================================================
+   543→  // AMMI STABILITY VALUE (ASV)
+   544→  // ASV = √[(SS_IPCA1/SS_IPCA2 * IPCA1_score)² + (IPCA2_score)²]
+   545→  // Lower ASV = more stable
+   546→  // ========================================================================
+   547→  
+   548→  // Calculate interaction effects matrix (residuals after removing main effects)
+   549→  const interactionMatrix: number[][] = []
+   550→  for (let i = 0; i < g; i++) {
+   551→    interactionMatrix[i] = []
+   552→    for (let j = 0; j < e; j++) {
+   553→      const cellMean = dataMatrix[i][j]
+   554→      const genoEffect = genotypeMeans[i] - grandMean
+   555→      const envEffect = environmentMeans[j] - grandMean
+   556→      interactionMatrix[i][j] = cellMean - grandMean - genoEffect - envEffect
+   557→    }
+   558→  }
+   559→  
+   560→  // Perform SVD on interaction matrix
+   561→  const { U, S, Vt } = computeSVD(interactionMatrix)
+   562→  
+   563→  // Calculate ASV for each genotype
+   564→  const asvValues: number[] = []
+   565→  const ssIPCA1 = S.length > 0 ? Math.pow(S[0], 2) : 1
+   566→  const ssIPCA2 = S.length > 1 ? Math.pow(S[1], 2) : 1
+   567→  const weightFactor = ssIPCA1 / Math.max(ssIPCA2, 1)
+   568→  
+   569→  for (let i = 0; i < g; i++) {
+   570→    const ipca1Score = U[i]?.[0] || 0
+   571→    const ipca2Score = U[i]?.[1] || 0
+   572→    const asv = Math.sqrt(
+   573→      Math.pow(weightFactor * ipca1Score, 2) + Math.pow(ipca2Score, 2)
+   574→    )
+   575→    asvValues.push(asv)
+   576→  }
+   577→  
+   578→  // ========================================================================
+   579→  // COMPILE STABILITY RESULTS
+   580→  // ========================================================================
+   581→  
+   582→  const stabilityResults: StabilityResult[] = genotypeNames.map((name, i) => {
+   583→    const fw = finlayWilkinsonResults[i]
+   584→    
+   585→    // F-test for S²d significance (Eberhart-Russell)
+   586→    const s2dFValue = fw.s2d / Math.max(pooledDevMS, 0.001)
+   587→    const s2dPValue = 1 - fDistributionCDF(s2dFValue, e - 2, dfDeviation)
+   588→    
+   589→    // Determine overall stability class based on composite score
+   590→    // Combine multiple metrics into a single ranking score
+   591→    const bDeviation = Math.abs(fw.b - 1)  // Deviation from ideal b=1
+   592→    const normalizedS2d = fw.s2d / Math.max(...finlayWilkinsonResults.map(r => r.s2d), 1)
+   593→    const normalizedShukla = shukaVariances[i] / Math.max(...shukaVariances, 1)
+   594→    const normalizedWricke = ecovalences[i] / Math.max(...ecovalences, 1)
+   595→    const normalizedASV = asvValues[i] / Math.max(...asvValues, 1)
+   596→    
+   597→    // Composite instability score (higher = more unstable)
+   598→    const instabilityScore = (
+   599→      bDeviation * 0.2 +
+   600→      normalizedS2d * 0.2 +
+   601→      normalizedShukla * 0.2 +
+   602→      normalizedWricke * 0.2 +
+   603→      normalizedASV * 0.2
+   604→    )
+   605→    
+   606→    let stabilityClass: StabilityResult['stabilityClass']
+   607→    if (instabilityScore < 0.15) stabilityClass = 'Very Stable'
+   608→    else if (instabilityScore < 0.35) stabilityClass = 'Stable'
+   609→    else if (instabilityScore < 0.55) stabilityClass = 'Moderate'
+   610→    else if (instabilityScore < 0.75) stabilityClass = 'Unstable'
+   611→    else stabilityClass = 'Very Unstable'
+   612→    
+   613→    return {
+   614→      genotype: name,
+   615→      meanYield: genotypeMeans[i],
+   616→      regressionCoeff: fw.b,
+   617→      deviationMS: fw.s2d,
+   618→      rSquared: fw.rSquared,
+   619→      erClassification: getERClassification(fw.b, fw.s2d),
+   620→      s2dFValue: s2dFValue,
+   621→      s2dSignificance: getSignificance(s2dPValue),
+   622→      shuklaVariance: shukaVariances[i],
+   623→      ecovalence: ecovalences[i],
+   624→      ecovalencePercent: ecovalencePercents[i],
+   625→      asv: asvValues[i],
+   626→      overallRank: 0,  // Will be calculated below
+   627→      stabilityClass
+   628→    }
+   629→  })
+   630→  
+   631→  // Sort by composite stability and assign ranks
+   632→  stabilityResults.sort((a, b) => {
+   633→    // Primary sort by stability class (Very Stable first)
+   634→    const classOrder = { 'Very Stable': 0, 'Stable': 1, 'Moderate': 2, 'Unstable': 3, 'Very Unstable': 4 }
+   635→    const classDiff = classOrder[a.stabilityClass] - classOrder[b.stabilityClass]
+   636→    if (classDiff !== 0) return classDiff
+   637→    // Secondary sort by ASV (lower is better)
+   638→    return a.asv - b.asv
+   639→  })
+   640→  
+   641→  stabilityResults.forEach((r, idx) => r.overallRank = idx + 1)
+   642→  
+   643→  // Find most stable and most responsive genotypes
+   644→  const sortedByStability = [...stabilityResults].sort((a, b) => a.asv - b.asv)
+   645→  const sortedByResponse = [...stabilityResults].sort((a, b) => b.regressionCoeff - a.regressionCoeff)
+   646→  
+   647→  return {
+   648→    genotypes: genotypeNames,
+   649→    environments: environmentNames,
+   650→    dataMatrix,
+   651→    grandMean,
+   652→    genotypeMeans,
+   653→    environmentMeans,
+   654→    anova,
+   655→    environmentalIndices: envIndices,
+   656→    stabilityResults,
+   657→    summary: {
+   658→      totalGenotypes: g,
+   659→      totalEnvironments: e,
+   660→      geSignificant: pValueGenotype < 0.05 || pValueEnvironment < 0.05,
+   661→      mostStableGenotype: sortedByStability[0]?.genotype || '',
+   662→      mostResponsiveGenotype: sortedByResponse[0]?.genotype || ''
+   663→    }
+   664→  }
+   665→}
+   666→
+   667→// ============================================================================
+   668→// EXPORT UTILITIES
+   669→// ============================================================================
+   670→
+   671→function exportResultsToCSV(result: GEXEResult): string {
+   672→  const lines: string[] = []
+   673→  
+   674→  // Header
+   675→  lines.push('G×E Interaction Analysis Results')
+   676→  lines.push('')
+   677→  
+   678→  // ANOVA Table
+   679→  lines.push('ANOVA TABLE')
+   680→  lines.push('Source,DF,SS,MS,F-value,P-value,Sig')
+   681→  result.anova.forEach(row => {
+   682→    lines.push(`${row.source},${row.df},${row.ss.toFixed(2)},${row.ms.toFixed(2)},${isNaN(row.f) ? '-' : row.f.toFixed(2)},${isNaN(row.pValue) ? '-' : row.pValue.toFixed(4)},${row.significance}`)
+   683→  })
+   684→  lines.push('')
+   685→  
+   686→  // Environmental Indices
+   687→  lines.push('ENVIRONMENTAL INDICES')
+   688→  lines.push('Environment,Environmental Index,Mean Yield,Rank')
+   689→  result.environmentalIndices.forEach(env => {
+   690→    lines.push(`${env.environment},${env.index.toFixed(2)},${env.meanYield.toFixed(2)},${env.rank}`)
+   691→  })
+   692→  lines.push('')
+   693→  
+   694→  // Stability Parameters
+   695→  lines.push('STABILITY PARAMETERS')
+   696→  lines.push('Rank,Genotype,Mean Yield,b (Reg Coef),S²d,R²,Shukla σ²,Wricke W,ASV,Stability Class')
+   697→  result.stabilityResults.sort((a, b) => a.overallRank - b.overallRank)
+   698→  result.stabilityResults.forEach(r => {
+   699→    lines.push(`${r.overallRank},${r.genotype},${r.meanYield.toFixed(2)},${r.regressionCoeff.toFixed(3)},${r.deviationMS.toFixed(2)},${r.rSquared.toFixed(4)},${r.shuklaVariance.toFixed(2)},${r.ecovalence.toFixed(2)},${r.asv.toFixed(3)},${r.stabilityClass}`)
+   700→  })
+   701→  
+   702→  return lines.join('\n')
+   703→}
+   704→
+   705→// ============================================================================
+   706→// STABILITY CLASS BADGE COMPONENT
+   707→// ============================================================================
+   708→
+   709→function StabilityBadge({ classification }: { classification: StabilityResult['stabilityClass'] }) {
+   710→  const config = {
+   711→    'Very Stable': { variant: 'default' as const, className: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100' },
+   712→    'Stable': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 hover:bg-green-100' },
+   713→    'Moderate': { variant: 'outline' as const, className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' },
+   714→    'Unstable': { variant: 'secondary' as const, className: 'bg-orange-100 text-orange-800 hover:bg-orange-100' },
+   715→    'Very Unstable': { variant: 'destructive' as const, className: 'bg-red-100 text-red-800 hover:bg-red-100' }
+   716→  }
+   717→  
+   718→  const { className } = config[classification]
+   719→  
+   720→  return (
+   721→    <Badge className={`font-medium ${className}`}>
+   722→      {classification}
+   723→    </Badge>
+   724→  )
+   725→}
+   726→
+   727→// ============================================================================
+   728→// MAIN COMPONENT
+   729→// ============================================================================
+   730→
+   731→export default function GXEInteractionAnalysis() {
+   732→  const [inputData, setInputData] = useState('')
+   733→  const [result, setResult] = useState<GEXEResult | null>(null)
+   734→  const [isCalculating, setIsCalculating] = useState(false)
+   735→  const [error, setError] = useState<string | null>(null)
+   736→  const [activeTab, setActiveTab] = useState<string>('results')
+   737→
+   738→  // Handle sample data loading
+   739→  const handleLoadSampleData = useCallback(() => {
+   740→    setInputData(SAMPLE_DATA)
+   741→    setError(null)
+   742→  }, [])
+   743→
+   744→  // Parse and analyze data
+   745→  const handleAnalyze = useCallback(() => {
+   746→    setError(null)
+   747→    setResult(null)
+   748→    
+   749→    // Parse CSV data
+   750→    const parsed = parseCSVData(inputData)
+   751→    
+   752→    if (!parsed) {
+   753→      setError('Failed to parse data. Please check the format:\n• First row must be headers: Genotype,Env1,Env2,...\n• Each subsequent row: GenotypeName,value1,value2,...\n• All values must be numeric')
+   754→      return
+   755→    }
+   756→    
+   757→    if (parsed.environments.length < 2) {
+   758→      setError('At least 2 environments are required for G×E analysis.')
+   759→      return
+   760→    }
+   761→    
+   762→    if (parsed.genotypes.length < 2) {
+   763→      setError('At least 2 genotypes are required for G×E analysis.')
+   764→      return
+   765→    }
+   766→    
+   767→    setIsCalculating(true)
+   768→    
+   769→    // Use setTimeout to allow UI to update before heavy calculation
+   770→    setTimeout(() => {
+   771→      try {
+   772→        const analysisResult = performGXEAnalysis(
+   773→          parsed.genotypes,
+   774→          parsed.environments,
+   775→          parsed.dataMatrix
+   776→        )
+   777→        setResult(analysisResult)
+   778→        setActiveTab('results')
+   779→      } catch (err) {
+   780→        setError(`Analysis error: ${err instanceof Error ? err.message : 'Unknown error occurred'}`)
+   781→      } finally {
+   782→        setIsCalculating(false)
+   783→      }
+   784→    }, 50)
+   785→  }, [inputData])
+   786→
+   787→  // Handle file upload
+   788→  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+   789→    const file = event.target.files?.[0]
+   790→    if (!file) return
+   791→    
+   792→    const reader = new FileReader()
+   793→    reader.onload = (e) => {
+   794→      const text = e.target?.result as string
+   795→      if (text) {
+   796→        setInputData(text)
+   797→        setError(null)
+   798→      }
+   799→    }
+   800→    reader.readAsText(file)
+   801→  }, [])
+   802→
+   803→  // Export results
+   804→  const handleExport = useCallback(() => {
+   805→    if (!result) return
+   806→    
+   807→    const csv = exportResultsToCSV(result)
+   808→    const blob = new Blob([csv], { type: 'text/csv' })
+   809→    const url = URL.createObjectURL(blob)
+   810→    const a = document.createElement('a')
+   811→    a.href = url
+   812→    a.download = 'gxe-analysis-results.csv'
+   813→    a.click()
+   814→    URL.revokeObjectURL(url)
+   815→  }, [result])
+   816→
+   817→  return (
+   818→    <div className="space-y-6">
+   819→      {/* Header */}
+   820→      <motion.div
+   821→        initial={{ opacity: 0, y: -20 }}
+   822→        animate={{ opacity: 1, y: 0 }}
+   823→        transition={{ duration: 0.5 }}
+   824→      >
+   825→        <Card>
+   826→          <CardHeader>
+   827→            <div className="flex items-center gap-3">
+   828→              <div className="p-2 bg-primary/10 rounded-lg">
+   829→                <Activity className="h-6 w-6 text-primary" />
+   830→              </div>
+   831→              <div>
+   832→                <CardTitle className="text-xl">G×E Interaction Analysis</CardTitle>
+   833→                <CardDescription>
+   834→                  Comprehensive stability and adaptation analysis using multiple methodologies
+   835→                </CardDescription>
+   836→              </div>
+   837→            </div>
+   838→          </CardHeader>
+   839→        </Card>
+   840→      </motion.div>
+   841→
+   842→      {/* Data Input Section */}
+   843→      <motion.div
+   844→        initial={{ opacity: 0, y: 20 }}
+   845→        animate={{ opacity: 1, y: 0 }}
+   846→        transition={{ duration: 0.5, delay: 0.1 }}
+   847→      >
+   848→        <Card>
+   849→          <CardHeader>
+   850→            <CardTitle className="flex items-center gap-2 text-lg">
+   851→              <Upload className="h-5 w-5" />
+   852→              Data Input
+   853→            </CardTitle>
+   854→            <CardDescription>
+   855→              Enter your multi-environment trial data (Genotypes × Environments)
+   856→            </CardDescription>
+   857→          </CardHeader>
+   858→          <CardContent>
+   859→            <Tabs defaultValue="paste" className="w-full">
+   860→              <TabsList className="grid w-full grid-cols-2 max-w-md">
+   861→                <TabsTrigger value="paste">Paste Data</TabsTrigger>
+   862→                <TabsTrigger value="upload">Upload CSV</TabsTrigger>
+   863→              </TabsList>
+   864→              
+   865→              <TabsContent value="paste" className="space-y-4 mt-4">
+   866→                <div className="space-y-2">
+   867→                  <Label htmlFor="data-input">Data (CSV Format)</Label>
+   868→                  <Textarea
+   869→                    id="data-input"
+   870→                    placeholder={`Genotype,Env1,Env2,Env3,Env4\nG1,3200,2850,3100,2980\nG2,2800,3100,2750,3050\n...`}
+   871→                    value={inputData}
+   872→                    onChange={(e) => setInputData(e.target.value)}
+   873→                    className="min-h-[200px] font-mono text-sm"
+   874→                  />
+   875→                </div>
+   876→                
+   877→                <div className="flex flex-wrap gap-2">
+   878→                  <Button onClick={handleLoadSampleData} variant="outline" size="sm">
+   879→                    Load Sample Data
+   880→                  </Button>
+   881→                </div>
+   882→              </TabsContent>
+   883→              
+   884→              <TabsContent value="upload" className="space-y-4 mt-4">
+   885→                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+   886→                  <Upload className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+   887→                  <p className="text-sm text-muted-foreground mb-4">
+   888→                    Upload a CSV file with your genotype × environment data
+   889→                  </p>
+   890→                  <Label htmlFor="file-upload">
+   891→                    <Button variant="outline" asChild>
+   892→                      <span>Choose File</span>
+   893→                    </Button>
+   894→                  </Label>
+   895→                  <Input
+   896→                    id="file-upload"
+   897→                    type="file"
+   898→                    accept=".csv,.txt"
+   899→                    onChange={handleFileUpload}
+   900→                    className="hidden"
+   901→                  />
+   902→                </div>
+   903→                
+   904→                {inputData && (
+   905→                  <p className="text-sm text-green-600 flex items-center gap-1">
+   906→                    ✓ Data loaded successfully ({inputData.split('\n').length} rows)
+   907→                  </p>
+   908→                )}
+   909→              </TabsContent>
+   910→            </Tabs>
+   911→            
+   912→            {/* Error Display */}
+   913→            {error && (
+   914→              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
+   915→                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+   916→                <pre className="text-sm text-destructive whitespace-pre-wrap">{error}</pre>
+   917→              </div>
+   918→            )}
+   919→            
+   920→            {/* Analyze Button */}
+   921→            <div className="mt-6 flex justify-end">
+   922→              <Button 
+   923→                onClick={handleAnalyze} 
+   924→                disabled={!inputData.trim() || isCalculating}
+   925→                size="lg"
+   926→                className="gap-2"
+   927→              >
+   928→                {isCalculating ? (
+   929→                  <>
+   930→                    <div className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+   931→                    Analyzing...
+   932→                  </>
+   933→                ) : (
+   934→                  <>
+   935→                    <Calculator className="h-4 w-4" />
+   936→                    Run G×E Analysis
+   937→                  </>
+   938→                )}
+   939→              </Button>
+   940→            </div>
+   941→          </CardContent>
+   942→        </Card>
+   943→      </motion.div>
+   944→
+   945→      {/* Results Section */}
+   946→      {result && (
+   947→        <motion.div
+   948→          initial={{ opacity: 0, y: 20 }}
+   949→          animate={{ opacity: 1, y: 0 }}
+   950→          transition={{ duration: 0.5, delay: 0.2 }}
+   951→        >
+   952→          <Card>
+   953→            <CardHeader>
+   954→              <div className="flex items-center justify-between flex-wrap gap-4">
+   955→                <div>
+   956→                  <CardTitle className="flex items-center gap-2 text-lg">
+   957→                    <BarChart3 className="h-5 w-5" />
+   958→                    Analysis Results
+   959→                  </CardTitle>
+   960→                  <CardDescription>
+   961→                    {result.summary.totalGenotypes} genotypes × {result.summary.totalEnvironments} environments | 
+   962→                    Grand Mean: {result.grandMean.toFixed(2)} | 
+   963→                    Most Stable: <span className="font-semibold text-emerald-600">{result.summary.mostStableGenotype}</span> |
+   964→                    Most Responsive: <span className="font-semibold text-blue-600">{result.summary.mostResponsiveGenotype}</span>
+   965→                  </CardDescription>
+   966→                </div>
+   967→                <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
+   968→                  <Download className="h-4 w-4" />
+   969→                  Export CSV
+   970→                </Button>
+   971→              </div>
+   972→            </CardHeader>
+   973→            <CardContent>
+   974→              <Tabs value={activeTab} onValueChange={setActiveTab}>
+   975→                <TabsList className="grid w-full grid-cols-4 lg:flex lg:flex-wrap lg:justify-start">
+   976→                  <TabsTrigger value="results">Stability Results</TabsTrigger>
+   977→                  <TabsTrigger value="anova">ANOVA</TabsTrigger>
+   978→                  <TabsTrigger value="environments">Environments</TabsTrigger>
+   979→                  <TabsTrigger value="methods">Methods Info</TabsTrigger>
+   980→                </TabsList>
+   981→                
+   982→                {/* Main Results Tab */}
+   983→                <TabsContent value="results" className="mt-4 space-y-6">
+   984→                  {/* Summary Cards */}
+   985→                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+   986→                    <Card className="bg-emerald-50 border-emerald-200">
+   987→                      <CardContent className="pt-4">
+   988→                        <div className="text-sm text-emerald-700 font-medium">Most Stable</div>
+   989→                        <div className="text-xl font-bold text-emerald-900">{result.summary.mostStableGenotype}</div>
+   990→                        <div className="text-xs text-emerald-600">Based on ASV & composite score</div>
+   991→                      </CardContent>
+   992→                    </Card>
+   993→                    
+   994→                    <Card className="bg-blue-50 border-blue-200">
+   995→                      <CardContent className="pt-4">
+   996→                        <div className="text-sm text-blue-700 font-medium">Most Responsive</div>
+   997→                        <div className="text-xl font-bold text-blue-900">{result.summary.mostResponsiveGenotype}</div>
+   998→                        <div className="text-xs text-blue-600">Highest regression coefficient</div>
+   999→                      </CardContent>
+  1000→                    </Card>
+  1001→                    
+  1002→                    <Card className="bg-purple-50 border-purple-200">
+  1003→                      <CardContent className="pt-4">
+  1004→                        <div className="text-sm text-purple-700 font-mean">Grand Mean</div>
+  1005→                        <div className="text-xl font-bold text-purple-900">{result.grandMean.toFixed(1)}</div>
+  1006→                        <div className="text-xs text-purple-600">Overall mean yield</div>
+  1007→                      </CardContent>
+  1008→                    </Card>
+  1009→                    
+  1010→                    <Card className="bg-orange-50 border-orange-200">
+  1011→                      <CardContent className="pt-4">
+  1012→                        <div className="text-sm text-orange-700 font-medium">G×E Significant</div>
+  1013→                        <div className="text-xl font-bold text-orange-900">
+  1014→                          {result.summary.geSignificant ? 'Yes' : 'No'}
+  1015→                        </div>
+  1016→                        <div className="text-xs text-orange-600">Interaction detected</div>
+  1017→                      </CardContent>
+  1018→                    </Card>
+  1019→                  </div>
+  1020→                  
+  1021→                  {/* Stability Parameters Table */}
+  1022→                  <div className="rounded-lg border overflow-hidden">
+  1023→                    <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+  1024→                      <Table>
+  1025→                        <TableHeader className="sticky top-0 bg-background">
+  1026→                          <TableRow>
+  1027→                            <TableHead className="w-[50px]">Rank</TableHead>
+  1028→                            <TableHead>Genotype</TableHead>
+  1029→                            <TableHead className="text-right">Mean Yield</TableHead>
+  1030→                            <TableHead className="text-right">
+  1031→                              <TooltipWrapper content="Finlay-Wilkinson regression coefficient (b)">
+  1032→                                b (Reg.)
+  1033→                              </TooltipWrapper>
+  1034→                            </TableHead>
+  1035→                            <TableHead className="text-right">
+  1036→                              <TooltipWrapper content="Deviation from regression (S²d)">
+  1037→                                S²d
+  1038→                              </TooltipWrapper>
+  1039→                            </TableHead>
+  1040→                            <TableHead className="text-right">R²</TableHead>
+  1041→                            <TableHead className="text-right">
+  1042→                              <TooltipWrapper content="Shukla's stability variance (σ²)">
+  1043→                                Shukla σ²
+  1044→                              </TooltipWrapper>
+  1045→                            </TableHead>
+  1046→                            <TableHead className="text-right">
+  1047→                              <TooltipWrapper content="Wricke's ecovalence (W)">
+  1048→                                Wricke W
+  1049→                              </TooltipWrapper>
+  1050→                            </TableHead>
+  1051→                            <TableHead className="text-right">
+  1052→                              <TooltipWrapper content="AMMI Stability Value">
+  1053→                                ASV
+  1054→                              </TooltipWrapper>
+  1055→                            </TableHead>
+  1056→                            <TableHead>Stability</TableHead>
+  1057→                          </TableRow>
+  1058→                        </TableHeader>
+  1059→                        <TableBody>
+  1060→                          {[...result.stabilityResults]
+  1061→                            .sort((a, b) => a.overallRank - b.overallRank)
+  1062→                            .map((r) => (
+  1063→                            <TableRow key={r.genotype}>
+  1064→                              <TableCell className="font-medium">{r.overallRank}</TableCell>
+  1065→                              <TableCell className="font-semibold">{r.genotype}</TableCell>
+  1066→                              <TableCell className="text-right">{r.meanYield.toFixed(1)}</TableCell>
+  1067→                              <TableCell className="text-right">
+  1068→                                <span className={r.regressionCoeff > 1.1 ? 'text-blue-600' : r.regressionCoeff < 0.9 ? 'text-green-600' : ''}>
+  1069→                                  {r.regressionCoeff.toFixed(3)}
+  1070→                                </span>
+  1071→                              </TableCell>
+  1072→                              <TableCell className="text-right">{r.deviationMS.toFixed(1)}</TableCell>
+  1073→                              <TableCell className="text-right">{r.rSquared.toFixed(4)}</TableCell>
+  1074→                              <TableCell className="text-right">{r.shuklaVariance.toFixed(2)}</TableCell>
+  1075→                              <TableCell className="text-right">{r.ecovalence.toFixed(1)}</TableCell>
+  1076→                              <TableCell className="text-right font-medium">{r.asv.toFixed(3)}</TableCell>
+  1077→                              <TableCell>
+  1078→                                <StabilityBadge classification={r.stabilityClass} />
+  1079→                              </TableCell>
+  1080→                            </TableRow>
+  1081→                          ))}
+  1082→                        </TableBody>
+  1083→                      </Table>
+  1084→                    </div>
+  1085→                  </div>
+  1086→                  
+  1087→                  {/* Interpretation Guide */}
+  1088→                  <Card className="bg-muted/30">
+  1089→                    <CardContent className="pt-4">
+  1090→                      <div className="flex items-start gap-2 mb-2">
+  1091→                        <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+  1092→                        <div className="text-sm text-muted-foreground">
+  1093→                          <strong>Interpretation:</strong>{' '}
+  1094→                          <strong>b ≈ 1</strong>: Average responsiveness to environments |{' '}
+  1095→                          <strong>b &lt; 1</strong>: More stable, better performance in poor environments |{' '}
+  1096→                          <strong>b &gt; 1</strong>: More responsive, better in favorable environments |{' '}
+  1097→                          <strong>Lower ASV/Shukla/Wricke</strong> = More stable
+  1098→                        </div>
+  1099→                      </div>
+  1100→                    </CardContent>
+  1101→                  </Card>
+  1102→                </TabsContent>
+  1103→                
+  1104→                {/* ANOVA Tab */}
+  1105→                <TabsContent value="anova" className="mt-4">
+  1106→                  <Card>
+  1107→                    <CardHeader>
+  1108→                      <CardTitle className="text-base">Two-Way ANOVA for G×E Analysis</CardTitle>
+  1109→                      <CardDescription>
+  1110→                        Analysis of variance partitioning sources of variation
+  1111→                      </CardDescription>
+  1112→                    </CardHeader>
+  1113→                    <CardContent>
+  1114→                      <div className="rounded-lg border overflow-x-auto">
+  1115→                        <Table>
+  1116→                          <TableHeader>
+  1117→                            <TableRow>
+  1118→                              <TableHead>Source of Variation</TableHead>
+  1119→                              <TableHead className="text-right">df</TableHead>
+  1120→                              <TableHead className="text-right">SS</TableHead>
+  1121→                              <TableHead className="text-right">MS</TableHead>
+  1122→                              <TableHead className="text-right">F-value</TableHead>
+  1123→                              <TableHead className="text-right">P-value</TableHead>
+  1124→                              <TableHead>Sig.</TableHead>
+  1125→                            </TableRow>
+  1126→                          </TableHeader>
+  1127→                          <TableBody>
+  1128→                            {result.anova.map((row) => (
+  1129→                              <TableRow key={row.source}>
+  1130→                                <TableCell className="font-medium">{row.source}</TableCell>
+  1131→                                <TableCell className="text-right">{row.df}</TableCell>
+  1132→                                <TableCell className="text-right">{row.ss.toFixed(2)}</TableCell>
+  1133→                                <TableCell className="text-right">
+  1134→                                  {isNaN(row.ms) ? '-' : row.ms.toFixed(2)}
+  1135→                                </TableCell>
+  1136→                                <TableCell className="text-right">
+  1137→                                  {isNaN(row.f) ? '-' : row.f.toFixed(2)}
+  1138→                                </TableCell>
+  1139→                                <TableCell className="text-right">
+  1140→                                  {isNaN(row.pValue) ? '-' : row.pValue.toFixed(4)}
+  1141→                                </TableCell>
+  1142→                                <TableCell>
+  1143→                                  <Badge variant={row.significance === 'ns' ? 'outline' : 'secondary'}>
+  1144→                                    {row.significance}
+  1145→                                  </Badge>
+  1146→                                </TableCell>
+  1147→                              </TableRow>
+  1148→                            ))}
+  1149→                          </TableBody>
+  1150→                        </Table>
+  1151→                      </div>
+  1152→                      
+  1153→                      <div className="mt-4 text-xs text-muted-foreground">
+  1154→                        <p><strong>Note:</strong> Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05, . p&lt;0.1, ns = not significant</p>
+  1155→                        <p>G×E Interaction tested using pooled error (deviations from regression)</p>
+  1156→                      </div>
+  1157→                    </CardContent>
+  1158→                  </Card>
+  1159→                </TabsContent>
+  1160→                
+  1161→                {/* Environmental Indices Tab */}
+  1162→                <TabsContent value="environments" className="mt-4 space-y-6">
+  1163→                  <Card>
+  1164→                    <CardHeader>
+  1165→                      <CardTitle className="text-base flex items-center gap-2">
+  1166→                        <TrendingUp className="h-4 w-4" />
+  1167→                        Environmental Indices
+  1168→                      </CardTitle>
+  1169→                      <CardDescription>
+  1170→                        Environmental index (I_j) = Environment mean - Grand mean. Positive values indicate favorable environments.
+  1171→                      </CardDescription>
+  1172→                    </CardHeader>
+  1173→                    <CardContent>
+  1174→                      <div className="rounded-lg border overflow-x-auto">
+  1175→                        <Table>
+  1176→                          <TableHeader>
+  1177→                            <TableRow>
+  1178→                              <TableHead>Environment</TableHead>
+  1179→                              <TableHead className="text-right">Mean Yield</TableHead>
+  1180→                              <TableHead className="text-right">Environmental Index (I_j)</TableHead>
+  1181→                              <TableHead className="text-right">Rank</TableHead>
+  1182→                              <TableHead>Interpretation</TableHead>
+  1183→                            </TableRow>
+  1184→                          </TableHeader>
+  1185→                          <TableBody>
+  1186→                            {[...result.environmentalIndices]
+  1187→                              .sort((a, b) => b.index - a.index)
+  1188→                              .map((env) => (
+  1189→                              <TableRow key={env.environment}>
+  1190→                                <TableCell className="font-medium">{env.environment}</TableCell>
+  1191→                                <TableCell className="text-right">{env.meanYield.toFixed(2)}</TableCell>
+  1192→                                <TableCell className="text-right">
+  1193→                                  <Badge variant={env.index > 0 ? 'default' : 'outline'} className={
+  1194→                                    env.index > 50 ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100' :
+  1195→                                    env.index > 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+  1196→                                    env.index > -50 ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
+  1197→                                    'bg-red-100 text-red-800 hover:bg-red-100'
+  1198→                                  }>
+  1199→                                    {env.index > 0 ? '+' : ''}{env.index.toFixed(2)}
+  1200→                                  </Badge>
+  1201→                                </TableCell>
+  1202→                                <TableCell className="text-right">{env.rank}</TableCell>
+  1203→                                <TableCell className="text-sm text-muted-foreground">
+  1204→                                  {env.index > 50 ? 'Highly Favorable' :
+  1205→                                   env.index > 0 ? 'Favorable' :
+  1206→                                   env.index > -50 ? 'Unfavorable' :
+  1207→                                   'Highly Unfavorable'}
+  1208→                                </TableCell>
+  1209→                              </TableRow>
+  1210→                            ))}
+  1211→                          </TableBody>
+  1212→                        </Table>
+  1213→                      </div>
+  1214→                    </CardContent>
+  1215→                  </Card>
+  1216→                  
+  1217→                  {/* Environment Means Visualization */}
+  1218→                  <Card>
+  1219→                    <CardHeader>
+  1220→                      <CardTitle className="text-base">Environment Mean Comparison</CardTitle>
+  1221→                    </CardHeader>
+  1222→                    <CardContent>
+  1223→                      <div className="space-y-3">
+  1224→                        {[...result.environmentalIndices]
+  1225→                          .sort((a, b) => b.meanYield - a.meanYield)
+  1226→                          .map((env, idx) => {
+  1227→                          const maxMean = Math.max(...result.environmentalIndices.map(e => e.meanYield))
+  1228→                          const widthPercent = (env.meanYield / maxMean) * 100
+  1229→                          
+  1230→                          return (
+  1231→                            <div key={env.environment} className="flex items-center gap-3">
+  1232→                              <div className="w-24 text-sm font-medium truncate">{env.environment}</div>
+  1233→                              <div className="flex-1 bg-muted rounded-full h-6 relative overflow-hidden">
+  1234→                                <div 
+  1235→                                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/70 to-primary rounded-full flex items-center justify-end pr-2"
+  1236→                                  style={{ width: `${widthPercent}%` }}
+  1237→                                >
+  1238→                                  <span className="text-xs text-primary-foreground font-medium">
+  1239→                                    {env.meanYield.toFixed(0)}
+  1240→                                  </span>
+  1241→                                </div>
+  1242→                              </div>
+  1243→                              <div className="w-16 text-right text-sm text-muted-foreground">
+  1244→                                #{idx + 1}
+  1245→                              </div>
+  1246→                            </div>
+  1247→                          )
+  1248→                        })}
+  1249→                      </div>
+  1250→                    </CardContent>
+  1251→                  </Card>
+  1252→                </TabsContent>
+  1253→                
+  1254→                {/* Methods Information Tab */}
+  1255→                <TabsContent value="methods" className="mt-4 space-y-6">
+  1256→                  <Card>
+  1257→                    <CardHeader>
+  1258→                      <CardTitle className="text-base">Stability Analysis Methods</CardTitle>
+  1259→                      <CardDescription>
+  1260→                        Overview of methodologies implemented in this analysis
+  1261→                      </CardDescription>
+  1262→                    </CardHeader>
+  1263→                    <CardContent className="space-y-6">
+  1264→                      {/* Finlay-Wilkinson */}
+  1265→                      <div className="border-l-4 border-blue-500 pl-4">
+  1266→                        <h4 className="font-semibold text-blue-700 mb-2">
+  1267→                          1. Finlay-Wilkinson Regression Analysis (1963)
+  1268→                        </h4>
+  1269→                        <p className="text-sm text-muted-foreground mb-2">
+  1270→                          Regresses each genotype's mean performance on the environmental index.
+  1271→                          The regression coefficient (b) measures responsiveness to environmental improvement.
+  1272→                        </p>
+  1273→                        <div className="bg-muted/50 rounded p-3 text-sm font-mono">
+  1274→                          Y_ij = α_i + β_i × I_j + δ_ij
+  1275→                        </div>
+  1276→                        <ul className="mt-2 text-sm text-muted-foreground list-disc list-inside space-y-1">
+  1277→                          <li><strong>b = 1</strong>: Average stability, responds proportionally to environment</li>
+  1278→                          <li><strong>b &lt; 1</strong>: Above average stability, performs relatively better in poor environments</li>
+  1279→                          <li><strong>b &gt; 1</strong>: Below average stability, responds strongly to favorable conditions</li>
+  1280→                          <li><strong>R²</strong>: Proportion of variation explained by linear regression</li>
+  1281→                        </ul>
+  1282→                      </div>
+  1283→                      
+  1284→                      {/* Eberhart-Russell */}
+  1285→                      <div className="border-l-4 border-green-500 pl-4">
+  1286→                        <h4 className="font-semibold text-green-700 mb-2">
+  1287→                          2. Eberhart-Russell Stability (1966)
+  1288→                        </h4>
+  1289→                        <p className="text-sm text-muted-foreground mb-2">
+  1290→                          Extends Finlay-Wilkinson by adding deviation from regression (S²d) as a second parameter.
+  1291→                          An ideal genotype has b_i ≈ 1 and S²d not significantly different from zero.
+  1292→                        </p>
+  1293→                        <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+  1294→                          <li><strong>b_i</strong>: Regression coefficient (same as Finlay-Wilkinson)</li>
+  1295→                          <li><strong>S²d_i</strong>: Deviation mean square from regression</li>
+  1296→                          <li><strong>F-test</strong>: Tests if S²d is significantly different from pooled error</li>
+  1297→                          <li>Ideal: High mean yield, b ≈ 1, non-significant S²d</li>
+  1298→                        </ul>
+  1299→                      </div>
+  1300→                      
+  1301→                      {/* Shukla's Variance */}
+  1302→                      <div className="border-l-4 border-purple-500 pl-4">
+  1303→                        <h4 className="font-semibold text-purple-700 mb-2">
+  1304→                          3. Shukla's Stability Variance (1972)
+  1305→                        </h4>
+  1306→                        <p className="text-sm text-muted-foreground mb-2">
+  1307→                          Measures the contribution of each genotype to the G×E interaction sum of squares.
+  1308→                          Based on the variance of genotype-environment interaction effects.
+  1309→                        </p>
+  1310→                        <div className="bg-muted/50 rounded p-3 text-sm font-mono">
+  1311→                          σ²_i = [(n-1)/(g-1)(n-2)] × ΣΣ(Y_ij - Ȳ_i. - Ȳ_.j + Ȳ..)²
+  1312→                        </div>
+  1313→                        <ul className="mt-2 text-sm text-muted-foreground list-disc list-inside space-y-1">
+  1314→                          <li><strong>Lower σ²</strong>: More stable genotype (less G×E interaction)</li>
+  1315→                          <li><strong>Higher σ²</strong>: More variable/unstable genotype</li>
+  1316→                          <li>Can be used for formal hypothesis testing</li>
+  1317→                        </ul>
+  1318→                      </div>
+  1319→                      
+  1320→                      {/* Wricke's Ecovalence */}
+  1321→                      <div className="border-l-4 border-orange-500 pl-4">
+  1322→                        <h4 className="font-semibold text-orange-700 mb-2">
+  1323→                          4. Wricke's Ecovalence (1962)
+  1324→                        </h4>
+  1325→                        <p className="text-sm text-muted-foreground mb-2">
+  1326→                          Measures the absolute contribution of each genotype to the G×E interaction.
+  1327→                          Represents the sum of squared interaction effects for each genotype.
+  1328→                        </p>
+  1329→                        <div className="bg-muted/50 rounded p-3 text-sm font-mono">
+  1330→                          W_i = Σ_j(Ȳ_ij - Ȳ_i. - Ȳ_.j + Ȳ..)²
+  1331→                        </div>
+  1332→                        <ul className="mt-2 text-sm text-muted-foreground list-disc list-inside space-y-1">
+  1333→                          <li><strong>Lower W_i</strong>: More stable (less contribution to G×E)</li>
+  1334→                          <li><strong>% Contribution</strong>: Relative share of total G×E SS</li>
+  1335→                          <li>Useful for identifying which genotypes drive interactions</li>
+  1336→                        </ul>
+  1337→                      </div>
+  1338→                      
+  1339→                      {/* AMMI Stability Value */}
+  1340→                      <div className="border-l-4 border-red-500 pl-4">
+  1341→                        <h4 className="font-semibold text-red-700 mb-2">
+  1342→                          5. AMMI Stability Value (ASV)
+  1343→                        </h4>
+  1344→                        <p className="text-sm text-muted-foreground mb-2">
+  1345→                          Combines IPCA1 and IPCA2 scores from AMMI analysis into a single stability measure.
+  1346→                          Accounts for the relative importance of each IPCA axis.
+  1347→                        </p>
+  1348→                        <div className="bg-muted/50 rounded p-3 text-sm font-mono">
+  1349→                          ASV = √[(SS_IPCA1/SS_IPCA2 × IPCA1_score)² + (IPCA2_score)²]
+  1350→                        </div>
+  1351→                        <ul className="mt-2 text-sm text-muted-foreground list-disc list-inside space-y-1">
+  1352→                          <li><strong>Lower ASV</strong>: More stable genotype</li>
+  1353→                          <li>Incorporates both major interaction axes</li>
+  1354→                          <li>Weighted by variance explained by each axis</li>
+  1355→                        </ul>
+  1356→                      </div>
+  1357→                    </CardContent>
+  1358→                  </Card>
+  1359→                </TabsContent>
+  1360→              </Tabs>
+  1361→            </CardContent>
+  1362→          </Card>
+  1363→        </motion.div>
+  1364→      )}
+  1365→    </div>
+  1366→  )
+  1367→}
+  1368→
+  1369→// ============================================================================
+  1370→// TOOLTIP HELPER COMPONENT
+  1371→// ============================================================================
+  1372→
+  1373→function TooltipWrapper({ children, content }: { children: React.ReactNode, content: string }) {
+  1374→  const [show, setShow] = useState(false)
+  1375→  
+  1376→  return (
+  1377→    <div 
+  1378→      className="relative inline-flex items-center cursor-help"
+  1379→      onMouseEnter={() => setShow(true)}
+  1380→      onMouseLeave={() => setShow(false)}
+  1381→    >
+  1382→      {children}
+  1383→      {show && (
+  1384→        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs bg-popover text-popover-foreground rounded shadow-md whitespace-nowrap z-50">
+  1385→          {content}
+  1386→          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover" />
+  1387→        </div>
+  1388→      )}
+  1389→    </div>
+  1390→  )
+  1391→}
+  1392→
