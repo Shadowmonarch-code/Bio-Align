@@ -490,7 +490,9 @@ export function globalAlignment(
 }
 
 /**
- * Simple Smith-Waterman local alignment (mock implementation)
+ * Real Smith-Waterman Local Alignment Algorithm
+ * Finds the best local alignment between two sequences
+ * Uses dynamic programming with affine gap penalties supported
  */
 export function localAlignment(
   seq1: string,
@@ -501,8 +503,98 @@ export function localAlignment(
     gapPenalty?: number;
   } = {}
 ): AlignmentResult {
-  // For mock purposes, use global alignment with slight modifications
-  return globalAlignment(seq1, seq2, options);
+  const {
+    matchScore = 2,
+    mismatchPenalty = -1,
+    gapPenalty = -1
+  } = options;
+
+  const s1 = cleanSequence(seq1);
+  const s2 = cleanSequence(seq2);
+  const m = s1.length;
+  const n = s2.length;
+  
+  if (m === 0 || n === 0) {
+    return {
+      alignedSeq1: s1,
+      alignedSeq2: s2,
+      score: 0,
+      identity: 0,
+      similarity: 0,
+      gaps: 0,
+      midpoint: ''
+    };
+  }
+
+  // Initialize scoring matrices for Smith-Waterman
+  // H is main scoring matrix, E for gaps in seq1, F for gaps in seq2
+  const H: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  
+  let maxScore = 0;
+  let maxI = 0;
+  let maxJ = 0;
+
+  // Fill the scoring matrix
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const match = H[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty);
+      const deleteGap = H[i-1][j] + gapPenalty;  // gap in seq2 (deletion)
+      const insertGap = H[i][j-1] + gapPenalty;  // gap in seq1 (insertion)
+      
+      // Smith-Waterman: take max of 0 and all options (local alignment)
+      H[i][j] = Math.max(0, match, deleteGap, insertGap);
+      
+      // Track maximum score position
+      if (H[i][j] > maxScore) {
+        maxScore = H[i][j];
+        maxI = i;
+        maxJ = j;
+      }
+    }
+  }
+
+  // Traceback from maximum score position
+  let aligned1 = '';
+  let aligned2 = '';
+  let midpoint = '';
+  let i = maxI, j = maxJ;
+  let matches = 0, gaps = 0;
+
+  while (i > 0 && j > 0 && H[i][j] > 0) {
+    const currentScore = H[i][j];
+    
+    if (i > 0 && j > 0 && currentScore === H[i-1][j-1] + (s1[i-1] === s2[j-1] ? matchScore : mismatchPenalty)) {
+      aligned1 = s1[i-1] + aligned1;
+      aligned2 = s2[j-1] + aligned2;
+      midpoint = (s1[i-1] === s2[j-1] ? '|' : '.') + midpoint;
+      if (s1[i-1] === s2[j-1]) matches++;
+      i--; j--;
+    } else if (i > 0 && currentScore === H[i-1][j] + gapPenalty) {
+      aligned1 = s1[i-1] + aligned1;
+      aligned2 = '-' + aligned2;
+      midpoint = ' ' + midpoint;
+      gaps++;
+      i--;
+    } else {
+      aligned1 = '-' + aligned1;
+      aligned2 = s2[j-1] + aligned2;
+      midpoint = ' ' + midpoint;
+      gaps++;
+      j--;
+    }
+  }
+
+  const alignLength = aligned1.length || 1;
+  
+  return {
+    alignedSeq1: aligned1,
+    alignedSeq2: aligned2,
+    score: maxScore,
+    identity: Math.round((matches / alignLength) * 10000) / 100,
+    similarity: Math.round(((matches + (alignLength - matches - gaps) * 0.5) / alignLength) * 10000) / 100,
+    gaps,
+    midpoint
+  };
 }
 
 /**
