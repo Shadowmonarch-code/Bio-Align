@@ -115,9 +115,9 @@ function getNavigationTarget(href: string): { view: string; toolId?: string } {
     return { view: "analysis", toolId }
   }
 
-  // Plant Breeding section - all map to plant-breeding view
+  // Plant Breeding section - all map to plant-breeding view (pass full path for tab selection)
   if (href.startsWith("/plant-breeding")) {
-    return { view: "plant-breeding" }
+    return { view: href }  // Pass full path like "/plant-breeding/ammi"
   }
 
   // Bioinformatics section - map to analysis view with toolId

@@ -33,6 +33,7 @@ type ViewType = 'landing' | 'dashboard' | 'tools' | 'analysis' | 'upload' | 'dat
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+  const [selectedPlantBreedingTool, setSelectedPlantBreedingTool] = useState<string>('genetic-params')
   // Main navigation handler - switches between views
   const handleNavigate = useCallback((view: string) => {
     setCurrentView(view as ViewType)
@@ -55,6 +56,36 @@ export default function Home() {
     if (toolId) {
       setSelectedTool(toolId)
       setCurrentView('analysis')
+    } else if (view === 'plant-breeding' || view.startsWith('/plant-breeding')) {
+      // Extract the specific plant breeding tool from the path and map to tab ID
+      // e.g., "/plant-breeding/ammi" -> "ammi-analysis"
+      const pbToolMatch = view.match(/\/plant-breeding\/(.+)/)
+      if (pbToolMatch && pbToolMatch[1]) {
+        const toolPath = pbToolMatch[1]
+        // Map sidebar paths to tab IDs
+        const pathToTabMap: Record<string, string> = {
+          'genetic-params': 'genetic-params',
+          'experimental-design': 'experimental-design',
+          'crd': 'experimental-design',
+          'rcbd': 'experimental-design',
+          'factorial': 'experimental-design',
+          'quantitative-genetics': 'quantitative-genetics',
+          'correlation': 'correlation-regression',
+          'path-analysis': 'path-analysis',
+          'selection-index': 'selection-index',
+          'gxe': 'gxe-interaction',
+          'gxe-interaction': 'gxe-interaction',
+          'ammi': 'ammi-analysis',
+          'ammi-analysis': 'ammi-analysis',
+          'gge-biplot': 'gge-biplot',
+          'diversity': 'diversity-analysis',
+          'molecular-breeding': 'molecular-breeding',
+          'population-genetics': 'population-genetics',
+        }
+        const tabId = pathToTabMap[toolPath] || toolPath
+        setSelectedPlantBreedingTool(tabId)
+      }
+      setCurrentView('plant-breeding')
     } else {
       setCurrentView(view as ViewType)
     }
@@ -713,7 +744,7 @@ export default function Home() {
             }
             onSidebarNavigate={handleSidebarNavigate}
           >
-            <PlantBreedingModule />
+            <PlantBreedingModule key={selectedPlantBreedingTool} initialTab={selectedPlantBreedingTool} />
           </DashboardLayout>
 
           {/* Sticky Footer */}
