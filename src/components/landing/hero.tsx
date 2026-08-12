@@ -163,16 +163,22 @@ interface Particle {
   type: 'circle' | 'molecule' | 'atom';
 }
 
+// Deterministic pseudo-random based on seed to avoid hydration mismatch
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 233280
+  return x - Math.floor(x)
+}
+
 function FloatingParticles({ mouseX, mouseY }: { mouseX: number; mouseY: number }) {
   const [particles] = useState<Particle[]>(() =>
     Array.from({ length: 30 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 12 + 4,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 5,
-      type: (['circle', 'molecule', 'atom'] as const)[Math.floor(Math.random() * 3)],
+      x: seededRandom(i * 7) * 100,
+      y: seededRandom(i * 13) * 100,
+      size: seededRandom(i * 17) * 12 + 4,
+      duration: seededRandom(i * 23) * 20 + 15,
+      delay: seededRandom(i * 29) * 5,
+      type: (['circle', 'molecule', 'atom'] as const)[Math.floor(seededRandom(i * 31) * 3)],
     }))
   );
 
