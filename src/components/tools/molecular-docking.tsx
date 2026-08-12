@@ -45,8 +45,7 @@ const DOCKING_TOOLS: ToolRedirect[] = [
     url: 'http://www.swissdock.ch/docking',
     organization: 'SIB Swiss Institute of Bioinformatics',
     type: 'Web Application (Free)',
-    attributes: ['No installation', 'EADock DSS', 'Multiple modes', 'Results download'],
-    features: ['Protein-ligand', 'Flexible docking', 'Binding poses', 'Energy scores']
+    features: ['No installation', 'EADock DSS', 'Multiple modes', 'Results download', 'Protein-ligand', 'Flexible docking']
   },
   {
     id: 'haddock',
@@ -179,7 +178,7 @@ export function MolecularDockingModule() {
                 <CardContent>
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">{tool.description}</p>
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {(tool.features || tool.attributes || []).slice(0, 3).map((f) => (
+                    {(tool.features || []).slice(0, 3).map((f) => (
                       <Badge key={f} variant="outline" className="text-xs">{f}</Badge>
                     ))}
                   </div>

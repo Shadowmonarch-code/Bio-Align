@@ -948,10 +948,9 @@ export function performBLASTSearch(
     );
     
     const alignment = localAlignment(regionQuery, regionSubject, {
-      match: matchScore,
-      mismatch: Math.abs(mismatchPenalty),
-      gapOpen: Math.abs(gapOpen),
-      gapExtend: Math.abs(gapExtend)
+      matchScore: matchScore,
+      mismatchPenalty: Math.abs(mismatchPenalty),
+      gapPenalty: Math.abs(gapOpen) + Math.abs(gapExtend)
     });
     
     // Only keep significant hits

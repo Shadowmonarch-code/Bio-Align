@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -168,13 +168,6 @@ const analysisTabs = [
 
 export default function PlantBreedingModule({ className, initialTab = 'genetic-params' }: PlantBreedingModuleProps) {
   const [activeTab, setActiveTab] = useState(initialTab)
-
-  // Sync activeTab when initialTab prop changes (e.g., from sidebar navigation)
-  useEffect(() => {
-    if (initialTab && initialTab !== activeTab) {
-      setActiveTab(initialTab)
-    }
-  }, [initialTab])
 
   return (
     <div className={`w-full ${className || ''}`}>
