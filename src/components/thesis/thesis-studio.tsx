@@ -862,7 +862,7 @@ export default function ThesisStudio() {
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Thesis Studio</h1>
+                <h1 className="text-xl font-bold text-foreground">Thesis Studio</h1>
                 <p className="text-sm text-muted-foreground">Complete thesis workflow management</p>
               </div>
             </div>

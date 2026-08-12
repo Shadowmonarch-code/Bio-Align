@@ -178,8 +178,8 @@ function PartnerLogo({ partner }: { partner: typeof partners[0] }) {
       href="#"
       onClick={(e) => e.preventDefault()}
       className="group flex-shrink-0 mx-3 md:mx-5 flex flex-col items-center justify-center p-4 md:p-6 rounded-xl 
-                 bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm border border-border/50 
-                 hover:border-biored/30 hover:bg-white dark:hover:bg-white/[0.06]
+                 bg-card/60 backdrop-blur-sm border border-border/50 
+                 hover:border-primary/30 hover:bg-card
                  transition-all duration-300 min-w-[100px] md:min-w-[130px]"
       title={partner.fullName}
     >

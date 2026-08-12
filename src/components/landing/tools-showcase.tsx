@@ -281,7 +281,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
               placeholder="Search tools by name or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 h-12 text-base rounded-xl border-border/50 bg-white/80 dark:bg-black/20 backdrop-blur-sm focus:border-biored focus:ring-biored/20 shadow-sm hover:shadow-md transition-shadow"
+              className="pl-12 pr-4 h-12 text-base rounded-xl border-border/50 bg-card/80 backdrop-blur-sm focus:border-biored focus:ring-biored/20 shadow-sm hover:shadow-md transition-shadow"
             />
           </div>
         </motion.div>

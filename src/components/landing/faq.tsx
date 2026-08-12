@@ -151,7 +151,7 @@ export default function FAQSection() {
               <motion.div key={item.id} variants={itemVariants}>
                 <AccordionItem
                   value={item.id}
-                  className="group border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-[#C1121F]/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-[#C1121F]/30 data-[state=open]:bg-white/90 dark:data-[state=open]:bg-gray-900/60 overflow-hidden"
+                  className="group border border-border/50 bg-card/70 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-primary/30 data-[state=open]:bg-card/90 overflow-hidden"
                 >
                   <AccordionTrigger className="py-5 text-left hover:no-underline group">
                     <div className="flex items-center gap-4">

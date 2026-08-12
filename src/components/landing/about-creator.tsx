@@ -348,7 +348,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           className="bg-gradient-to-br from-biored/5 via-purple-500/5 to-emerald-500/5 border border-biored/10 rounded-2xl p-8 md:p-12"
         >
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-900 px-4 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-card px-4 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
               <Heart className="size-4 text-red-500" />
               Student-Faculty Collaboration
             </div>

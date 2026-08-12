@@ -335,7 +335,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FAFAFA] dark:bg-black"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background"
     >
       {/* Background Effects */}
       <DNAHelix />
@@ -347,7 +347,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
       />
 
       {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(193,18,31,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(193,18,31,0.02)_1px,transparent_1px)] bg-[size:60px_60px] dark:bg-[linear-gradient(rgba(239,68,68,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(239,68,68,0.03)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(193,18,31,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(193,18,31,0.02)_1px,transparent_1px)] bg-[size:60px_60px] dark:bg-[linear-gradient(rgba(248,113,113,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(248,113,113,0.04)_1px,transparent_1px)]" />
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
@@ -373,8 +373,8 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
             variants={itemVariants}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 md:mb-8"
           >
-            <span className="block text-gray-900 dark:text-white">One Platform.</span>
-            <span className="block mt-2 md:mt-4 bg-gradient-to-r from-[#C1121F] via-red-600 to-orange-600 dark:from-red-500 dark:via-red-400 dark:to-orange-400 bg-clip-text text-transparent">
+            <span className="block text-foreground">One Platform.</span>
+            <span className="block mt-2 md:mt-4 text-gradient-primary">
               Every Bioinformatics Tool.
             </span>
           </motion.h1>
@@ -382,10 +382,10 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
           {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="max-w-2xl mx-auto text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 md:mb-12 leading-relaxed"
+            className="max-w-2xl mx-auto text-lg sm:text-xl md:text-2xl text-muted-foreground mb-10 md:mb-12 leading-relaxed"
           >
             Analyze sequences, proteins, genomes, and more —{' '}
-            <span className="text-gray-900 dark:text-white font-medium">without switching between dozens of tools.</span>
+            <span className="text-foreground font-medium">without switching between dozens of tools.</span>
           </motion.p>
 
           {/* CTA Buttons */}
@@ -404,7 +404,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
 
             <button 
               onClick={onExploreClick}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-white/5 border-2 border-gray-200 dark:border-gray-800 hover:border-[#C1121F] dark:hover:border-red-500 rounded-xl hover:bg-white dark:hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm cursor-pointer"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-foreground bg-card/80 border-2 border-border hover:border-primary rounded-xl hover:bg-card transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm cursor-pointer"
             >
               Explore Tools
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#C1121F] dark:text-red-500" />
@@ -429,7 +429,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
                 scale: 1.02,
                 transition: { duration: 0.2 } 
               }}
-              className="group relative p-4 md:p-6 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200/50 dark:border-white/[0.06] shadow-sm hover:shadow-md hover:shadow-red-500/5 dark:hover:shadow-red-500/5 transition-all duration-300 cursor-default"
+              className="group relative p-4 md:p-6 rounded-2xl bg-card/70 backdrop-blur-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 cursor-default"
             >
               {/* Subtle gradient glow on hover */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/0 to-orange-500/0 group-hover:from-red-500/[0.03] group-hover:to-orange-500/[0.03] transition-all duration-300" />
@@ -438,10 +438,10 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
                 <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-50 dark:bg-red-950/30 mb-3 md:mb-4 group-hover:bg-red-100 dark:group-hover:bg-red-950/50 transition-colors">
                   <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-[#C1121F] dark:text-red-500" />
                 </div>
-                <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-1">
                   {stat.value}
                 </div>
-                <div className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300">
+                <div className="text-sm md:text-base font-medium text-foreground">
                   {stat.label}
                 </div>
                 <p className="hidden md:block text-xs text-gray-500 dark:text-gray-500 mt-2 max-w-[140px]">
@@ -459,18 +459,18 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
           transition={{ duration: 0.6, delay: 1.2 }}
           className="mt-12 md:mt-16 text-center"
         >
-          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-600">
+          <p className="text-xs md:text-sm text-muted-foreground">
             Trusted by leading institutions including{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-400">Stanford</span>,{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-400">MIT</span>,{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-400">NIH</span>, and{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-400">100+ more</span>
+            <span className="font-medium text-foreground/80">Stanford</span>,{' '}
+            <span className="font-medium text-foreground/80">MIT</span>,{' '}
+            <span className="font-medium text-foreground/80">NIH</span>, and{' '}
+            <span className="font-medium text-foreground/80">100+ more</span>
           </p>
         </motion.div>
       </div>
 
       {/* Bottom fade gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFAFA] dark:from-black to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
 
       {/* Global styles for DNA animation */}
       <style>{`

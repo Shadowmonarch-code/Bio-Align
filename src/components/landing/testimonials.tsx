@@ -109,7 +109,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       }}
       className="group relative h-full"
     >
-      <div className="relative h-full p-6 rounded-2xl border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 hover:border-[#C1121F]/20 transition-all duration-300 overflow-hidden">
+      <div className="relative h-full p-6 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
         {/* Gradient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/5 via-transparent to-transparent rounded-2xl" />
@@ -217,7 +217,7 @@ export default function TestimonialsSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 px-8 rounded-2xl bg-white/50 dark:bg-white/[0.03] backdrop-blur-sm border border-border/50">
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 px-8 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
                 {['SC', 'JM', 'AP', 'CR'].map((initials) => (

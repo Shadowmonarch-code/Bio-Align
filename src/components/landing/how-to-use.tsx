@@ -325,7 +325,7 @@ export default function HowToUseGuide() {
                 }}
                 className="group relative"
               >
-                <div className="relative h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 hover:border-[#C1121F]/20 transition-all duration-300 overflow-hidden">
+                <div className="relative h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
                   {/* Glow effect on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/5 via-transparent to-transparent rounded-2xl" />
@@ -422,7 +422,7 @@ export default function HowToUseGuide() {
                 }}
                 className="group relative"
               >
-                <div className="h-full p-6 rounded-2xl border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 hover:border-[#C1121F]/20 transition-all duration-300 overflow-hidden">
+                <div className="h-full p-6 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
                   {/* Gradient header bar */}
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${category.color} opacity-80`} />
 
@@ -484,7 +484,7 @@ export default function HowToUseGuide() {
                 }}
                 className="group relative"
               >
-                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 hover:border-[#C1121F]/20 transition-all duration-300">
+                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
                   {/* Icon with decorative ring */}
                   <div className="relative mb-6">
                     <div className="absolute inset-0 w-16 h-16 rounded-full bg-[#C1121F]/10 group-hover:bg-[#C1121F]/20 transition-colors duration-300 animate-pulse-slow" />
@@ -603,7 +603,7 @@ export default function HowToUseGuide() {
                 >
                   <AccordionItem
                     value={item.id}
-                    className="group border border-border/50 bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-[#C1121F]/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-[#C1121F]/30 data-[state=open]:bg-white/90 dark:data-[state=open]:bg-gray-900/60 overflow-hidden"
+                    className="group border border-border/50 bg-card/70 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-primary/30 data-[state=open]:bg-card/90 overflow-hidden"
                   >
                     <AccordionTrigger className="py-5 text-left hover:no-underline group">
                       <div className="flex items-center gap-4">
@@ -662,7 +662,7 @@ export default function HowToUseGuide() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-[#C1121F] bg-white hover:bg-gray-100 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+                <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>

@@ -141,7 +141,7 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
       )}
 
       {/* Main Card */}
-      <div className="relative flex flex-col h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-white/70 dark:bg-gray-900/50 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-[#C1121F]/15 hover:border-[#C1121F]/30 transition-all duration-500 overflow-hidden z-10">
+      <div className="relative flex flex-col h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-500 overflow-hidden z-10">
         {/* Background gradient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/10 via-transparent to-purple-500/5 rounded-2xl" />
@@ -361,7 +361,7 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
           transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-20 text-center"
         >
-          <div className="relative inline-flex flex-col items-center p-8 sm:p-12 rounded-3xl bg-white/70 dark:bg-gray-900/50 backdrop-blur-xl border border-border/50 shadow-2xl shadow-[#C1121F]/10 overflow-hidden">
+          <div className="relative inline-flex flex-col items-center p-8 sm:p-12 rounded-3xl bg-card/70 backdrop-blur-xl border border-border/50 shadow-2xl shadow-primary/10 overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#C1121F]/10 rounded-full blur-[80px]" />

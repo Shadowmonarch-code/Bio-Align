@@ -159,7 +159,7 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }) {
       }}
       className="group relative"
     >
-      <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-white/80 dark:bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-biored/5 hover:border-biored/20 transition-all duration-300 overflow-hidden">
+      <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 overflow-hidden">
         {/* Background gradient on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-biored/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
@@ -277,7 +277,7 @@ export default function Statistics() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-8 py-6 px-8 rounded-2xl border border-border/50 bg-white/60 dark:bg-card/30 backdrop-blur-sm">
+          <div className="inline-flex flex-wrap items-center justify-center gap-8 py-6 px-8 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Zap className="w-5 h-5 text-biored" />
               <span className="text-sm font-medium">Lightning Fast</span>
