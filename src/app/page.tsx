@@ -21,6 +21,13 @@ import ToolsCatalog from '@/components/dashboard/tools-catalog'
 import FileUpload from '@/components/dashboard/file-upload'
 import { Button } from '@/components/ui/button'
 import SequenceAnalysisTool from '@/components/tools/sequence-analysis'
+import AlignmentModule from '@/components/tools/alignment'
+import BlastSearchModule from '@/components/tools/blast'
+import PhylogeneticsModule from '@/components/tools/phylogenetics'
+import ProteinAnalysisModule from '@/components/tools/protein-analysis'
+import StructuralBiologyModule from '@/components/tools/structural-biology'
+import GenomicsModule from '@/components/tools/genomics'
+import MolecularDockingModule from '@/components/tools/molecular-docking'
 import DatasetManager from '@/components/dataset/dataset-manager'
 import PlantBreedingModule from '@/components/plant-breeding/plant-breeding-module'
 import ThesisStudio from '@/components/thesis/thesis-studio'
@@ -519,8 +526,21 @@ export default function Home() {
             }
             onSidebarNavigate={handleSidebarNavigate}
           >
-            <SequenceAnalysisTool selectedTool={selectedTool} />
-          </DashboardLayout>
+            {/* Bioinformatics Tool Views - Redirect to Original Tools */}
+            {selectedTool === 'sequence' && <SequenceAnalysisModule />}
+            {selectedTool === 'alignment' && <AlignmentModule />}
+            {selectedTool === 'blast' && <BlastSearchModule />}
+            {selectedTool === 'phylogenetics' && <PhylogeneticsModule />}
+            {selectedTool === 'protein' && <ProteinAnalysisModule />}
+            {selectedTool === 'structure' && <StructuralBiologyModule />}
+            {selectedTool === 'genomics' && <GenomicsModule />}
+            {selectedTool === 'docking' && <MolecularDockingModule />}
+            
+            {/* Fallback for any other tool - show sequence analysis */}
+            {!['sequence', 'alignment', 'blast', 'phylogenetics', 'protein', 'structure', 'genomics', 'docking'].includes(selectedTool || '') && 
+              <SequenceAnalysisModule />
+            }
+            </DashboardLayout>
 
           
           {/* Sticky Footer */}
