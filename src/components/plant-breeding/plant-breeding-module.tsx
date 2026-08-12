@@ -221,6 +221,74 @@ export default function PlantBreedingModule({ className, initialTab = 'genetic-p
         </div>
       </motion.div>
 
+      {/* Visual Guide Section - How to Use */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+        className="mb-6"
+      >
+        <Card className="bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 border-red-200/50 overflow-hidden">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-white rounded-lg shadow-sm">
+                <Info className="h-4 w-4 text-red-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900">How to Use Plant Breeding Tools</h3>
+              <Badge variant="outline" className="ml-auto text-xs border-red-300 text-red-700">Quick Guide</Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-3">
+              <div className="flex items-start gap-3 p-3 bg-white/70 rounded-xl">
+                <div className="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                <div>
+                  <p className="font-medium text-sm text-gray-800">Select Analysis Type</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Choose from 12 analysis tools above based on your research goal</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-3 bg-white/70 rounded-xl">
+                <div className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                <div>
+                  <p className="font-medium text-sm text-gray-800">Open Official Tool</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Click to access the original software (R packages, web tools)</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-3 bg-white/70 rounded-xl">
+                <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shrink-0">3</div>
+                <div>
+                  <p className="font-medium text-sm text-gray-800">Input Your Data</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Prepare data in required format (CSV, FASTA, etc.)</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-3 bg-white/70 rounded-xl">
+                <div className="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold shrink-0">4</div>
+                <div>
+                  <p className="font-medium text-sm text-gray-800">Get Results</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Analyze outputs and interpret results for your research</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Tool Categories Quick Reference */}
+            <div className="mt-4 pt-4 border-t border-red-200/30">
+              <p className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
+                <Leaf className="w-3 h-3" />Tool Categories:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs font-medium">📊 Basic Statistics (Genetic Params, Correlation)</span>
+                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-md text-xs font-medium">🧪 Experimental Design (ANOVA, RCBD)</span>
+                <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-md text-xs font-medium">🌾 G×E Analysis (AMMI, GGE Biplot)</span>
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-medium">🧬 Molecular (Markers, QTL)</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium">👥 Population Genetics</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tab Navigation - Responsive */}

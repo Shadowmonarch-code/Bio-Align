@@ -5,6 +5,7 @@ import Navbar from '@/components/landing/navbar'
 import HeroSection from '@/components/landing/hero'
 import FeaturesSection from '@/components/landing/features'
 import ToolsShowcase from '@/components/landing/tools-showcase'
+import HowToUseGuide from '@/components/landing/how-to-use'
 import WorkflowSection from '@/components/landing/workflow'
 import StatisticsSection from '@/components/landing/statistics'
 import TestimonialsSection from '@/components/landing/testimonials'
@@ -132,6 +133,11 @@ export default function Home() {
         {/* Popular Tools Showcase */}
         <section id="tools" className="py-24 bg-muted/30">
           <ToolsShowcase onLaunchTool={handleToolSelect} />
+        </section>
+
+        {/* How to Use Guide */}
+        <section id="how-to-use" className="py-24 relative overflow-hidden">
+          <HowToUseGuide />
         </section>
 
         {/* Research Workflow */}
