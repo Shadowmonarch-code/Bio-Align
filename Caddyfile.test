@@ -1,0 +1,13 @@
+:8080 {
+	@transform_port_query {
+		query XTransformPort=*
+	}
+
+	handle @transform_port_query {
+		reverse_proxy localhost:{query.XTransformPort}
+	}
+
+	handle {
+		reverse_proxy localhost:3000
+	}
+}
