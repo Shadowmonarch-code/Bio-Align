@@ -147,21 +147,16 @@ export function BioDoodles({ variant = 'colorful', density = 'medium', className
               <polygon points="1152,74 1176,70 1200,74" fill="none" stroke="#C1121F" strokeWidth="1" opacity={0.5}/>
               <circle cx="48" cy="120" r="12" fill="none" stroke="#A855F7" strokeWidth="0.5" opacity={0.4}/>
               
-              {Array.from({length: 20}).map((_, i) => {
-                // Use deterministic positions based on index to avoid hydration mismatch
-                const cx = ((i * 37 + 13) % 97 + 1.5)
-                const cy = ((i * 53 + 7) % 93 + 3.5)
-                return (
-                  <circle 
-                    key={i} 
-                    cx={`${cx}%`} 
-                    cy={`${cy}%`} 
-                    r="1" 
-                    fill="#C1121F" 
-                    opacity={0.3}
-                  />
-                )
-              })}
+              {Array.from({length: 20}).map((_, i) => (
+                <circle 
+                  key={i} 
+                  cx={`${Math.random() * 100}%`} 
+                  cy={`${Math.random() * 100}%`} 
+                  r="1" 
+                  fill="#C1121F" 
+                  opacity={0.3}
+                />
+              ))}
             </g>
           </>
         )
