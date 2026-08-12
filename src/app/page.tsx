@@ -6,6 +6,8 @@ import HeroSection from '@/components/landing/hero'
 import FeaturesSection from '@/components/landing/features'
 import ToolsShowcase from '@/components/landing/tools-showcase'
 import HowToUseGuide from '@/components/landing/how-to-use'
+import { BioDoodles } from '@/components/ui/bio-doodles'
+import { ColorfulDivider } from '@/components/ui/colorful-sections'
 import WorkflowSection from '@/components/landing/workflow'
 import StatisticsSection from '@/components/landing/statistics'
 import TestimonialsSection from '@/components/landing/testimonials'
@@ -112,56 +114,86 @@ export default function Home() {
       <main className="min-h-screen flex flex-col">
         <Navbar onNavigate={handleNavigate} />
         
-        {/* Hero Section */}
-        <section id="hero">
+        {/* Hero Section with Doodles */}
+        <section id="hero" className="relative">
+          <BioDoodles variant="colorful" density="medium" className="absolute inset-0 pointer-events-none" />
           <HeroSection 
             onStartClick={() => handleNavigate('dashboard')}
             onExploreClick={() => handleNavigate('tools')}
           />
         </section>
 
+        {/* Colorful Divider */}
+        <ColorfulDivider style="gentle" colors={['#C1121F', '#FF6B6B', '#4ECDC4']} />
+
         {/* Partners/Trusted By */}
-        <section id="partners" className="py-16 border-b border-border/50">
+        <section id="partners" className="py-16 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-red-50/50 via-transparent to-transparent" />
           <PartnersSection />
         </section>
 
         {/* Features Section */}
         <section id="features" className="py-24 relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl" />
           <FeaturesSection onExploreClick={() => handleNavigate('tools')} />
         </section>
 
+        {/* Colorful Divider */}
+        <ColorfulDivider style="organic" colors={['#A855F7', '#3B82F6', '#10B981']} />
+
         {/* Popular Tools Showcase */}
-        <section id="tools" className="py-24 bg-muted/30">
-          <ToolsShowcase onLaunchTool={handleToolSelect} />
+        <section id="tools" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50/40 via-pink-50/30 to-blue-50/40" />
+          <BioDoodles variant="minimal" density="low" className="absolute inset-0 pointer-events-none" />
+          <div className="relative">
+            <ToolsShowcase onLaunchTool={handleToolSelect} />
+          </div>
         </section>
+
+        {/* Colorful Divider */}
+        <ColorfulDivider style="dramatic" colors={['#FF6B6B', '#F59E0B', '#A855F7']} />
 
         {/* How to Use Guide */}
         <section id="how-to-use" className="py-24 relative overflow-hidden">
+          <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-gradient-to-br from-yellow-100/40 to-orange-100/40 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-0 w-[400px] h-[400px] bg-gradient-to-br from-pink-100/40 to-purple-100/40 rounded-full blur-3xl" />
           <HowToUseGuide />
         </section>
 
         {/* Research Workflow */}
-        <section id="workflow" className="py-24 relative">
+        <section id="workflow" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-white to-cyan-50/30" />
           <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
         </section>
 
+        {/* Colorful Divider */}
+        <ColorfulDivider style="sharp" colors={['#EC4899', '#A855F7', '#6366F1']} />
+
         {/* About Creator Section */}
-        <section id="about" className="py-24 bg-muted/30">
+        <section id="about" className="py-24 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-rose-100/40 to-pink-100/40 rounded-full blur-3xl" />
           <AboutCreator onBack={handleGoHome} />
         </section>
 
         {/* Statistics */}
-        <section id="statistics" className="py-24 bg-muted/30">
+        <section id="statistics" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-red-50/30 via-orange-50/20 to-yellow-50/30" />
           <StatisticsSection />
         </section>
 
+        {/* Colorful Divider */}
+        <ColorfulDivider style="organic" colors={['#F59E0B', '#FF6B6B', '#A855F7']} />
+
         {/* Testimonials */}
-        <section id="testimonials" className="py-24">
+        <section id="testimonials" className="py-24 relative">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-t from-purple-100/30 to-transparent rounded-full blur-3xl" />
           <TestimonialsSection />
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="py-24 bg-muted/30">
+        <section id="faq" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 via-transparent to-teal-50/20" />
           <FAQSection />
         </section>
 

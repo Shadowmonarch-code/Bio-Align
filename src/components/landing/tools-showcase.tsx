@@ -52,7 +52,7 @@ const categories: Category[] = [
   { id: "utilities", name: "Utilities", icon: <Wrench className="w-4 h-4" /> },
 ];
 
-// Define tools
+// Define tools with vibrant colors
 const tools: Tool[] = [
   // Sequence Analysis
   {
@@ -61,7 +61,7 @@ const tools: Tool[] = [
     description: "Sequence similarity search against comprehensive databases",
     category: "sequence",
     icon: <Search className="w-5 h-5" />,
-    color: "from-blue-500 to-cyan-500",
+    color: "from-violet-500 via-purple-500 to-fuchsia-500",
   },
   {
     id: "clustal-omega",
@@ -69,7 +69,7 @@ const tools: Tool[] = [
     description: "Multiple sequence alignment for large datasets",
     category: "sequence",
     icon: <AlignLeft className="w-5 h-5" />,
-    color: "from-green-500 to-emerald-500",
+    color: "from-emerald-400 via-teal-400 to-cyan-500",
   },
   {
     id: "muscle",
@@ -77,7 +77,7 @@ const tools: Tool[] = [
     description: "Fast multiple sequence alignment with high accuracy",
     category: "sequence",
     icon: <Zap className="w-5 h-5" />,
-    color: "from-yellow-500 to-orange-500",
+    color: "from-amber-400 via-orange-400 to-red-500",
   },
   {
     id: "mafft",
@@ -85,7 +85,7 @@ const tools: Tool[] = [
     description: "Accurate multiple alignment with various strategies",
     category: "sequence",
     icon: <Target className="w-5 h-5" />,
-    color: "from-purple-500 to-pink-500",
+    color: "from-pink-400 via-rose-400 to-red-500",
   },
 
   // Protein Analysis
@@ -95,7 +95,7 @@ const tools: Tool[] = [
     description: "Compute physical and chemical protein properties",
     category: "protein",
     icon: <FlaskConical className="w-5 h-5" />,
-    color: "from-red-500 to-rose-500",
+    color: "from-red-500 via-rose-500 to-pink-500",
   },
   {
     id: "secondary-structure",
@@ -103,7 +103,7 @@ const tools: Tool[] = [
     description: "Predict protein secondary structure elements",
     category: "protein",
     icon: <Layers className="w-5 h-5" />,
-    color: "from-indigo-500 to-blue-500",
+    color: "from-indigo-500 via-blue-500 to-cyan-400",
   },
   {
     id: "transmembrane",
@@ -111,7 +111,7 @@ const tools: Tool[] = [
     description: "Identify transmembrane helices in proteins",
     category: "protein",
     icon: <Eye className="w-5 h-5" />,
-    color: "from-teal-500 to-cyan-500",
+    color: "from-teal-400 via-emerald-400 to-green-500",
   },
 
   // Phylogenetics
@@ -121,7 +121,7 @@ const tools: Tool[] = [
     description: "Construct phylogenetic trees using NJ algorithm",
     category: "phylogenetics",
     icon: <GitBranch className="w-5 h-5" />,
-    color: "from-emerald-500 to-green-500",
+    color: "from-lime-400 via-green-500 to-emerald-600",
   },
   {
     id: "maximum-likelihood",
@@ -129,7 +129,7 @@ const tools: Tool[] = [
     description: "Build trees using maximum likelihood methods",
     category: "phylogenetics",
     icon: <BarChart3 className="w-5 h-5" />,
-    color: "from-amber-500 to-yellow-500",
+    color: "from-yellow-400 via-amber-400 to-orange-500",
   },
   {
     id: "tree-viewer",
@@ -137,7 +137,7 @@ const tools: Tool[] = [
     description: "Interactive visualization of phylogenetic trees",
     category: "phylogenetics",
     icon: <TreePine className="w-5 h-5" />,
-    color: "from-lime-500 to-green-500",
+    color: "from-green-400 via-emerald-400 to-teal-500",
   },
 
   // Utilities
@@ -147,7 +147,7 @@ const tools: Tool[] = [
     description: "Generate reverse complement of DNA sequences",
     category: "utilities",
     icon: <ArrowRightLeft className="w-5 h-5" />,
-    color: "from-slate-500 to-gray-500",
+    color: "from-slate-500 via-zinc-500 to-neutral-600",
   },
   {
     id: "orf-finder",
@@ -155,7 +155,7 @@ const tools: Tool[] = [
     description: "Find open reading frames in nucleotide sequences",
     category: "utilities",
     icon: <SearchCode className="w-5 h-5" />,
-    color: "from-violet-500 to-purple-500",
+    color: "from-violet-500 via-purple-500 to-indigo-500",
   },
   {
     id: "gc-content",
@@ -163,7 +163,7 @@ const tools: Tool[] = [
     description: "Calculate GC percentage and composition analysis",
     category: "utilities",
     icon: <Percent className="w-5 h-5" />,
-    color: "from-sky-500 to-blue-500",
+    color: "from-sky-400 via-blue-400 to-indigo-500",
   },
   {
     id: "primer-designer",
@@ -171,7 +171,7 @@ const tools: Tool[] = [
     description: "Design PCR primers with melting temperature optimization",
     category: "utilities",
     icon: <PenTool className="w-5 h-5" />,
-    color: "from-fuchsia-500 to-pink-500",
+    color: "from-fuchsia-500 via-pink-500 to-rose-500",
   },
 ];
 
