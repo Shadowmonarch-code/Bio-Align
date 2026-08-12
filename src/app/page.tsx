@@ -167,30 +167,32 @@ export default function Home() {
           <FAQSection />
         </section>
 
-        {/* CTA Section */}
+        {/* CTA Section - Scientific Design */}
         <section id="cta" className="py-24 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-3xl bg-gradient-to-br from-primary via-biored-dark to-biored p-12 md:p-20 text-center text-white overflow-hidden">
-              {/* Background decoration */}
+            <div className="relative rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600 dark:from-emerald-700 dark:via-emerald-600 dark:to-emerald-800 p-12 md:p-20 text-center text-white overflow-hidden">
+              {/* Background decoration - molecular pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
                 <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl"></div>
+                {/* Scientific grid overlay */}
+                <div className="absolute inset-0 scientific-grid opacity-50" />
               </div>
               
               <div className="relative z-10 space-y-6">
                 <h2 className="text-3xl md:text-5xl font-bold">
-                  Ready to Transform Your Research?
+                  Ready to Accelerate Your Research?
                 </h2>
                 <p className="text-xl text-white/80 max-w-2xl mx-auto">
-                  Join thousands of researchers who are already using BioAlign to accelerate their discoveries.
+                  Join thousands of scientists who are already using BioAlign to make groundbreaking discoveries.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                   <Button 
                     size="lg"
-                    className="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg cursor-pointer"
+                    className="px-8 py-4 bg-white text-emerald-700 font-semibold rounded-xl hover:bg-white/90 transition-all hover:scale-105 shadow-lg cursor-pointer"
                     onClick={() => handleNavigate('dashboard')}
                   >
-                    Get Started Free
+                    Start Analyzing Free
                   </Button>
                   <Button 
                     size="lg"
@@ -231,7 +233,7 @@ export default function Home() {
               <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
                 Upload Files
               </Button>
-              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white">
                 Browse Tools
               </Button>
             </div>
@@ -322,7 +324,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -345,7 +347,7 @@ export default function Home() {
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
                 Dashboard
               </Button>
-              <Button className="cursor-pointer bg-biored hover:bg-biored-dark text-white">
+              <Button className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white">
                 + New Workspace
               </Button>
             </div>
@@ -416,9 +418,9 @@ export default function Home() {
                   status: 'active'
                 },
               ].map((workspace, i) => (
-                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all cursor-pointer group">
+                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-emerald-500/30 transition-all cursor-pointer group">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-biored/10 to-biored/20 flex items-center justify-center group-hover:from-biored/20 group-hover:to-biored/30 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 flex items-center justify-center group-hover:from-emerald-500/20 group-hover:to-emerald-500/30 transition-colors">
                       <span className="text-lg">🧬</span>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -429,7 +431,7 @@ export default function Home() {
                       {workspace.status}
                     </span>
                   </div>
-                  <h3 className="font-semibold mb-1 group-hover:text-biored transition-colors">{workspace.name}</h3>
+                  <h3 className="font-semibold mb-1 group-hover:text-emerald-500 transition-colors">{workspace.name}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{workspace.desc}</p>
                   
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -450,12 +452,12 @@ export default function Home() {
               {/* Add new workspace card */}
               <button 
                 onClick={() => handleNavigate('dashboard')}
-                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-biored/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
+                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-emerald-500/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
               >
-                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-biored/10 flex items-center justify-center mb-3 transition-colors">
-                  <span className="text-2xl group-hover:text-biored transition-colors">+</span>
+                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-emerald-500/10 flex items-center justify-center mb-3 transition-colors">
+                  <span className="text-2xl group-hover:text-emerald-500 transition-colors">+</span>
                 </div>
-                <p className="font-medium group-hover:text-biored transition-colors">Create New Workspace</p>
+                <p className="font-medium group-hover:text-emerald-500 transition-colors">Create New Workspace</p>
                 <p className="text-sm text-muted-foreground mt-1">Start a new project</p>
               </button>
             </div>
@@ -464,7 +466,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -498,7 +500,7 @@ export default function Home() {
           
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -553,7 +555,7 @@ export default function Home() {
           
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -603,7 +605,7 @@ export default function Home() {
                   { category: 'Archive', formats: ['ZIP', 'GZ', 'TAR', 'BZ2'] },
                 ].map((group, i) => (
                   <div key={i} className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs font-medium text-biored mb-2">{group.category}</p>
+                    <p className="text-xs font-medium text-emerald-500 mb-2">{group.category}</p>
                     <div className="flex flex-wrap gap-1">
                       {group.formats.map((fmt, j) => (
                         <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-background border">
@@ -621,7 +623,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -674,7 +676,7 @@ export default function Home() {
                   href={db.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-biored/30 transition-all group no-underline"
+                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-emerald-500/30 transition-all group no-underline"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
@@ -682,9 +684,9 @@ export default function Home() {
                       External
                     </span>
                   </div>
-                  <h3 className="font-semibold text-lg mb-1 group-hover:text-biored transition-colors">{db.name}</h3>
+                  <h3 className="font-semibold text-lg mb-1 group-hover:text-emerald-500 transition-colors">{db.name}</h3>
                   <p className="text-sm text-muted-foreground">{db.desc}</p>
-                  <button className="mt-4 text-sm text-biored hover:text-biored-dark font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                  <button className="mt-4 text-sm text-emerald-500 hover:text-emerald-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                     Open Database →
                   </button>
                 </a>
@@ -696,7 +698,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -777,7 +779,7 @@ export default function Home() {
 
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -817,7 +819,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-biored">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -849,7 +851,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-[emerald-500]">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -883,7 +885,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-[#C1121F]">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-[emerald-500]">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -898,7 +900,7 @@ export default function Home() {
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Page Not Found</h1>
           <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
-          <Button onClick={handleGoHome} className="bg-biored hover:bg-biored-dark text-white cursor-pointer">
+          <Button onClick={handleGoHome} className="bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer">
             Go Home
           </Button>
         </div>

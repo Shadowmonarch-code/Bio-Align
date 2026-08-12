@@ -125,8 +125,11 @@ interface FeaturesSectionProps {
 
 export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps) {
   return (
-    <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gray-50/50 dark:bg-[#050505]">
+      {/* Subtle background grid */}
+      <div className="absolute inset-0 fine-grid" />
+      
+      <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -137,9 +140,9 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
             Everything You Need for{' '}
-            <span className="text-[#C1121F] dark:text-[#C1121F]">Bioinformatics</span>
+            <span className="text-gradient-primary">Bioinformatics</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-slate-400 leading-relaxed">
             A comprehensive suite of powerful tools designed to accelerate your research.
             From sequence analysis to molecular docking — all in one unified platform.
           </p>
@@ -163,31 +166,31 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
               }}
               className="group relative"
             >
-              <div className="relative h-full p-6 rounded-2xl border border-gray-200/50 dark:border-white/[0.08] bg-white/80 dark:bg-black/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 dark:hover:shadow-[#C1121F]/20 hover:border-[#C1121F]/20 dark:hover:border-[#C1121F]/30 transition-all duration-300 overflow-hidden">
+              <div className="relative h-full p-6 rounded-2xl border border-gray-200/50 dark:border-white/[0.06] bg-white/80 dark:bg-[#101010]/80 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 dark:hover:shadow-emerald-500/20 hover:border-emerald-500/20 dark:hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/5 dark:from-[#C1121F]/10 via-transparent to-transparent rounded-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 dark:from-emerald-500/10 via-transparent to-transparent rounded-2xl" />
                 </div>
 
                 {/* Icon Container */}
-                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-[#C1121F] to-[#9B1B30] flex items-center justify-center mb-4 shadow-lg shadow-[#C1121F]/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <feature.icon className="w-6 h-6 text-white" strokeWidth={2} />
                 </div>
 
                 {/* Content */}
                 <div className="relative">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#C1121F] dark:group-hover:text-[#C1121F] transition-colors duration-300">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
                     {feature.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">
                     {feature.description}
                   </p>
                 </div>
 
                 {/* Subtle corner accent */}
                 <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-[#C1121F] to-transparent rounded-br" />
-                  <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-[#C1121F] to-transparent rounded-br" />
+                  <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-emerald-500 to-transparent rounded-br" />
+                  <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-emerald-500 to-transparent rounded-br" />
                 </div>
               </div>
             </motion.div>

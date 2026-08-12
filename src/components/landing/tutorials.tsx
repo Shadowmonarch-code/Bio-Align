@@ -203,14 +203,14 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                 <motion.div
                   key={idx}
                   whileHover={{ y: -4 }}
-                  className="bg-card border rounded-xl overflow-hidden hover:border-biored/30 hover:shadow-lg transition-all group"
+                  className="bg-card border rounded-xl overflow-hidden hover:border-emerald-500/30 hover:shadow-lg transition-all group"
                 >
                   {/* Card Header */}
                   <div className={`h-2 bg-gradient-to-r ${category.color}`} />
                   
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-semibold group-hover:text-biored transition-colors line-clamp-2">
+                      <h3 className="font-semibold group-hover:text-emerald-500 transition-colors line-clamp-2">
                         {tutorial.title}
                       </h3>
                     </div>
@@ -239,7 +239,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">What you'll learn:</p>
                       {(tutorial.steps || []).slice(0, 3).map((step, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="size-3 text-biored shrink-0" />
+                          <CheckCircle2 className="size-3 text-emerald-500 shrink-0" />
                           <span>{step}</span>
                         </div>
                       ))}
@@ -248,7 +248,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full group-hover:bg-biored group-hover:text-white cursor-pointer"
+                      className="w-full group-hover:bg-emerald-500 group-hover:text-white cursor-pointer"
                     >
                       Start Learning
                       <ChevronRight className="size-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -282,7 +282,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                 <div className="aspect-video bg-black/30 rounded-lg mb-3 flex items-center justify-center group-hover:bg-black/50 transition-colors">
                   <Play className="size-10 text-white/50 group-hover:text-red-500 transition-colors" />
                 </div>
-                <h4 className="font-medium text-sm group-hover:text-biored transition-colors">{video.title}</h4>
+                <h4 className="font-medium text-sm group-hover:text-emerald-500 transition-colors">{video.title}</h4>
                 <p className="text-xs text-white/50">{video.duration}</p>
               </a>
             ))}
@@ -294,9 +294,9 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-biored/10 to-orange-500/10 border border-biored/20 rounded-2xl p-6 flex gap-4"
+          className="bg-gradient-to-r from-emerald-500/10 to-orange-500/10 border border-emerald-500/20 rounded-2xl p-6 flex gap-4"
         >
-          <Lightbulb className="size-6 text-biored shrink-0" />
+          <Lightbulb className="size-6 text-emerald-500 shrink-0" />
           <div>
             <h3 className="font-semibold mb-1">Learning Path Recommendation</h3>
             <p className="text-muted-foreground text-sm">

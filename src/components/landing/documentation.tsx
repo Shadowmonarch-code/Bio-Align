@@ -208,7 +208,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                   <div className="bg-card border rounded-xl p-6 space-y-4">
                     {section.content?.[1]?.steps?.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-3">
-                        <span className="size-6 rounded-full bg-biored/10 text-biored text-sm font-medium flex items-center justify-center shrink-0">
+                        <span className="size-6 rounded-full bg-emerald-500/10 text-emerald-500 text-sm font-medium flex items-center justify-center shrink-0">
                           {idx + 1}
                         </span>
                         <p className="text-muted-foreground">{step}</p>
@@ -232,7 +232,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                 {section.endpoints?.map((endpoint, idx) => (
                   <div
                     key={idx}
-                    className="bg-card border rounded-xl p-5 hover:border-biored/30 transition-colors"
+                    className="bg-card border rounded-xl p-5 hover:border-emerald-500/30 transition-colors"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className={`px-2 py-1 rounded text-xs font-mono font-bold ${
@@ -245,7 +245,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                       <code className="font-mono text-sm font-semibold">{endpoint.path}</code>
                     </div>
                     <p className="text-muted-foreground text-sm mb-2">{endpoint.description}</p>
-                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-biored">
+                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-emerald-500">
                       {endpoint.params}
                     </code>
                   </div>
@@ -269,11 +269,11 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                     href={db.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block bg-card border rounded-xl p-5 hover:border-biored/30 hover:shadow-lg transition-all group no-underline"
+                    className="block bg-card border rounded-xl p-5 hover:border-emerald-500/30 hover:shadow-lg transition-all group no-underline"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold group-hover:text-biored transition-colors">{db.name}</h4>
-                      <ExternalLink className="size-4 text-muted-foreground group-hover:text-biored" />
+                      <h4 className="font-semibold group-hover:text-emerald-500 transition-colors">{db.name}</h4>
+                      <ExternalLink className="size-4 text-muted-foreground group-hover:text-emerald-500" />
                     </div>
                     <p className="text-sm text-muted-foreground">{db.desc}</p>
                   </a>
@@ -287,11 +287,11 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                 {section.categories?.map((category, idx) => (
                   <div
                     key={idx}
-                    className="bg-card border rounded-xl p-5 hover:border-biored/30 transition-all cursor-pointer group"
+                    className="bg-card border rounded-xl p-5 hover:border-emerald-500/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <ChevronRight className="size-4 text-biored group-hover:translate-x-1 transition-transform" />
-                      <h4 className="font-semibold group-hover:text-biored transition-colors">{category.split(' (')[0]}</h4>
+                      <ChevronRight className="size-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+                      <h4 className="font-semibold group-hover:text-emerald-500 transition-colors">{category.split(' (')[0]}</h4>
                     </div>
                     <p className="text-sm text-muted-foreground pl-6">
                       {category.includes('(') ? category.match(/\(([^)]+)\)/)?.[1] : ''}
@@ -312,7 +312,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
         >
           <p className="text-muted-foreground text-sm">
             BioAlign v1.0.0 • Last Updated: August 2024 •{' '}
-            <a href="#" className="text-biored hover:underline">View Changelog</a>
+            <a href="#" className="text-emerald-500 hover:underline">View Changelog</a>
           </p>
         </motion.div>
       </div>

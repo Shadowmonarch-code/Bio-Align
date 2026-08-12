@@ -79,11 +79,11 @@ export default function FooterSection() {
   };
 
   return (
-    <footer className="relative bg-slate-900 text-white overflow-hidden">
-      {/* Background decoration */}
+    <footer className="relative bg-[#0A0A0A] dark:bg-[#050505] text-white overflow-hidden mt-auto">
+      {/* Background decoration - subtle scientific glow */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-biored rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,16 +93,16 @@ export default function FooterSection() {
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-8 lg:mb-0">
             <a href="#" className="flex items-center gap-2 no-underline group" onClick={(e) => { e.preventDefault(); scrollToTop(); }}>
               <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 rounded-lg bg-biored/20 blur-lg group-hover:bg-biored/30 transition-colors duration-300" />
-                <Dna className="relative size-8 text-biored transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <div className="absolute inset-0 rounded-lg bg-emerald-500/20 blur-lg group-hover:bg-emerald-500/30 transition-colors duration-300" />
+                <Dna className="relative size-8 text-emerald-500 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 <span className="text-white">Bio</span>
-                <span className="text-biored">Align</span>
+                <span className="text-emerald-500">Align</span>
               </span>
             </a>
             
-            <p className="mt-4 text-sm text-white/60 leading-relaxed max-w-xs">
+            <p className="mt-4 text-sm text-slate-400 leading-relaxed max-w-xs">
               The most comprehensive bioinformatics platform for researchers, students, and scientists worldwide.
             </p>
 
@@ -110,14 +110,14 @@ export default function FooterSection() {
             <div className="mt-6 space-y-3">
               <a
                 href="mailto:toufikmahata20@gmail.com"
-                className="flex items-center gap-2 text-sm text-white/60 hover:text-biored transition-colors no-underline"
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors no-underline"
               >
                 <Mail className="size-4" />
                 toufikmahata20@gmail.com
               </a>
               <a
                 href="tel:+916296159691"
-                className="flex items-center gap-2 text-sm text-white/60 hover:text-biored transition-colors no-underline"
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors no-underline"
               >
                 <Phone className="size-4" />
                 +91 62961 56961
@@ -133,9 +133,9 @@ export default function FooterSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.ariaLabel}
-                  className="size-9 rounded-lg bg-white/5 hover:bg-biored/20 flex items-center justify-center transition-all hover:scale-110 no-underline"
+                  className="size-9 rounded-lg bg-white/5 hover:bg-emerald-500/20 flex items-center justify-center transition-all hover:scale-110 no-underline"
                 >
-                  <social.icon className="size-4" />
+                  <social.icon className="size-4 text-slate-400 hover:text-emerald-400" />
                 </a>
               ))}
             </div>
@@ -151,14 +151,14 @@ export default function FooterSection() {
                     {link.href.startsWith('mailto:') || link.href.startsWith('tel:') ? (
                       <a
                         href={link.href}
-                        className="text-sm text-white/60 hover:text-biored transition-colors no-underline flex items-center gap-1"
+                        className="text-sm text-slate-400 hover:text-emerald-400 transition-colors no-underline flex items-center gap-1"
                       >
                         {link.name}
                       </a>
                     ) : (
                       <button
                         onClick={() => handleLinkClick(link.href)}
-                        className="text-sm text-white/60 hover:text-biored transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+                        className="text-sm text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
                       >
                         <ChevronRight className="size-3 opacity-0 group-hover:opacity-100" />
                         {link.name}
@@ -172,15 +172,15 @@ export default function FooterSection() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/10 py-6">
+        <div className="border-t border-white/[0.08] py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-white/40 text-center md:text-left">
+            <p className="text-sm text-slate-500 text-center md:text-left">
               © {new Date().getFullYear()} BioAlign. Developed by{' '}
-              <span className="text-biored font-medium">Toufik Mahata</span>, CBSH, RPCAU.
+              <span className="text-emerald-400 font-medium">Toufik Mahata</span>, CBSH, RPCAU.
             </p>
             
             <div className="flex items-center gap-4">
-              <span className="text-sm text-white/40 flex items-center gap-1">
+              <span className="text-sm text-slate-500 flex items-center gap-1">
                 Made with <Heart className="size-3 text-red-500 inline" /> &{' '}
                 <Coffee className="size-3 text-amber-500 inline" /> for science
               </span>
@@ -188,7 +188,7 @@ export default function FooterSection() {
               {/* Scroll to Top Button */}
               <button
                 onClick={scrollToTop}
-                className="size-9 rounded-lg bg-white/5 hover:bg-biored/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+                className="size-9 rounded-lg bg-white/5 hover:bg-emerald-500/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
                 aria-label="Scroll to top"
               >
                 <ArrowUp className="size-4" />
