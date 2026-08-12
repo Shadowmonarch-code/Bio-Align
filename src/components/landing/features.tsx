@@ -126,12 +126,6 @@ interface FeaturesSectionProps {
 export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps) {
   return (
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background gradient decoration */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#C1121F]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C1121F]/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
@@ -141,11 +135,11 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
             Everything You Need for{' '}
-            <span className="text-[#C1121F]">Bioinformatics</span>
+            <span className="text-[#C1121F] dark:text-[#C1121F]">Bioinformatics</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
             A comprehensive suite of powerful tools designed to accelerate your research.
             From sequence analysis to molecular docking — all in one unified platform.
           </p>
@@ -169,10 +163,10 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
               }}
               className="group relative"
             >
-              <div className="relative h-full p-6 rounded-2xl border border-border/50 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 hover:border-[#C1121F]/20 transition-all duration-300 overflow-hidden">
+              <div className="relative h-full p-6 rounded-2xl border border-gray-200/50 dark:border-white/[0.08] bg-white/80 dark:bg-black/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#C1121F]/10 dark:hover:shadow-[#C1121F]/20 hover:border-[#C1121F]/20 dark:hover:border-[#C1121F]/30 transition-all duration-300 overflow-hidden">
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/5 via-transparent to-transparent rounded-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#C1121F]/5 dark:from-[#C1121F]/10 via-transparent to-transparent rounded-2xl" />
                 </div>
 
                 {/* Icon Container */}
@@ -182,10 +176,10 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
 
                 {/* Content */}
                 <div className="relative">
-                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#C1121F] transition-colors duration-300">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#C1121F] dark:group-hover:text-[#C1121F] transition-colors duration-300">
                     {feature.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                     {feature.description}
                   </p>
                 </div>
