@@ -197,11 +197,7 @@ export default function FooterSection() {
               <span className="text-emerald-300 font-medium">Toufik Mahata</span>, CBSH, RPCAU.
             </p>
             
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500 flex items-center gap-1.5">
-                Made with <Heart className="w-3.5 h-3.5 text-red-500 inline animate-pulse" /> &{' '}
-                <Coffee className="w-3.5 h-3.5 text-amber-500 inline" /> for science
-              </span>
+            
               
               {/* Scroll to Top Button */}
               <button
