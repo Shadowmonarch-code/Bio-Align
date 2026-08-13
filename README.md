@@ -493,3 +493,4 @@ Made with ❤️ by the BioAlign Team
 <p align="center">
   <sub>Built with cutting-edge technologies. Optimized for researchers worldwide.</sub>
 </p>
+# Bio-Align
