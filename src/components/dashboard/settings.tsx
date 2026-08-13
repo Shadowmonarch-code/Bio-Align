@@ -266,7 +266,7 @@ export default function SettingsSection({ onBack }: SettingsProps) {
           transition={{ delay: 0.5 }}
           className="flex justify-end gap-4"
         >
-          <Button variant="outline" onClick={() => window.history.back()} className="cursor-pointer">
+          <Button variant="outline" onClick={onBack} className="cursor-pointer">
             Cancel
           </Button>
           <Button 
