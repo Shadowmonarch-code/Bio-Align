@@ -220,17 +220,17 @@
   background: #404040;
 }
 
-/* Glassmorphism utilities - Scientific styling */
+/* Glassmorphism utilities - Forest green styling */
 .glass {
-  background: rgba(248, 250, 252, 0.85);
+  background: rgba(218, 241, 222, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid rgba(184, 220, 200, 0.5);
 }
 
 .dark .glass {
-  background: rgba(16, 16, 16, 0.85);
-  border: 1px solid rgba(31, 31, 31, 0.5);
+  background: rgba(11, 43, 38, 0.85);
+  border: 1px solid rgba(26, 64, 57, 0.5);
 }
 
 /* Glass card for tools catalog */
@@ -238,28 +238,28 @@
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(35, 83, 71, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .glass-card {
-  background: rgba(16, 16, 16, 0.72);
-  border: 1px solid rgba(31, 31, 31, 0.4);
+  background: rgba(11, 43, 38, 0.72);
+  border: 1px solid rgba(26, 64, 57, 0.4);
 }
 
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(35, 83, 71, 0.2);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(16, 185, 129, 0.08);
+    0 4px 6px -1px rgba(5, 31, 32, 0.05),
+    0 10px 15px -3px rgba(35, 83, 71, 0.08);
 }
 
 .dark .glass-card:hover {
-  background: rgba(20, 20, 20, 0.82);
+  background: rgba(15, 50, 44, 0.82);
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 10px 15px -3px rgba(16, 185, 129, 0.12);
+    0 10px 15px -3px rgba(142, 182, 155, 0.12);
 }
 
 /* ============================================
@@ -279,10 +279,10 @@
   50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-/* Pulsing glow effect - emerald based */
+/* Pulsing glow effect - Forest green based */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); }
-  50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.45); }
+  0%, 100% { box-shadow: 0 0 20px rgba(35, 83, 71, 0.25); }
+  50% { box-shadow: 0 0 40px rgba(35, 83, 71, 0.45); }
 }
 
 /* Shimmer effect for loading states */
@@ -400,16 +400,16 @@
   animation: molecularPulse 3s ease-in-out infinite;
 }
 
-/* Gradient text utility - Refined scientific emerald theme */
+/* Gradient text utility - Forest green theme */
 .gradient-text {
-  background: linear-gradient(135deg, #059669 0%, #0891B2 50%, #0D9488 100%);
+  background: linear-gradient(135deg, #235347 0%, #163832 50%, #0B2B26 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, #34D399 0%, #22D3EE 50%, #2DD4BF 100%);
+  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #C5E6D5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -441,45 +441,45 @@
 }
 
 /* ============================================
-   SCIENTIFIC GRID BACKGROUND UTILITIES
+   FOREST GRID BACKGROUND UTILITIES
    ============================================ */
 
-/* Main scientific grid pattern */
+/* Main scientific grid pattern - Forest green */
 .scientific-grid {
   background-image: 
-    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(35, 83, 71, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 83, 71, 0.06) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .dark .scientific-grid {
   background-image: 
-    linear-gradient(rgba(16, 185, 129, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(142, 182, 155, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(142, 182, 155, 0.05) 1px, transparent 1px);
 }
 
 /* Fine grid pattern for subtle backgrounds */
 .fine-grid {
   background-image: 
-    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(90, 125, 114, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 125, 114, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .dark .fine-grid {
   background-image: 
-    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(106, 148, 136, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(106, 148, 136, 0.05) 1px, transparent 1px);
 }
 
-/* Dot matrix pattern */
+/* Dot matrix pattern - Forest green */
 .dot-matrix {
-  background-image: radial-gradient(circle, rgba(16, 185, 129, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(35, 83, 71, 0.12) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .dot-matrix {
-  background-image: radial-gradient(circle, rgba(16, 185, 129, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(142, 182, 155, 0.15) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -518,46 +518,46 @@
 }
 
 .dark .pro-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(142, 182, 155, 0.15);
 }
 
-/* Text gradient for headings - emerald-teal based */
+/* Text gradient for headings - Forest green based */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #059669 0%, #0891B2 100%);
+  background: linear-gradient(135deg, #235347 0%, #163832 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #34D399 0%, #22D3EE 100%);
+  background: linear-gradient(135deg, #8EB69B 0%, #C5E6D5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Text gradient with teal-cyan accent */
+/* Text gradient with sage accents */
 .text-gradient-science {
-  background: linear-gradient(135deg, #059669 0%, #0891B2 50%, #06B6D4 100%);
+  background: linear-gradient(135deg, #235347 0%, #8EB69B 50%, #DAF1DE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-science {
-  background: linear-gradient(135deg, #34D399 0%, #22D3EE 50%, #67E8F9 100%);
+  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #DAF1DE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glow effects - Refined emerald */
+/* Glow effects - Forest green */
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(5, 150, 105, 0.15);
+  box-shadow: 0 0 30px rgba(35, 83, 71, 0.15);
 }
 
 .dark .glow-emerald {
-  box-shadow: 0 0 30px rgba(52, 211, 153, 0.2);
+  box-shadow: 0 0 30px rgba(142, 182, 155, 0.2);
 }
 
 /* Border glow on hover */
@@ -566,9 +566,9 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(5, 150, 105, 0.15);
+  box-shadow: 0 0 20px rgba(35, 83, 71, 0.15);
 }
 
 .dark .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+  box-shadow: 0 0 20px rgba(142, 182, 155, 0.25);
 }
