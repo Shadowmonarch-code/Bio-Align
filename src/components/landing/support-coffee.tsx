@@ -122,7 +122,7 @@ export default function SupportPage({ onBack }: SupportProps) {
               { icon: '🔬', title: 'New Tools', desc: 'Adding more bioinformatics tools' },
               { icon: '🐛', title: 'Bug Fixes', desc: 'Quick fixes and improvements' },
             ].map((item, idx) => (
-              <div key={idx} className="bg-card border rounded-xl p-6 hover:border-green-primary/30 transition-colors">
+              <div key={idx} className="bg-card border rounded-xl p-6 hover:border-red-primary/30 transition-colors">
                 <span className="text-4xl mb-3 block">{item.icon}</span>
                 <h3 className="font-semibold mb-1">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
@@ -148,8 +148,8 @@ export default function SupportPage({ onBack }: SupportProps) {
                 onClick={() => setSelectedCoffee(coffee.id)}
                 className={`relative p-6 rounded-xl border-2 text-left transition-all cursor-pointer ${
                   selectedCoffee === coffee.id 
-                    ? 'border-green-primary bg-green-primary/5 shadow-lg shadow-green-primary/20' 
-                    : 'border-border hover:border-green-primary/30 hover:shadow-md'
+                    ? 'border-red-primary bg-red-primary/5 shadow-lg shadow-red-primary/20' 
+                    : 'border-border hover:border-red-primary/30 hover:shadow-md'
                 }`}
               >
                 {coffee.popular && (
@@ -161,7 +161,7 @@ export default function SupportPage({ onBack }: SupportProps) {
                 <span className="text-4xl mb-3 block">{coffee.emoji}</span>
                 <div className="flex items-baseline justify-between mb-1">
                   <h3 className="font-semibold text-lg">{coffee.name}</h3>
-                  <span className="text-xl font-bold text-green-primary">{coffee.price}</span>
+                  <span className="text-xl font-bold text-red-primary">{coffee.price}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">{coffee.description}</p>
                 
@@ -171,7 +171,7 @@ export default function SupportPage({ onBack }: SupportProps) {
                     animate={{ scale: 1 }}
                     className="mt-4"
                   >
-                    <Button className="w-full bg-green-primary hover:bg-green-dark cursor-pointer">
+                    <Button className="w-full bg-red-primary hover:bg-red-dark cursor-pointer">
                       <Heart className="size-4 mr-1" />
                       Support Now
                     </Button>
@@ -203,7 +203,7 @@ export default function SupportPage({ onBack }: SupportProps) {
             >
               <Github className="size-6" />
               <div>
-                <p className="font-medium group-hover:text-green-primary transition-colors">Star on GitHub</p>
+                <p className="font-medium group-hover:text-red-primary transition-colors">Star on GitHub</p>
                 <p className="text-xs text-white/60">Show your appreciation</p>
               </div>
               <ExternalLink className="size-4 ml-auto opacity-50 group-hover:opacity-100" />
@@ -217,7 +217,7 @@ export default function SupportPage({ onBack }: SupportProps) {
             >
               <Twitter className="size-6" />
               <div>
-                <p className="font-medium group-hover:text-green-primary transition-colors">Follow on Twitter</p>
+                <p className="font-medium group-hover:text-red-primary transition-colors">Follow on Twitter</p>
                 <p className="text-xs text-white/60">Stay updated</p>
               </div>
               <ExternalLink className="size-4 ml-auto opacity-50 group-hover:opacity-100" />
@@ -231,7 +231,7 @@ export default function SupportPage({ onBack }: SupportProps) {
             >
               <Linkedin className="size-6" />
               <div>
-                <p className="font-medium group-hover:text-green-primary transition-colors">Connect on LinkedIn</p>
+                <p className="font-medium group-hover:text-red-primary transition-colors">Connect on LinkedIn</p>
                 <p className="text-xs text-white/60">Professional network</p>
               </div>
               <ExternalLink className="size-4 ml-auto opacity-50 group-hover:opacity-100" />
@@ -246,13 +246,13 @@ export default function SupportPage({ onBack }: SupportProps) {
           transition={{ delay: 0.4 }}
           className="text-center py-8"
         >
-          <Gift className="size-12 text-green-primary mx-auto mb-4" />
+          <Gift className="size-12 text-red-primary mx-auto mb-4" />
           <h3 className="text-2xl font-bold mb-2">Thank You! 🙏</h3>
           <p className="text-muted-foreground max-w-lg mx-auto">
             Whether you buy a coffee, star the repo, or just use the platform—your support means everything. 
             Together, we're making bioinformatics accessible to everyone!
           </p>
-          <p className="text-lg mt-4 font-medium text-green-primary">
+          <p className="text-lg mt-4 font-medium text-red-primary">
             — Toufik Mahata ❤️
           </p>
         </motion.div>

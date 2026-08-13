@@ -60,7 +60,7 @@ npm run dev`,
     id: 'api-reference',
     title: 'API Reference',
     icon: Code2,
-    color: 'text-green-500 bg-green-100 dark:bg-green-900/30',
+    color: 'text-red-500 bg-red-100 dark:bg-red-900/30',
     endpoints: [
       {
         method: 'POST',
@@ -195,7 +195,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                         className="absolute top-2 right-2 p-2 rounded-lg bg-white/10 hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         {copiedCode === item.code ? (
-                          <Check className="size-4 text-green-400" />
+                          <Check className="size-4 text-red-400" />
                         ) : (
                           <Copy className="size-4" />
                         )}
@@ -208,7 +208,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                   <div className="bg-card border rounded-xl p-6 space-y-4">
                     {section.content?.[1]?.steps?.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-3">
-                        <span className="size-6 rounded-full bg-green-primary/10 text-green-primary text-sm font-medium flex items-center justify-center shrink-0">
+                        <span className="size-6 rounded-full bg-red-primary/10 text-red-primary text-sm font-medium flex items-center justify-center shrink-0">
                           {idx + 1}
                         </span>
                         <p className="text-muted-foreground">{step}</p>
@@ -232,11 +232,11 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                 {section.endpoints?.map((endpoint, idx) => (
                   <div
                     key={idx}
-                    className="bg-card border rounded-xl p-5 hover:border-green-primary/30 transition-colors"
+                    className="bg-card border rounded-xl p-5 hover:border-red-primary/30 transition-colors"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className={`px-2 py-1 rounded text-xs font-mono font-bold ${
-                        endpoint.method === 'GET' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        endpoint.method === 'GET' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                         endpoint.method === 'POST' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                         'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
                       }`}>
@@ -245,7 +245,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                       <code className="font-mono text-sm font-semibold">{endpoint.path}</code>
                     </div>
                     <p className="text-muted-foreground text-sm mb-2">{endpoint.description}</p>
-                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-green-primary">
+                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-red-primary">
                       {endpoint.params}
                     </code>
                   </div>
@@ -269,11 +269,11 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                     href={db.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block bg-card border rounded-xl p-5 hover:border-green-primary/30 hover:shadow-lg transition-all group no-underline"
+                    className="block bg-card border rounded-xl p-5 hover:border-red-primary/30 hover:shadow-lg transition-all group no-underline"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold group-hover:text-green-primary transition-colors">{db.name}</h4>
-                      <ExternalLink className="size-4 text-muted-foreground group-hover:text-green-primary" />
+                      <h4 className="font-semibold group-hover:text-red-primary transition-colors">{db.name}</h4>
+                      <ExternalLink className="size-4 text-muted-foreground group-hover:text-red-primary" />
                     </div>
                     <p className="text-sm text-muted-foreground">{db.desc}</p>
                   </a>
@@ -287,11 +287,11 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
                 {section.categories?.map((category, idx) => (
                   <div
                     key={idx}
-                    className="bg-card border rounded-xl p-5 hover:border-green-primary/30 transition-all cursor-pointer group"
+                    className="bg-card border rounded-xl p-5 hover:border-red-primary/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <ChevronRight className="size-4 text-green-primary group-hover:translate-x-1 transition-transform" />
-                      <h4 className="font-semibold group-hover:text-green-primary transition-colors">{category.split(' (')[0]}</h4>
+                      <ChevronRight className="size-4 text-red-primary group-hover:translate-x-1 transition-transform" />
+                      <h4 className="font-semibold group-hover:text-red-primary transition-colors">{category.split(' (')[0]}</h4>
                     </div>
                     <p className="text-sm text-muted-foreground pl-6">
                       {category.includes('(') ? category.match(/\(([^)]+)\)/)?.[1] : ''}
@@ -312,7 +312,7 @@ export default function DocumentationSection({ onBack }: DocumentationProps) {
         >
           <p className="text-muted-foreground text-sm">
             BioAlign v1.0.0 • Last Updated: August 2024 •{' '}
-            <a href="#" className="text-green-primary hover:underline">View Changelog</a>
+            <a href="#" className="text-red-primary hover:underline">View Changelog</a>
           </p>
         </motion.div>
       </div>

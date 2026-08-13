@@ -166,20 +166,20 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
               }}
               className="group relative"
             >
-              <div className="relative h-full p-6 rounded-2xl border border-gray-200/50 dark:border-white/[0.06] bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-green-primary/10 dark:hover:shadow-green-primary/20 hover:border-green-primary/20 dark:hover:border-green-primary/30 transition-all duration-300 overflow-hidden">
+              <div className="relative h-full p-6 rounded-2xl border border-gray-200/50 dark:border-white/[0.06] bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-red-primary/10 dark:hover:shadow-red-primary/20 hover:border-red-primary/20 dark:hover:border-red-primary/30 transition-all duration-300 overflow-hidden">
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-primary/5 dark:from-green-primary/10 via-transparent to-transparent rounded-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-primary/5 dark:from-red-primary/10 via-transparent to-transparent rounded-2xl" />
                 </div>
 
                 {/* Icon Container */}
-                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-green-primary to-green-dark flex items-center justify-center mb-4 shadow-lg shadow-green-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center mb-4 shadow-lg shadow-red-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                   <feature.icon className="w-6 h-6 text-white" strokeWidth={2} />
                 </div>
 
                 {/* Content */}
                 <div className="relative">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-green-dark dark:group-hover:text-green-bright transition-colors duration-300">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-red-dark dark:group-hover:text-red-bright transition-colors duration-300">
                     {feature.title}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">
@@ -189,8 +189,8 @@ export default function FeaturesSection({ onExploreClick }: FeaturesSectionProps
 
                 {/* Subtle corner accent */}
                 <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-green-primary to-transparent rounded-br" />
-                  <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-green-primary to-transparent rounded-br" />
+                  <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-red-primary to-transparent rounded-br" />
+                  <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-red-primary to-transparent rounded-br" />
                 </div>
               </div>
             </motion.div>

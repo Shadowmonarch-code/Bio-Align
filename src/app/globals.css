@@ -42,13 +42,13 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* BioAlign Scientific Green Palette */
-  --color-green-primary: #16A34A;
-  --color-green-dark: #15803D;
-  --color-green-bright: #22C55E;
-  --color-green-soft: #86EFAC;
-  --color-green-light: #DCFCE7;
-  --color-green-bg: #F0FDF4;
+  /* BioAlign Scientific Red Palette */
+  --color-red-primary: #DC2626;
+  --color-red-dark: #B91C1C;
+  --color-red-bright: #EF4444;
+  --color-red-soft: #FCA5A5;
+  --color-red-light: #FEE2E2;
+  --color-red-bg: #FEF2F2;
   
   /* Extended professional palette */
   --color-surface: var(--surface);
@@ -58,7 +58,7 @@
 
 /* ============================================
    BIOALIGN LIGHT MODE PALETTE
-   Clean White + Scientific Green Accent
+   Clean White + Scientific Red Accent
    Professional Research Environment
    ============================================ */
 :root {
@@ -74,8 +74,8 @@
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
   
-  /* Primary actions - Scientific Green (brand accent) */
-  --primary: #16A34A;
+  /* Primary actions - Scientific Red (brand accent) */
+  --primary: #DC2626;
   --primary-foreground: #FFFFFF;
   
   /* Secondary surfaces - Very light gray */
@@ -86,9 +86,9 @@
   --muted: #F1F5F9;
   --muted-foreground: #64748B;
   
-  /* Accent elements - Soft green tint */
-  --accent: #F0FDF4;
-  --accent-foreground: #166534;
+  /* Accent elements - Soft red tint */
+  --accent: #FEF2F2;
+  --accent-foreground: #991B1B;
   
   /* Destructive/Errors */
   --destructive: #DC2626;
@@ -96,24 +96,24 @@
   /* Borders & Inputs - Subtle gray */
   --border: #E2E8F0;
   --input: #E2E8F0;
-  --ring: #16A34A;
+  --ring: #DC2626;
   
-  /* Chart colors - Scientific green palette */
-  --chart-1: #16A34A;
-  --chart-2: #22C55E;
-  --chart-3: #15803D;
-  --chart-4: #86EFAC;
-  --chart-5: #166534;
+  /* Chart colors - Scientific red palette */
+  --chart-1: #DC2626;
+  --chart-2: #EF4444;
+  --chart-3: #B91C1C;
+  --chart-4: #FCA5A5;
+  --chart-5: #991B1B;
   
   /* Sidebar */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0F172A;
-  --sidebar-primary: #16A34A;
+  --sidebar-primary: #DC2626;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F0FDF4;
-  --sidebar-accent-foreground: #166534;
+  --sidebar-accent: #FEF2F2;
+  --sidebar-accent-foreground: #991B1B;
   --sidebar-border: #E2E8F0;
-  --sidebar-ring: #16A34A;
+  --sidebar-ring: #DC2626;
   
   /* Surface variants */
   --surface: #FFFFFF;
@@ -123,7 +123,7 @@
 
 /* ============================================
    BIOALIGN DARK MODE PALETTE
-   Deep Black + Scientific Green Accent
+   Deep Black + Scientific Red Accent
    Computational Research Laboratory
    ============================================ */
 .dark {
@@ -137,8 +137,8 @@
   --popover: #0A0A0A;
   --popover-foreground: #F8FAFC;
   
-  /* Primary actions - Bright Green (consistent brand) */
-  --primary: #16A34A;
+  /* Primary actions - Bright Red (consistent brand) */
+  --primary: #EF4444;
   --primary-foreground: #FFFFFF;
   
   /* Secondary surfaces - Very dark gray */
@@ -149,9 +149,9 @@
   --muted: #111111;
   --muted-foreground: #A1A1AA;
   
-  /* Accent elements - Dark green background */
-  --accent: #052E16;
-  --accent-foreground: #86EFAC;
+  /* Accent elements - Dark red background */
+  --accent: #450A0A;
+  --accent-foreground: #FCA5A5;
   
   /* Destructive/Errors */
   --destructive: #EF4444;
@@ -159,24 +159,24 @@
   /* Borders & Inputs - Dark gray */
   --border: #1F2937;
   --input: #1F2937;
-  --ring: #22C55E;
+  --ring: #EF4444;
   
   /* Chart colors - Dark mode scientific palette */
-  --chart-1: #22C55E;
-  --chart-2: #16A34A;
-  --chart-3: #86EFAC;
-  --chart-4: #4ADE80;
-  --chart-5: #15803D;
+  --chart-1: #EF4444;
+  --chart-2: #DC2626;
+  --chart-3: #FCA5A5;
+  --chart-4: #F87171;
+  --chart-5: #B91C1C;
   
   /* Sidebar */
   --sidebar: #000000;
   --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #22C55E;
+  --sidebar-primary: #EF4444;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #052E16;
-  --sidebar-accent-foreground: #86EFAC;
+  --sidebar-accent: #450A0A;
+  --sidebar-accent-foreground: #FCA5A5;
   --sidebar-border: #1F2937;
-  --sidebar-ring: #22C55E;
+  --sidebar-ring: #EF4444;
   
   /* Surface variants */
   --surface: #000000;
@@ -249,17 +249,17 @@
 
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(22, 163, 74, 0.3);
+  border-color: rgba(220, 38, 38, 0.3);
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(22, 163, 74, 0.08);
+    0 10px 15px -3px rgba(220, 38, 38, 0.08);
 }
 
 .dark .glass-card:hover {
   background: rgba(17, 17, 17, 0.82);
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 10px 15px -3px rgba(34, 197, 94, 0.12);
+    0 10px 15px -3px rgba(239, 68, 68, 0.12);
 }
 
 /* ============================================
@@ -279,10 +279,10 @@
   50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-/* Pulsing glow effect - Green based */
+/* Pulsing glow effect - Red based */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.25); }
-  50% { box-shadow: 0 0 40px rgba(22, 163, 74, 0.45); }
+  0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.25); }
+  50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.45); }
 }
 
 /* Shimmer effect for loading states */
@@ -400,16 +400,16 @@
   animation: molecularPulse 3s ease-in-out infinite;
 }
 
-/* Gradient text utility - Scientific green theme */
+/* Gradient text utility - Scientific red theme */
 .gradient-text {
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 50%, #166534 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 50%, #86EFAC 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #FCA5A5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -444,18 +444,18 @@
    SCIENTIFIC GRID BACKGROUND UTILITIES
    ============================================ */
 
-/* Main scientific grid pattern - Subtle green tint */
+/* Main scientific grid pattern - Subtle red tint */
 .scientific-grid {
   background-image: 
-    linear-gradient(rgba(22, 163, 74, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 163, 74, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(220, 38, 38, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 38, 38, 0.04) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .dark .scientific-grid {
   background-image: 
-    linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(239, 68, 68, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.03) 1px, transparent 1px);
 }
 
 /* Fine grid pattern for subtle backgrounds */
@@ -472,14 +472,14 @@
     linear-gradient(90deg, rgba(100, 116, 139, 0.04) 1px, transparent 1px);
 }
 
-/* Dot matrix pattern - Green accent */
+/* Dot matrix pattern - Red accent */
 .dot-matrix {
-  background-image: radial-gradient(circle, rgba(22, 163, 74, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(220, 38, 38, 0.1) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .dot-matrix {
-  background-image: radial-gradient(circle, rgba(34, 197, 94, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(239, 68, 68, 0.12) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -504,13 +504,13 @@
   background-color: var(--surface);
 }
 
-/* Section with subtle green tint for variety */
-.section-bg-green {
-  background-color: #F0FDF4;
+/* Section with subtle red tint for variety */
+.section-bg-red {
+  background-color: #FEF2F2;
 }
 
-.dark .section-bg-green {
-  background-color: #020D06;
+.dark .section-bg-red {
+  background-color: #0A0505;
 }
 
 /* Professional card styles */
@@ -522,24 +522,24 @@
 }
 
 .pro-card:hover {
-  border-color: #16A34A;
+  border-color: #DC2626;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .pro-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(239, 68, 68, 0.15);
 }
 
-/* Text gradient for headings - Scientific green based */
+/* Text gradient for headings - Scientific red based */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #FCA5A5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -547,26 +547,26 @@
 
 /* Text gradient with bright accents */
 .text-gradient-science {
-  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #FCA5A5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-science {
-  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 50%, #DCFCE7 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #FCA5A5 50%, #FEE2E2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glow effects - Green accent */
+/* Glow effects - Red accent */
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(22, 163, 74, 0.15);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.15);
 }
 
 .dark .glow-emerald {
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
 }
 
 /* Border glow on hover */
@@ -575,11 +575,11 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(22, 163, 74, 0.15);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15);
 }
 
 .dark .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
 }
 
 /* ============================================
@@ -587,51 +587,51 @@
    BioAlign Brand Identity
    ============================================ */
 
-/* Primary gradient - Green brand colors */
+/* Primary gradient - Red brand colors */
 .gradient-primary {
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
 }
 
-/* Secondary gradient - Lighter greens */
+/* Secondary gradient - Lighter reds */
 .gradient-secondary {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 50%, #15803D 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%);
 }
 
-/* Light gradient - Soft greens */
+/* Light gradient - Soft reds */
 .gradient-light {
-  background: linear-gradient(135deg, #86EFAC 0%, #DCFCE7 50%, #F0FDF4 100%);
+  background: linear-gradient(135deg, #FCA5A5 0%, #FEE2E2 50%, #FEF2F2 100%);
 }
 
-/* Text gradient - BioAlign green brand */
+/* Text gradient - BioAlign red brand */
 .text-gradient-botanical {
-  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #FCA5A5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-botanical {
-  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 50%, #DCFCE7 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #FCA5A5 50%, #FEE2E2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Premium button gradient - Green primary */
+/* Premium button gradient - Red primary */
 .gradient-btn-primary {
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
 }
 
 .gradient-btn-primary:hover {
-  background: linear-gradient(135deg, #15803D 0%, #166534 100%);
+  background: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
 }
 
 .dark .gradient-btn-primary {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
 }
 
 .dark .gradient-btn-primary:hover {
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
 }
 
 /* ============================================
@@ -640,28 +640,28 @@
    ============================================ */
 
 .badge-success {
-  background-color: #DCFCE7;
-  color: #166534;
+  background-color: #FEE2E2;
+  color: #991B1B;
 }
 
 .dark .badge-success {
-  background-color: #052E16;
-  color: #86EFAC;
+  background-color: #450A0A;
+  color: #FCA5A5;
 }
 
 .badge-info {
-  background-color: #F0FDF4;
-  color: #15803D;
+  background-color: #FEF2F2;
+  color: #B91C1C;
 }
 
 .dark .badge-info {
-  background-color: #052E16;
-  color: #22C55E;
+  background-color: #450A0A;
+  color: #EF4444;
 }
 
 /* ============================================
    AI STATUS INDICATOR
-   Pulsing green dot
+   Pulsing red dot
    ============================================ */
 
 .ai-status-dot {
@@ -674,7 +674,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #22C55E;
+  background: #EF4444;
   animation: aiPulse 2s ease-in-out infinite;
 }
 

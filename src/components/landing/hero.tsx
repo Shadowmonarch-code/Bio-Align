@@ -76,21 +76,21 @@ function ScientificVisualization() {
         }}
         className="absolute inset-0 flex items-center justify-center"
       >
-        {/* Outer ring - Subtle green border */}
-        <div className="absolute w-72 h-72 md:w-96 md:h-96 rounded-full border border-green-primary/10 dark:border-green-bright/10 animate-pulse" />
+        {/* Outer ring - Subtle red border */}
+        <div className="absolute w-72 h-72 md:w-96 md:h-96 rounded-full border border-red-primary/10 dark:border-red-bright/10 animate-pulse" />
         
-        {/* Middle ring - Green accent border */}
-        <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-green-dark/15 dark:border-green-primary/15" 
+        {/* Middle ring - Red accent border */}
+        <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-red-dark/15 dark:border-red-primary/15" 
           style={{ animation: 'spin 20s linear infinite' }} 
         />
         
-        {/* Inner ring - Brighter green border */}
-        <div className="absolute w-40 h-40 md:w-52 md:h-52 rounded-full border border-green-primary/20 dark:border-green-soft/20"
+        {/* Inner ring - Brighter red border */}
+        <div className="absolute w-40 h-40 md:w-52 md:h-52 rounded-full border border-red-primary/20 dark:border-red-soft/20"
           style={{ animation: 'spin 15s linear reverse infinite' }}
         />
 
-        {/* Core glow - Subtle green gradient */}
-        <div className="absolute w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-green-primary/10 via-transparent to-green-soft/10 blur-xl" />
+        {/* Core glow - Subtle red gradient */}
+        <div className="absolute w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-red-primary/10 via-transparent to-red-soft/10 blur-xl" />
 
         {/* Central DNA Icon */}
         <motion.div
@@ -98,10 +98,10 @@ function ScientificVisualization() {
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="relative z-10"
         >
-          <Dna className="w-16 h-16 md:w-20 md:h-20 text-green-primary dark:text-green-bright" strokeWidth={1.5} />
+          <Dna className="w-16 h-16 md:w-20 md:h-20 text-red-primary dark:text-red-bright" strokeWidth={1.5} />
         </motion.div>
 
-        {/* Orbiting molecular nodes - Green palette alternating */}
+        {/* Orbiting molecular nodes - Red palette alternating */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
@@ -112,8 +112,8 @@ function ScientificVisualization() {
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              backgroundColor: i % 2 === 0 ? '#16A34A' : '#22C55E',
-              boxShadow: `0 0 10px ${i % 2 === 0 ? 'rgba(22,163,74,0.5)' : 'rgba(34,197,94,0.5)'}`,
+              backgroundColor: i % 2 === 0 ? '#DC2626' : '#EF4444',
+              boxShadow: `0 0 10px ${i % 2 === 0 ? 'rgba(220,38,38,0.5)' : 'rgba(239,68,68,0.5)'}`,
             }}
             animate={{
               rotate: i * 60,
@@ -128,12 +128,12 @@ function ScientificVisualization() {
           />
         ))}
 
-        {/* Floating data points - Clean white cards with green accents */}
+        {/* Floating data points - Clean white cards with red accents */}
         {[
-          { x: '-10%', y: '20%', icon: Atom, color: '#16A34A' },
-          { x: '85%', y: '25%', icon: Activity, color: '#22C55E' },
-          { x: '15%', y: '75%', icon: Sparkles, color: '#15803D' },
-          { x: '80%', y: '70%', icon: Dna, color: '#86EFAC' },
+          { x: '-10%', y: '20%', icon: Atom, color: '#DC2626' },
+          { x: '85%', y: '25%', icon: Activity, color: '#EF4444' },
+          { x: '15%', y: '75%', icon: Sparkles, color: '#B91C1C' },
+          { x: '80%', y: '70%', icon: Dna, color: '#FCA5A5' },
         ].map((point, i) => (
           <motion.div
             key={`point-${i}`}
@@ -190,8 +190,8 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
       {/* Scientific grid pattern overlay - Very subtle */}
       <div className="absolute inset-0 scientific-grid" />
       
-      {/* Subtle radial gradient for depth - Green tint in center */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(22,163,74,0.03)_0%,_transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(34,197,94,0.04)_0%,_transparent_70%)]" />
+      {/* Subtle radial gradient for depth - Red tint in center */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(220,38,38,0.03)_0%,_transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(239,68,68,0.04)_0%,_transparent_70%)]" />
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
@@ -203,10 +203,10 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
         >
           {/* Badge - Clean professional styling */}
           <motion.div variants={itemVariants} className="mb-6 md:mb-8">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-green-light dark:bg-green-bg text-green-dark dark:text-green-soft border border-green-primary/20">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-red-light dark:bg-red-bg text-red-dark dark:text-red-soft border border-red-primary/20">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-primary" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-primary" />
               </span>
               Next-Gen Bioinformatics Platform
             </span>
@@ -218,7 +218,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 md:mb-8"
           >
             <span className="block text-gray-900 dark:text-white">One Platform.</span>
-            <span className="block mt-2 md:mt-4 bg-gradient-to-r from-green-primary via-green-bright to-green-soft dark:from-green-bright dark:via-green-primary dark:to-green-soft bg-clip-text text-transparent">
+            <span className="block mt-2 md:mt-4 bg-gradient-to-r from-red-primary via-red-bright to-red-soft dark:from-red-bright dark:via-red-primary dark:to-red-soft bg-clip-text text-transparent">
               Every Bioinformatics Tool.
             </span>
           </motion.h1>
@@ -232,28 +232,28 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
             <span className="text-gray-900 dark:text-white font-medium">statistical analysis, and scientific discovery.</span>
           </motion.p>
 
-          {/* CTA Buttons - Green primary, outlined secondary */}
+          {/* CTA Buttons - Red primary, outlined secondary */}
           <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            {/* Primary CTA Button - Green brand color */}
+            {/* Primary CTA Button - Red brand color */}
             <button 
               onClick={onStartClick}
-              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-green-primary hover:bg-green-dark rounded-xl shadow-lg shadow-green-primary/25 hover:shadow-green-primary/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden cursor-pointer"
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-red-primary hover:bg-red-dark rounded-xl shadow-lg shadow-red-primary/25 hover:shadow-red-primary/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden cursor-pointer"
             >
               <span className="relative z-10">Start Analyzing</span>
               <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </button>
 
-            {/* Secondary Button - Outlined with green border */}
+            {/* Secondary Button - Outlined with red border */}
             <button 
               onClick={onExploreClick}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-green-primary dark:text-green-bright bg-white dark:bg-black border-2 border-green-primary/30 hover:border-green-primary dark:hover:border-green-bright/50 rounded-xl hover:bg-green-light/50 dark:hover:bg-green-bg/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-red-primary dark:text-red-bright bg-white dark:bg-black border-2 border-red-primary/30 hover:border-red-primary dark:hover:border-red-bright/50 rounded-xl hover:bg-red-light/50 dark:hover:bg-red-bg/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               Explore Tools
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-green-primary dark:text-green-bright" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-red-primary dark:text-red-bright" />
             </button>
           </motion.div>
         </motion.div>
@@ -285,15 +285,15 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
                 scale: 1.02,
                 transition: { duration: 0.2 } 
               }}
-              className="group relative p-4 md:p-6 rounded-2xl bg-white dark:bg-zinc-900 backdrop-blur-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg hover:shadow-green-primary/5 dark:hover:shadow-green-primary/10 transition-all duration-300 cursor-default"
+              className="group relative p-4 md:p-6 rounded-2xl bg-white dark:bg-zinc-900 backdrop-blur-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg hover:shadow-red-primary/5 dark:hover:shadow-red-primary/10 transition-all duration-300 cursor-default"
             >
               {/* Subtle gradient glow on hover */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent to-transparent group-hover:from-green-primary/[0.02] group-hover:to-green-soft/[0.02] transition-all duration-300" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent to-transparent group-hover:from-red-primary/[0.02] group-hover:to-red-soft/[0.02] transition-all duration-300" />
               
               <div className="relative flex flex-col items-center text-center">
-                {/* Icon container with light green background */}
-                <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-green-light dark:bg-green-bg mb-3 md:mb-4 group-hover:bg-green-100 dark:group-hover:bg-green-bg/80 transition-colors">
-                  <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-green-primary dark:text-green-bright" />
+                {/* Icon container with light red background */}
+                <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-light dark:bg-red-bg mb-3 md:mb-4 group-hover:bg-red-100 dark:group-hover:bg-red-bg/80 transition-colors">
+                  <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-red-primary dark:text-red-bright" />
                 </div>
                 {/* Value text - Strong typography */}
                 <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">

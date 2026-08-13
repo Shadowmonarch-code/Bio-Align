@@ -280,7 +280,7 @@ export default function Home() {
               <Button variant="outline" onClick={() => handleNavigate('upload')} className="cursor-pointer">
                 Upload Files
               </Button>
-              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white">
+              <Button onClick={() => handleNavigate('tools')} className="cursor-pointer bg-red-primary hover:bg-red-dark text-white">
                 Browse Tools
               </Button>
             </div>
@@ -323,7 +323,7 @@ export default function Home() {
                   ].map((activity, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
                       <div className={`w-2 h-2 rounded-full ${
-                        activity.type === 'success' ? 'bg-green-500' :
+                        activity.type === 'success' ? 'bg-red-500' :
                         activity.type === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
                       }`} />
                       <div className="flex-1 min-w-0">
@@ -371,7 +371,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -394,7 +394,7 @@ export default function Home() {
               <Button variant="outline" onClick={() => handleNavigate('dashboard')} className="cursor-pointer">
                 Dashboard
               </Button>
-              <Button className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white">
+              <Button className="cursor-pointer bg-red-primary hover:bg-red-dark text-white">
                 + New Workspace
               </Button>
             </div>
@@ -406,7 +406,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { title: 'Total Workspaces', value: '5', icon: '📁', color: 'text-blue-500' },
-                { title: 'Shared with Me', value: '3', icon: '👥', color: 'text-green-500' },
+                { title: 'Shared with Me', value: '3', icon: '👥', color: 'text-red-500' },
                 { title: 'Recent Activity', value: '12', icon: '⚡', color: 'text-orange-500' },
               ].map((stat, i) => (
                 <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
@@ -465,20 +465,20 @@ export default function Home() {
                   status: 'active'
                 },
               ].map((workspace, i) => (
-                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-emerald-500/30 transition-all cursor-pointer group">
+                <div key={i} className="p-5 rounded-xl border bg-card hover:shadow-lg hover:border-red-primary/30 transition-all cursor-pointer group">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 flex items-center justify-center group-hover:from-emerald-500/20 group-hover:to-emerald-500/30 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-primary/10 to-red-primary/20 flex items-center justify-center group-hover:from-red-primary/20 group-hover:to-red-primary/30 transition-colors">
                       <span className="text-lg">🧬</span>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      workspace.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      workspace.status === 'active' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                       workspace.status === 'shared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                       'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                     }`}>
                       {workspace.status}
                     </span>
                   </div>
-                  <h3 className="font-semibold mb-1 group-hover:text-emerald-500 transition-colors">{workspace.name}</h3>
+                  <h3 className="font-semibold mb-1 group-hover:text-red-primary transition-colors">{workspace.name}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{workspace.desc}</p>
                   
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -499,12 +499,12 @@ export default function Home() {
               {/* Add new workspace card */}
               <button 
                 onClick={() => handleNavigate('dashboard')}
-                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-emerald-500/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
+                className="p-5 rounded-xl border border-dashed border-2 border-muted hover:border-red-primary/50 hover:bg-accent/30 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer group"
               >
-                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-emerald-500/10 flex items-center justify-center mb-3 transition-colors">
-                  <span className="text-2xl group-hover:text-emerald-500 transition-colors">+</span>
+                <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-red-primary/10 flex items-center justify-center mb-3 transition-colors">
+                  <span className="text-2xl group-hover:text-red-primary transition-colors">+</span>
                 </div>
-                <p className="font-medium group-hover:text-emerald-500 transition-colors">Create New Workspace</p>
+                <p className="font-medium group-hover:text-red-primary transition-colors">Create New Workspace</p>
                 <p className="text-sm text-muted-foreground mt-1">Start a new project</p>
               </button>
             </div>
@@ -513,7 +513,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -547,7 +547,7 @@ export default function Home() {
           
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -602,7 +602,7 @@ export default function Home() {
           
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -652,7 +652,7 @@ export default function Home() {
                   { category: 'Archive', formats: ['ZIP', 'GZ', 'TAR', 'BZ2'] },
                 ].map((group, i) => (
                   <div key={i} className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs font-medium text-emerald-500 mb-2">{group.category}</p>
+                    <p className="text-xs font-medium text-red-primary mb-2">{group.category}</p>
                     <div className="flex flex-wrap gap-1">
                       {group.formats.map((fmt, j) => (
                         <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-background border">
@@ -670,7 +670,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -709,7 +709,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { name: 'NCBI GenBank', desc: 'Nucleotide sequence database', icon: '🧬', url: 'https://www.ncbi.nlm.nih.gov/', color: 'bg-blue-500' },
-                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', url: 'https://www.uniprot.org/', color: 'bg-green-500' },
+                { name: 'UniProt', desc: 'Protein sequence database', icon: '🔬', url: 'https://www.uniprot.org/', color: 'bg-red-500' },
                 { name: 'PDB', desc: 'Protein Data Bank structures', icon: '📐', url: 'https://www.rcsb.org/', color: 'bg-purple-500' },
                 { name: 'Ensembl', desc: 'Genome annotation database', icon: '🎯', url: 'https://ensembl.org/', color: 'bg-orange-500' },
                 { name: 'KEGG', desc: 'Pathway and gene database', icon: '🗺️', url: 'https://www.genome.jp/kegg/', color: 'bg-teal-500' },
@@ -723,7 +723,7 @@ export default function Home() {
                   href={db.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-emerald-500/30 transition-all group no-underline"
+                  className="p-6 rounded-xl border bg-card hover:shadow-lg hover:border-red-primary/30 transition-all group no-underline"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-3xl group-hover:scale-110 transition-transform">{db.icon}</span>
@@ -731,9 +731,9 @@ export default function Home() {
                       External
                     </span>
                   </div>
-                  <h3 className="font-semibold text-lg mb-1 group-hover:text-emerald-500 transition-colors">{db.name}</h3>
+                  <h3 className="font-semibold text-lg mb-1 group-hover:text-red-primary transition-colors">{db.name}</h3>
                   <p className="text-sm text-muted-foreground">{db.desc}</p>
-                  <button className="mt-4 text-sm text-emerald-500 hover:text-emerald-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                  <button className="mt-4 text-sm text-red-primary hover:text-red-dark font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                     Open Database →
                   </button>
                 </a>
@@ -745,7 +745,7 @@ export default function Home() {
         
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -826,7 +826,7 @@ export default function Home() {
 
           {/* Sticky Footer */}
           <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-            <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+            <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
             <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
           </footer>
         </main>
@@ -866,7 +866,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-emerald-500">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-red-primary">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -898,7 +898,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-[emerald-500]">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-[red-primary]">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -932,7 +932,7 @@ export default function Home() {
 
         {/* Sticky Footer */}
         <footer className="mt-auto border-t bg-card py-4 px-6 text-center text-sm text-muted-foreground">
-          <p>Developed by <span className="font-semibold text-[emerald-500]">CBSH, RPCAU</span></p>
+          <p>Developed by <span className="font-semibold text-[red-primary]">CBSH, RPCAU</span></p>
           <p className="text-xs mt-1">by Toufik Mahata & Dr. Nitesh Kumar Sharma</p>
         </footer>
       </main>
@@ -947,7 +947,7 @@ export default function Home() {
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Page Not Found</h1>
           <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
-          <Button onClick={handleGoHome} className="bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer">
+          <Button onClick={handleGoHome} className="bg-red-primary hover:bg-red-dark text-white cursor-pointer">
             Go Home
           </Button>
         </div>

@@ -25,9 +25,9 @@ const tutorials = [
     id: 'beginner',
     title: 'Beginner Tutorials',
     icon: BookOpen,
-    color: 'from-green-500 to-green-dark',
-    bgColor: 'bg-green-100 dark:bg-green-900/30',
-    textColor: 'text-green-600 dark:text-green-400',
+    color: 'from-red-500 to-red-dark',
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    textColor: 'text-red-600 dark:text-red-400',
     items: [
       {
         title: 'Getting Started with BioAlign',
@@ -164,7 +164,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
               <p className="text-white/60 text-sm">Tutorials</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-green-400">4h+</p>
+              <p className="text-3xl font-bold text-red-400">4h+</p>
               <p className="text-white/60 text-sm">Content</p>
             </div>
             <div className="text-center">
@@ -203,14 +203,14 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                 <motion.div
                   key={idx}
                   whileHover={{ y: -4 }}
-                  className="bg-card border rounded-xl overflow-hidden hover:border-green-primary/30 hover:shadow-lg transition-all group"
+                  className="bg-card border rounded-xl overflow-hidden hover:border-red-primary/30 hover:shadow-lg transition-all group"
                 >
                   {/* Card Header */}
                   <div className={`h-2 bg-gradient-to-r ${category.color}`} />
                   
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-semibold group-hover:text-green-primary transition-colors line-clamp-2">
+                      <h3 className="font-semibold group-hover:text-red-primary transition-colors line-clamp-2">
                         {tutorial.title}
                       </h3>
                     </div>
@@ -226,7 +226,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                         {tutorial.duration}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full ${
-                        tutorial.level === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        tutorial.level === 'Beginner' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                         tutorial.level === 'Intermediate' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                         'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                       }`}>
@@ -239,7 +239,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">What you'll learn:</p>
                       {(tutorial.steps || []).slice(0, 3).map((step, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="size-3 text-green-primary shrink-0" />
+                          <CheckCircle2 className="size-3 text-red-primary shrink-0" />
                           <span>{step}</span>
                         </div>
                       ))}
@@ -248,7 +248,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full group-hover:bg-green-primary group-hover:text-white cursor-pointer"
+                      className="w-full group-hover:bg-red-primary group-hover:text-white cursor-pointer"
                     >
                       Start Learning
                       <ChevronRight className="size-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -282,7 +282,7 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
                 <div className="aspect-video bg-black/30 rounded-lg mb-3 flex items-center justify-center group-hover:bg-black/50 transition-colors">
                   <Play className="size-10 text-white/50 group-hover:text-red-500 transition-colors" />
                 </div>
-                <h4 className="font-medium text-sm group-hover:text-green-primary transition-colors">{video.title}</h4>
+                <h4 className="font-medium text-sm group-hover:text-red-primary transition-colors">{video.title}</h4>
                 <p className="text-xs text-white/50">{video.duration}</p>
               </a>
             ))}
@@ -294,9 +294,9 @@ export default function TutorialsSection({ onBack }: TutorialsProps) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-green-primary/10 to-orange-500/10 border border-green-primary/20 rounded-2xl p-6 flex gap-4"
+          className="bg-gradient-to-r from-red-primary/10 to-orange-500/10 border border-red-primary/20 rounded-2xl p-6 flex gap-4"
         >
-          <Lightbulb className="size-6 text-green-primary shrink-0" />
+          <Lightbulb className="size-6 text-red-primary shrink-0" />
           <div>
             <h3 className="font-semibold mb-1">Learning Path Recommendation</h3>
             <p className="text-muted-foreground text-sm">
