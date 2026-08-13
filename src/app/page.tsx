@@ -21,6 +21,7 @@ import SettingsSection from '@/components/dashboard/settings'
 import ToolsCatalog from '@/components/dashboard/tools-catalog'
 import FileUpload from '@/components/dashboard/file-upload'
 import { Button } from '@/components/ui/button'
+import { SectionNav, BackToTopLink } from '@/components/ui/section-nav'
 import { SequenceAnalysisModule } from '@/components/tools/sequence-analysis'
 import AlignmentModule from '@/components/tools/alignment'
 import BlastSearchModule from '@/components/tools/blast'
@@ -122,55 +123,98 @@ export default function Home() {
 
         {/* Partners/Trusted By */}
         <section id="partners" className="py-16">
-          <PartnersSection />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <PartnersSection />
+            <div className="flex justify-end mt-4">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* Features Section */}
         <section id="features" className="py-24 relative overflow-hidden">
-          <FeaturesSection onExploreClick={() => handleNavigate('tools')} />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <FeaturesSection onExploreClick={() => handleNavigate('tools')} />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* Popular Tools Showcase */}
         <section id="tools" className="py-24 relative overflow-hidden">
-          <div className="relative">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ToolsShowcase onLaunchTool={handleToolSelect} />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
           </div>
         </section>
 
         {/* How to Use Guide */}
         <section id="how-to-use" className="py-24 relative overflow-hidden">
-          <HowToUseGuide />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <HowToUseGuide />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* Research Workflow */}
         <section id="workflow" className="py-24 relative overflow-hidden">
-          <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <WorkflowSection onStartClick={() => handleNavigate('dashboard')} />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* About Creator Section */}
         <section id="about" className="py-24 relative overflow-hidden">
-          <AboutCreator onBack={handleGoHome} />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AboutCreator onBack={handleGoHome} />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* Statistics */}
         <section id="statistics" className="py-24 relative overflow-hidden">
-          <StatisticsSection />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <StatisticsSection />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* Testimonials */}
         <section id="testimonials" className="py-24 relative">
-          <TestimonialsSection />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <TestimonialsSection />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
         {/* FAQ */}
         <section id="faq" className="py-24 relative overflow-hidden">
-          <FAQSection />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <FAQSection />
+            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
+              <BackToTopLink />
+            </div>
+          </div>
         </section>
 
-        {/* CTA Section - Scientific Design */}
+        {/* CTA Section - Scientific Design with refined gradient */}
         <section id="cta" className="py-24 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600 dark:from-emerald-700 dark:via-emerald-600 dark:to-emerald-800 p-12 md:p-20 text-center text-white overflow-hidden">
+            <div className="relative rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-700 dark:via-emerald-600 dark:to-teal-800 p-12 md:p-20 text-center text-white overflow-hidden">
               {/* Background decoration - molecular pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
@@ -213,6 +257,9 @@ export default function Home() {
 
         {/* Footer */}
         <FooterSection />
+
+        {/* Floating Back to Top Navigation */}
+        <SectionNav showIndicator={true} scrollThreshold={300} />
       </main>
     )
   }

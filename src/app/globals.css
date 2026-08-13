@@ -42,12 +42,13 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* BioAlign Scientific Color System */
-  --color-emerald-primary: #10B981;
-  --color-emerald-dark: #059669;
-  --color-emerald-light: #34D399;
-  --color-scientific-blue: #3B82F6;
-  --color-scientific-violet: #8B5CF6;
+  /* BioAlign Forest Green Palette */
+  --color-forest-darkest: #051F20;
+  --color-forest-dark: #0B2B26;
+  --color-forest-deep: #163832;
+  --color-forest-primary: #235347;
+  --color-forest-sage: #8EB69B;
+  --color-forest-light: #DAF1DE;
   
   /* Extended professional palette */
   --color-surface: var(--surface);
@@ -56,129 +57,131 @@
 }
 
 /* ============================================
-   SCIENTIFIC LIGHT MODE PALETTE
-   Premium, clean, research-focused
+   FOREST GREEN LIGHT MODE PALETTE
+   Sage & Mint tones - Natural, Calm, Scientific
+   Based on: #DAF1DE → #8EB69B → #235347 → #051F20
    ============================================ */
 :root {
   --radius: 0.625rem;
   
-  /* Core background & foreground */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  /* Core background - Soft mint cream */
+  --background: #DAF1DE;
+  --foreground: #051F20;  /* Deep forest black-green for text */
   
-  /* Card surfaces */
+  /* Card surfaces - Clean white with warmth */
   --card: #FFFFFF;
-  --card-foreground: #0F172A;
+  --card-foreground: #051F20;
   --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
+  --popover-foreground: #051F20;
   
-  /* Primary actions - Scientific Emerald */
-  --primary: #10B981;
-  --primary-foreground: #FFFFFF;
+  /* Primary actions - Forest green */
+  --primary: #235347;
+  --primary-foreground: #DAF1DE;
   
-  /* Secondary surfaces */
-  --secondary: #F1F5F9;
-  --secondary-foreground: #334155;
+  /* Secondary surfaces - Light sage */
+  --secondary: #E8F5EE;
+  --secondary-foreground: #163832;
   
-  /* Muted elements */
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  /* Muted elements - Very light sage */
+  --muted: #E8F5EE;
+  --muted-foreground: #5A7D72;
   
-  /* Accent elements - Emerald tinted */
-  --accent: #ECFDF5;
-  --accent-foreground: #059669;
+  /* Accent elements - Sage green tint */
+  --accent: #C5E6D5;
+  --accent-foreground: #235347;
   
   /* Destructive/Errors */
-  --destructive: #EF4444;
+  --destructive: #C95D53;
   
-  /* Borders & Inputs */
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #10B981;
+  /* Borders & Inputs - Subtle sage */
+  --border: #B8DCC8;
+  --input: #B8DCC8;
+  --ring: #235347;
   
-  /* Chart colors - Scientific palette */
-  --chart-1: #10B981;
-  --chart-2: #3B82F6;
-  --chart-3: #8B5CF6;
-  --chart-4: #F59E0B;
-  --chart-5: #EF4444;
+  /* Chart colors - Forest palette harmony */
+  --chart-1: #235347;
+  --chart-2: #0B2B26;
+  --chart-3: #8EB69B;
+  --chart-4: #163832;
+  --chart-5: #5A7D72;
   
   /* Sidebar */
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #0F172A;
-  --sidebar-primary: #10B981;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #ECFDF5;
-  --sidebar-accent-foreground: #059669;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #10B981;
+  --sidebar-foreground: #051F20;
+  --sidebar-primary: #235347;
+  --sidebar-primary-foreground: #DAF1DE;
+  --sidebar-accent: #C5E6D5;
+  --sidebar-accent-foreground: #235347;
+  --sidebar-border: #B8DCC8;
+  --sidebar-ring: #235347;
   
   /* Surface variants */
-  --surface: #F8FAFC;
+  --surface: #DAF1DE;
   --surface-elevated: #FFFFFF;
   --surface-overlay: rgba(255, 255, 255, 0.95);
 }
 
 /* ============================================
-   AMOLED DARK MODE PALETTE
-   Pure black, futuristic, OLED-optimized
+   FOREST GREEN DARK MODE PALETTE
+   Deep forest tones - Rich, Premium, OLED-friendly
+   Based on: #051F20 → #0B2B26 → #163832 → #235347
    ============================================ */
 .dark {
-  /* Core background - Pure AMOLED black */
-  --background: #050505;
-  --foreground: #F8FAFC;
+  /* Core background - Deepest forest */
+  --background: #051F20;
+  --foreground: #DAF1DE;  /* Light mint for text */
   
-  /* Card surfaces - Slightly elevated pure dark */
-  --card: #101010;
-  --card-foreground: #F8FAFC;
-  --popover: #101010;
-  --popover-foreground: #F8FAFC;
+  /* Card surfaces - Elevated forest tones */
+  --card: #0B2B26;
+  --card-foreground: #DAF1DE;
+  --popover: #0B2B26;
+  --popover-foreground: #DAF1DE;
   
-  /* Primary actions - Bright emerald for contrast */
-  --primary: #10B981;
-  --primary-foreground: #FFFFFF;
+  /* Primary actions - Sage green for contrast */
+  --primary: #8EB69B;
+  --primary-foreground: #051F20;
   
-  /* Secondary surfaces */
-  --secondary: #0A0A0A;
-  --secondary-foreground: #CBD5E1;
+  /* Secondary surfaces - Deep forest */
+  --secondary: #0A2421;
+  --secondary-foreground: #8EB69B;
   
   /* Muted elements */
-  --muted: #141414;
-  --muted-foreground: #94A3B8;
+  --muted: #0D2D29;
+  --muted-foreground: #6A9488;
   
-  /* Accent elements - Subtle emerald tint */
-  --accent: #062E22;
-  --accent-foreground: #34D399;
+  /* Accent elements - Forest green tint */
+  --accent: #163832;
+  --accent-foreground: #8EB69B;
   
   /* Destructive/Errors */
-  --destructive: #F87171;
+  --destructive: #E57373;
   
-  /* Borders & Inputs - Very subtle visibility on pure black */
-  --border: #1F1F1F;
-  --input: #1A1A1A;
-  --ring: #10B981;
+  /* Borders & Inputs - Subtle forest definition */
+  --border: #1A4039;
+  --input: #163832;
+  --ring: #8EB69B;
   
-  /* Chart colors - Optimized for dark mode */
-  --chart-1: #34D399;
-  --chart-2: #60A5FA;
-  --chart-3: #A78BFA;
-  --chart-4: #FBBF24;
-  --chart-5: #F87171;
+  /* Chart colors - Forest palette for dark */
+  --chart-1: #8EB69B;
+  --chart-2: #A8CBB8;
+  --chart-3: #235347;
+  --chart-4: #C5E6D5;
+  --chart-5: #5A7D72;
   
   /* Sidebar */
-  --sidebar: #101010;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #10B981;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #062E22;
-  --sidebar-accent-foreground: #34D399;
-  --sidebar-border: #1F1F1F;
-  --sidebar-ring: #10B981;
+  --sidebar: #0B2B26;
+  --sidebar-foreground: #DAF1DE;
+  --sidebar-primary: #8EB69B;
+  --sidebar-primary-foreground: #051F20;
+  --sidebar-accent: #163832;
+  --sidebar-accent-foreground: #8EB69B;
+  --sidebar-border: #1A4039;
+  --sidebar-ring: #8EB69B;
   
   /* Surface variants */
-  --surface: #050505;
-  --surface-elevated: #0A0A0A;
-  --surface-overlay: rgba(16, 16, 16, 0.95);
+  --surface: #051F20;
+  --surface-elevated: #0B2B26;
+  --surface-overlay: rgba(11, 43, 38, 0.95);
 }
 
 @layer base {
@@ -397,16 +400,16 @@
   animation: molecularPulse 3s ease-in-out infinite;
 }
 
-/* Gradient text utility - Scientific emerald theme */
+/* Gradient text utility - Refined scientific emerald theme */
 .gradient-text {
-  background: linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%);
+  background: linear-gradient(135deg, #059669 0%, #0891B2 50%, #0D9488 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%);
+  background: linear-gradient(135deg, #34D399 0%, #22D3EE 50%, #2DD4BF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -518,43 +521,43 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.1);
 }
 
-/* Text gradient for headings - emerald based */
+/* Text gradient for headings - emerald-teal based */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, #059669 0%, #0891B2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+  background: linear-gradient(135deg, #34D399 0%, #22D3EE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Text gradient with blue accent */
+/* Text gradient with teal-cyan accent */
 .text-gradient-science {
-  background: linear-gradient(135deg, #10B981 0%, #3B82F6 100%);
+  background: linear-gradient(135deg, #059669 0%, #0891B2 50%, #06B6D4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-science {
-  background: linear-gradient(135deg, #34D399 0%, #60A5FA 100%);
+  background: linear-gradient(135deg, #34D399 0%, #22D3EE 50%, #67E8F9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glow effects */
+/* Glow effects - Refined emerald */
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 30px rgba(5, 150, 105, 0.15);
 }
 
 .dark .glow-emerald {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.2);
 }
 
 /* Border glow on hover */
@@ -563,9 +566,9 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 20px rgba(5, 150, 105, 0.15);
 }
 
 .dark .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
 }
