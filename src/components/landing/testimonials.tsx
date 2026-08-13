@@ -172,14 +172,14 @@ export default function TestimonialsSection() {
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-400/5 dark:bg-red-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-teal-400/5 dark:bg-orange-500/5 rounded-full blur-3xl" />
         
-        {/* Animated subtle particles */}
+        {/* Animated subtle particles - Deterministic positions to avoid hydration mismatch */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 rounded-full bg-emerald-300/30 dark:bg-red-400/25"
             style={{
-              left: `${10 + Math.random() * 80}%`,
-              top: `${10 + Math.random() * 80}%`,
+              left: `${15 + (i * 13) % 70}%`,
+              top: `${12 + (i * 17) % 75}%`,
             }}
             animate={{
               opacity: [0.2, 0.6, 0.2],

@@ -338,6 +338,21 @@
 /* Animation utility classes */
 .animate-float { animation: float 6s ease-in-out infinite; }
 
+.animate-float-particle {
+  animation: floatParticle 5s ease-in-out infinite;
+}
+
+@keyframes floatParticle {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: translateY(0px); 
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: translateY(-20px); 
+  }
+}
+
 .animate-pulse-glow { 
   animation: pulse-glow-light 3s ease-in-out infinite;
 }
