@@ -57,63 +57,63 @@
 }
 
 /* ============================================
-   FOREST GREEN LIGHT MODE PALETTE
-   Sage & Mint tones - Natural, Calm, Scientific
-   Based on: #DAF1DE → #8EB69B → #235347 → #051F20
+   BOTANICAL FOREST-GREEN LIGHT MODE PALETTE
+   Living Computational Ecosystem Theme
+   Based on: #DAF1DE → #8EB69B → #163832 → #051F20
    ============================================ */
 :root {
   --radius: 0.625rem;
   
-  /* Core background - Soft mint cream */
+  /* Core background - Pale mint cream */
   --background: #DAF1DE;
-  --foreground: #051F20;  /* Deep forest black-green for text */
+  --foreground: #051F20;  /* Deepest Green for text */
   
-  /* Card surfaces - Clean white with warmth */
+  /* Card surfaces - Clean white */
   --card: #FFFFFF;
   --card-foreground: #051F20;
   --popover: #FFFFFF;
   --popover-foreground: #051F20;
   
-  /* Primary actions - Forest green */
-  --primary: #235347;
+  /* Primary actions - Forest Green (main brand color) */
+  --primary: #163832;
   --primary-foreground: #DAF1DE;
   
-  /* Secondary surfaces - Light sage */
-  --secondary: #E8F5EE;
-  --secondary-foreground: #163832;
+  /* Secondary surfaces - Very light forest tint */
+  --secondary: #F4FAF5;
+  --secondary-foreground: #235347;
   
-  /* Muted elements - Very light sage */
+  /* Muted elements - Light sage */
   --muted: #E8F5EE;
-  --muted-foreground: #5A7D72;
+  --muted-foreground: #235347;
   
   /* Accent elements - Sage green tint */
   --accent: #C5E6D5;
-  --accent-foreground: #235347;
+  --accent-foreground: #163832;
   
   /* Destructive/Errors */
   --destructive: #C95D53;
   
-  /* Borders & Inputs - Subtle sage */
+  /* Borders & Inputs - Subtle sage border */
   --border: #B8DCC8;
   --input: #B8DCC8;
-  --ring: #235347;
+  --ring: #163832;
   
-  /* Chart colors - Forest palette harmony */
+  /* Chart colors - Botanical palette harmony */
   --chart-1: #235347;
-  --chart-2: #0B2B26;
-  --chart-3: #8EB69B;
-  --chart-4: #163832;
+  --chart-2: #8EB69B;
+  --chart-3: #163832;
+  --chart-4: #0B2B26;
   --chart-5: #5A7D72;
   
   /* Sidebar */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #051F20;
-  --sidebar-primary: #235347;
+  --sidebar-primary: #163832;
   --sidebar-primary-foreground: #DAF1DE;
   --sidebar-accent: #C5E6D5;
-  --sidebar-accent-foreground: #235347;
+  --sidebar-accent-foreground: #163832;
   --sidebar-border: #B8DCC8;
-  --sidebar-ring: #235347;
+  --sidebar-ring: #163832;
   
   /* Surface variants */
   --surface: #DAF1DE;
@@ -122,32 +122,32 @@
 }
 
 /* ============================================
-   FOREST GREEN DARK MODE PALETTE
+   BOTANICAL FOREST-GREEN DARK MODE PALETTE
    Deep forest tones - Rich, Premium, OLED-friendly
-   Based on: #051F20 → #0B2B26 → #163832 → #235347
+   Living Computational Ecosystem Theme
    ============================================ */
 .dark {
-  /* Core background - Deepest forest */
+  /* Core background - Deepest Green */
   --background: #051F20;
-  --foreground: #DAF1DE;  /* Light mint for text */
+  --foreground: #DAF1DE;  /* Pale Mint for text */
   
-  /* Card surfaces - Elevated forest tones */
+  /* Card surfaces - Dark Botanical */
   --card: #0B2B26;
   --card-foreground: #DAF1DE;
   --popover: #0B2B26;
   --popover-foreground: #DAF1DE;
   
-  /* Primary actions - Sage green for contrast */
-  --primary: #8EB69B;
-  --primary-foreground: #051F20;
+  /* Primary actions - Forest Green (consistent) */
+  --primary: #163832;
+  --primary-foreground: #DAF1DE;
   
   /* Secondary surfaces - Deep forest */
   --secondary: #0A2421;
   --secondary-foreground: #8EB69B;
   
-  /* Muted elements */
+  /* Muted elements - Dark botanical */
   --muted: #0D2D29;
-  --muted-foreground: #6A9488;
+  --muted-foreground: #8EB69B;
   
   /* Accent elements - Forest green tint */
   --accent: #163832;
@@ -156,12 +156,12 @@
   /* Destructive/Errors */
   --destructive: #E57373;
   
-  /* Borders & Inputs - Subtle forest definition */
-  --border: #1A4039;
+  /* Borders & Inputs - Deep Teal Green definition */
+  --border: #235347;
   --input: #163832;
   --ring: #8EB69B;
   
-  /* Chart colors - Forest palette for dark */
+  /* Chart colors - Dark botanical palette */
   --chart-1: #8EB69B;
   --chart-2: #A8CBB8;
   --chart-3: #235347;
@@ -175,7 +175,7 @@
   --sidebar-primary-foreground: #051F20;
   --sidebar-accent: #163832;
   --sidebar-accent-foreground: #8EB69B;
-  --sidebar-border: #1A4039;
+  --sidebar-border: #235347;
   --sidebar-ring: #8EB69B;
   
   /* Surface variants */
@@ -444,7 +444,7 @@
    FOREST GRID BACKGROUND UTILITIES
    ============================================ */
 
-/* Main scientific grid pattern - Forest green */
+/* Main scientific grid pattern - Botanical forest green */
 .scientific-grid {
   background-image: 
     linear-gradient(rgba(35, 83, 71, 0.06) 1px, transparent 1px),
@@ -454,8 +454,8 @@
 
 .dark .scientific-grid {
   background-image: 
-    linear-gradient(rgba(142, 182, 155, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(142, 182, 155, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(142, 182, 155, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(142, 182, 155, 0.04) 1px, transparent 1px);
 }
 
 /* Fine grid pattern for subtle backgrounds */
@@ -571,4 +571,56 @@
 
 .dark .hover-glow:hover {
   box-shadow: 0 0 20px rgba(142, 182, 155, 0.25);
+}
+
+/* ============================================
+   BOTANICAL GRADIENT UTILITIES
+   Living Computational Ecosystem Theme
+   ============================================ */
+
+/* Primary gradient - Deep forest (darkest to forest) */
+.gradient-primary {
+  background: linear-gradient(135deg, #051F20 0%, #0B2B26 50%, #163832 100%);
+}
+
+/* Secondary gradient - Forest to sage */
+.gradient-secondary {
+  background: linear-gradient(135deg, #163832 0%, #235347 50%, #8EB69B 100%);
+}
+
+/* Light gradient - Teal to mint */
+.gradient-light {
+  background: linear-gradient(135deg, #235347 0%, #8EB69B 50%, #DAF1DE 100%);
+}
+
+/* Text gradient - Botanical theme */
+.text-gradient-botanical {
+  background: linear-gradient(135deg, #163832 0%, #235347 50%, #8EB69B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .text-gradient-botanical {
+  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #DAF1DE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium button gradient */
+.gradient-btn-primary {
+  background: linear-gradient(135deg, #163832 0%, #235347 100%);
+}
+
+.gradient-btn-primary:hover {
+  background: linear-gradient(135deg, #1a453d 0%, #2a6054 100%);
+}
+
+.dark .gradient-btn-primary {
+  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 100%);
+}
+
+.dark .gradient-btn-primary:hover {
+  background: linear-gradient(135deg, #9ec5ab 0%, #b6dbbf 100%);
 }

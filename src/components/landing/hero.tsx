@@ -76,21 +76,21 @@ function ScientificVisualization() {
         }}
         className="absolute inset-0 flex items-center justify-center"
       >
-        {/* Outer ring - Forest green */}
+        {/* Outer ring - Sage Green border */}
         <div className="absolute w-72 h-72 md:w-96 md:h-96 rounded-full border border-[#8EB69B]/20 animate-pulse" />
         
-        {/* Middle ring - Deep forest */}
+        {/* Middle ring - Deep Teal Green border */}
         <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-[#235347]/20" 
           style={{ animation: 'spin 20s linear infinite' }} 
         />
         
-        {/* Inner ring - Sage */}
+        {/* Inner ring - Forest Green border */}
         <div className="absolute w-40 h-40 md:w-52 md:h-52 rounded-full border border-[#163832]/25"
           style={{ animation: 'spin 15s linear reverse infinite' }}
         />
 
         {/* Core glow - Forest gradient */}
-        <div className="absolute w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#235347]/20 via-transparent to-[#8EB69B]/20 blur-xl" />
+        <div className="absolute w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#163832]/20 via-transparent to-[#8EB69B]/20 blur-xl" />
 
         {/* Central DNA Icon */}
         <motion.div
@@ -98,10 +98,10 @@ function ScientificVisualization() {
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="relative z-10"
         >
-          <Dna className="w-16 h-16 md:w-20 md:h-20 text-[#235347] dark:text-[#8EB69B]" strokeWidth={1.5} />
+          <Dna className="w-16 h-16 md:w-20 md:h-20 text-[#163832] dark:text-[#8EB69B]" strokeWidth={1.5} />
         </motion.div>
 
-        {/* Orbiting molecular nodes - Forest palette */}
+        {/* Orbiting molecular nodes - Botanical palette alternating */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
@@ -112,8 +112,8 @@ function ScientificVisualization() {
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              backgroundColor: i % 2 === 0 ? '#235347' : '#8EB69B',
-              boxShadow: `0 0 10px ${i % 2 === 0 ? 'rgba(35,83,71,0.5)' : 'rgba(142,182,155,0.5)'}`,
+              backgroundColor: i % 2 === 0 ? '#163832' : '#8EB69B',
+              boxShadow: `0 0 10px ${i % 2 === 0 ? 'rgba(22,56,50,0.5)' : 'rgba(142,182,155,0.5)'}`,
             }}
             animate={{
               rotate: i * 60,
@@ -128,11 +128,11 @@ function ScientificVisualization() {
           />
         ))}
 
-        {/* Floating data points - Forest palette */}
+        {/* Floating data points - Botanical palette with forest green borders */}
         {[
-          { x: '-10%', y: '20%', icon: Atom, color: '#235347' },
+          { x: '-10%', y: '20%', icon: Atom, color: '#163832' },
           { x: '85%', y: '25%', icon: Activity, color: '#8EB69B' },
-          { x: '15%', y: '75%', icon: Sparkles, color: '#163832' },
+          { x: '15%', y: '75%', icon: Sparkles, color: '#235347' },
           { x: '80%', y: '70%', icon: Dna, color: '#0B2B26' },
         ].map((point, i) => (
           <motion.div
@@ -202,24 +202,24 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
           animate={isInView ? 'visible' : 'hidden'}
           className="text-center"
         >
-          {/* Badge - Forest green theme */}
+          {/* Badge - Botanical forest theme */}
           <motion.div variants={itemVariants} className="mb-6 md:mb-8">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/80 dark:bg-[#163832]/50 text-[#235347] dark:text-[#8EB69B] border border-[#235347]/20 dark:border-[#8EB69B]/30">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/80 dark:bg-[#163832]/50 text-[#051F20] dark:text-[#DAF1DE] border border-[#163832]/20 dark:border-[#8EB69B]/30">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#235347] dark:bg-[#8EB69B] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#235347] dark:bg-[#8EB69B]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#163832] dark:bg-[#8EB69B] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#163832] dark:bg-[#8EB69B]" />
               </span>
               Next-Gen Bioinformatics Platform
             </span>
           </motion.div>
 
-          {/* Main Headline with Gradient */}
+          {/* Main Headline with Gradient - Botanical theme */}
           <motion.h1
             variants={itemVariants}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 md:mb-8"
           >
             <span className="block text-[#051F20] dark:text-[#DAF1DE]">One Platform.</span>
-            <span className="block mt-2 md:mt-4 bg-gradient-to-r from-[#235347] via-[#163832] to-[#8EB69B] dark:from-[#8EB69B] dark:via-[#A8CBB8] dark:to-[#C5E6D5] bg-clip-text text-transparent">
+            <span className="block mt-2 md:mt-4 bg-gradient-to-r from-[#163832] via-[#235347] to-[#8EB69B] dark:from-[#8EB69B] dark:via-[#A8CBB8] dark:to-[#C5E6D5] bg-clip-text text-transparent">
               Every Bioinformatics Tool.
             </span>
           </motion.h1>
@@ -233,26 +233,28 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
             <span className="text-[#051F20] dark:text-[#DAF1DE] font-medium">intelligent research workspace.</span>
           </motion.p>
 
-          {/* CTA Buttons - Forest green theme */}
+          {/* CTA Buttons - Botanical forest-green theme */}
           <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
+            {/* Primary CTA Button - Forest Green */}
             <button 
               onClick={onStartClick}
-              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-[#DAF1DE] dark:text-[#051F20] bg-[#235347] hover:bg-[#163832] dark:bg-[#8EB69B] dark:hover:bg-[#A8CBB8] rounded-xl shadow-lg shadow-[#235347]/25 dark:shadow-[#8EB69B]/25 hover:shadow-[#235347]/40 dark:hover:shadow-[#8EB69B]/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden cursor-pointer"
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-[#DAF1DE] dark:text-[#051F20] bg-[#163832] hover:bg-[#235347] dark:bg-[#8EB69B] dark:hover:bg-[#A8CBB8] rounded-xl shadow-lg shadow-[#163832]/25 dark:shadow-[#8EB69B]/25 hover:shadow-[#163832]/40 dark:hover:shadow-[#8EB69B]/40 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden cursor-pointer"
             >
               <span className="relative z-10">Start Analyzing</span>
               <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </button>
 
+            {/* Secondary Button - Outline with botanical colors */}
             <button 
               onClick={onExploreClick}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-[#235347] dark:text-[#8EB69B] bg-white/80 dark:bg-white/[0.03] border-2 border-[#235347]/20 dark:border-[#8EB69B]/20 hover:border-[#235347] dark:hover:border-[#8EB69B]/50 rounded-xl hover:bg-white dark:hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm cursor-pointer"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-[#163832] dark:text-[#8EB69B] bg-white/80 dark:bg-white/[0.03] border-2 border-[#163832]/30 dark:border-[#8EB69B]/30 hover:border-[#163832] dark:hover:border-[#8EB69B]/50 rounded-xl hover:bg-white dark:hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm cursor-pointer"
             >
               Explore Tools
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#235347] dark:text-[#8EB69B]" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#163832] dark:text-[#8EB69B]" />
             </button>
           </motion.div>
         </motion.div>
@@ -267,7 +269,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
           <ScientificVisualization />
         </motion.div>
 
-        {/* Stats Bar - Glassmorphism Cards - Forest theme */}
+        {/* Stats Bar - Glassmorphism Cards - Botanical forest theme */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -284,21 +286,25 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
                 scale: 1.02,
                 transition: { duration: 0.2 } 
               }}
-              className="group relative p-4 md:p-6 rounded-2xl bg-white/70 dark:bg-[#0B2B26]/70 backdrop-blur-xl border border-[#235347]/10 dark:border-[#8EB69B]/10 shadow-sm hover:shadow-lg hover:shadow-[#235347]/10 dark:hover:shadow-[#8EB69B]/10 transition-all duration-300 cursor-default"
+              className="group relative p-4 md:p-6 rounded-2xl bg-white/70 dark:bg-[#0B2B26]/70 backdrop-blur-xl border border-[#163832]/10 dark:border-[#8EB69B]/10 shadow-sm hover:shadow-lg hover:shadow-[#163832]/10 dark:hover:shadow-[#8EB69B]/10 transition-all duration-300 cursor-default"
             >
               {/* Subtle gradient glow on hover */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#235347]/0 to-[#8EB69B]/0 group-hover:from-[#235347]/[0.03] group-hover:to-[#8EB69B]/[0.02] transition-all duration-300" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#163832]/0 to-[#8EB69B]/0 group-hover:from-[#163832]/[0.03] group-hover:to-[#8EB69B]/[0.02] transition-all duration-300" />
               
               <div className="relative flex flex-col items-center text-center">
+                {/* Icon container with botanical colors */}
                 <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[#E8F5EE] dark:bg-[#163832]/50 mb-3 md:mb-4 group-hover:bg-[#C5E6D5] dark:group-hover:bg-[#163832]/70 transition-colors">
-                  <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-[#235347] dark:text-[#8EB69B]" />
+                  <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-[#163832] dark:text-[#8EB69B]" />
                 </div>
+                {/* Value text - botanical colors */}
                 <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#051F20] dark:text-[#DAF1DE] mb-1">
                   {stat.value}
                 </div>
+                {/* Label text - botanical colors */}
                 <div className="text-sm md:text-base font-medium text-[#163832] dark:text-[#8EB69B]">
                   {stat.label}
                 </div>
+                {/* Description - muted botanical */}
                 <p className="hidden md:block text-xs text-[#5A7D72] dark:text-[#6A9488] mt-2 max-w-[140px]">
                   {stat.description}
                 </p>
@@ -307,7 +313,7 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
           ))}
         </motion.div>
 
-        {/* Trust indicators */}
+        {/* Trust indicators - Botanical styling */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
@@ -316,15 +322,15 @@ export default function HeroSection({ onStartClick, onExploreClick }: HeroSectio
         >
           <p className="text-xs md:text-sm text-[#5A7D72] dark:text-[#6A9488]">
             Trusted by leading institutions including{' '}
-            <span className="font-medium text-[#235347] dark:text-[#8EB69B]">Stanford</span>,{' '}
-            <span className="font-medium text-[#235347] dark:text-[#8EB69B]">MIT</span>,{' '}
-            <span className="font-medium text-[#235347] dark:text-[#8EB69B]">NIH</span>, and{' '}
-            <span className="font-medium text-[#235347] dark:text-[#8EB69B]">100+ more</span>
+            <span className="font-medium text-[#163832] dark:text-[#8EB69B]">Stanford</span>,{' '}
+            <span className="font-medium text-[#163832] dark:text-[#8EB69B]">MIT</span>,{' '}
+            <span className="font-medium text-[#163832] dark:text-[#8EB69B]">NIH</span>, and{' '}
+            <span className="font-medium text-[#163832] dark:text-[#8EB69B]">100+ more</span>
           </p>
         </motion.div>
       </div>
 
-      {/* Bottom fade gradient */}
+      {/* Bottom fade gradient - Botanical colors */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#DAF1DE] dark:from-[#051F20] to-transparent" />
     </section>
   );

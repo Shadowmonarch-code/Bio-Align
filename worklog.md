@@ -827,3 +827,88 @@ Stage Summary:
 - **Refined light mode palette** with warmer undertones and better harmony
 - **More vibrant gradients** using emerald-teal-cyan spectrum
 - **Improved accessibility** with proper ARIA labels and touch targets
+
+---
+Task ID: 3
+Agent: Visual Design System Implementer
+Task: Implement Comprehensive Botanical Green Visual Design System for BioAlign
+
+Work Log:
+- Updated `/src/app/globals.css` with complete Botanical Forest-Green color palette:
+
+### Light Mode Variables (:root):
+| Variable | Value | Usage |
+|----------|-------|-------|
+| --background | #DAF1DE | Pale mint cream background |
+| --foreground | #051F20 | Deepest green for text |
+| --card | #FFFFFF | Clean white cards |
+| --primary | #163832 | Forest Green (main brand) |
+| --primary-foreground | #DAF1DE | Pale mint on primary |
+| --secondary | #F4FAF5 | Very light forest tint |
+| --secondary-foreground | #235347 | Deep teal green text |
+| --muted | #E8F5EE | Light sage muted |
+| --muted-foreground | #235347 | Deep teal muted text |
+| --accent | #C5E6D5 | Sage green accent |
+| --accent-foreground | #163832 | Forest on accent |
+| --border | #B8DCC8 | Subtle sage border |
+| --ring | #163832 | Forest ring focus |
+| --chart-1 to 5 | #235347, #8EB69B, #163832, #0B2B26, #5A7D72 | Botanical chart palette |
+
+### Dark Mode Variables (.dark):
+| Variable | Value | Usage |
+|----------|-------|-------|
+| --background | #051F20 | Deepest green background |
+| --foreground | #DAF1DE | Pale mint text |
+| --card | #0B2B26 | Dark botanical cards |
+| --primary | #163832 | Consistent forest green |
+| --border | #235347 | Deep teal border |
+| --chart-1 to 5 | #8EB69B, #A8CBB8, #235347, #C5E6D5, #5A7D72 | Dark botanical charts |
+
+### New Gradient Utilities Added:
+- `.gradient-primary`: Deep forest gradient (#051F20 → #0B2B26 → #163832)
+- `.gradient-secondary`: Forest to sage (#163832 → #235347 → #8EB69B)
+- `.gradient-light`: Teal to mint (#235347 → #8EB69B → #DAF1DE)
+- `.text-gradient-botanical`: Text gradient with dark mode variant
+- `.gradient-btn-primary`: Premium button gradient with hover states
+
+### Updated Scientific Grid Pattern:
+- Light mode: rgba(35, 83, 71, 0.06) grid lines
+- Dark mode: rgba(142, 182, 155, 0.04) grid lines (subtler)
+
+### Updated Hero Section (`/src/components/landing/hero.tsx`):
+- Background: bg-[#DAF1DE] dark:bg-[#051F20]
+- Badge styling with botanical colors (white/80 dark:bg-[#163832]/50)
+- Headline gradient: from-[#163832] via-[#235347] to-[#8EB69B]
+- Primary CTA: bg-[#163832] hover:bg-[#235347] dark:bg-[#8EB69B]
+- Secondary Button: border-[#163832]/30 dark:border-[#8EB69B]/30
+- Stat Cards: bg-white/70 dark:bg-[#0B2B26]/70
+- Scientific visualization with botanical orbiting nodes
+- DNA icon: text-[#163832] dark:text-[#8EB69B]
+
+### Updated CTA Section (`/src/app/page.tsx`):
+- Background gradient: from-[#051F20] via-[#163832] to-[#235347]
+- Dark gradient: from-[#163832] via-[#235347] to-[#8EB69B]
+- Primary button: text-[#163832] dark:text-[#8EB69B]
+- Outline button: border-[#8EB69B]/30 in dark mode
+
+Design Principles Applied:
+✅ Monochromatic green palette throughout
+✅ Smooth color transitions between shades
+✅ Low contrast, sophisticated aesthetic
+✅ Premium "living computational ecosystem" feel
+✅ No bright neon or gaming aesthetics
+✅ Minimal glassmorphism (subtle only)
+
+Files Modified:
+1. `/src/app/globals.css` - Complete botanical color system + gradients
+2. `/src/components/landing/hero.tsx` - Full hero redesign with botanical theme
+3. `/src/app/page.tsx` - CTA section updated with botanical colors
+
+Stage Summary:
+- **Complete Botanical Forest-Green Design System** implemented
+- **6 core colors** consistently applied across all components
+- **New gradient utilities** for backgrounds and text
+- **Hero section** fully redesigned with botanical theme
+- **CTA section** updated with proper botanical gradients
+- **Dark mode** fully supported with inverted botanical palette
+- **Living Computational Ecosystem** aesthetic achieved

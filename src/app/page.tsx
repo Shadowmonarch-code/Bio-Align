@@ -211,10 +211,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section - Forest Green Design */}
+        {/* CTA Section - Botanical Forest Green Design */}
         <section id="cta" className="py-24 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-3xl bg-gradient-to-br from-[#235347] via-[#163832] to-[#0B2B26] dark:from-[#8EB69B] dark:via-[#235347] dark:to-[#163832] p-12 md:p-20 text-center text-[#DAF1DE] dark:text-[#051F20] overflow-hidden">
+            <div className="relative rounded-3xl bg-gradient-to-br from-[#051F20] via-[#163832] to-[#235347] dark:from-[#163832] dark:via-[#235347] dark:to-[#8EB69B] p-12 md:p-20 text-center text-[#DAF1DE] dark:text-[#051F20] overflow-hidden">
               {/* Background decoration - molecular pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
@@ -233,7 +233,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                   <Button 
                     size="lg"
-                    className="px-8 py-4 bg-[#DAF1DE] dark:bg-[#051F20] text-[#235347] dark:text-[#8EB69B] font-semibold rounded-xl hover:bg-white dark:hover:bg-[#0B2B26] transition-all hover:scale-105 shadow-lg cursor-pointer"
+                    className="px-8 py-4 bg-[#DAF1DE] dark:bg-[#051F20] text-[#163832] dark:text-[#8EB69B] font-semibold rounded-xl hover:bg-white dark:hover:bg-[#0B2B26] transition-all hover:scale-105 shadow-lg shadow-[#163832]/25 cursor-pointer"
                     onClick={() => handleNavigate('dashboard')}
                   >
                     Start Analyzing Free
@@ -241,7 +241,7 @@ export default function Home() {
                   <Button 
                     size="lg"
                     variant="outline"
-                    className="px-8 py-4 border-2 border-[#DAF1DE]/30 dark:border-[#051F20]/30 text-[#DAF1DE] dark:text-[#051F20] font-semibold rounded-xl hover:bg-[#DAF1DE]/10 dark:hover:bg-[#051F20]/10 transition-all cursor-pointer"
+                    className="px-8 py-4 border-2 border-[#DAF1DE]/30 dark:border-[#8EB69B]/30 text-[#DAF1DE] dark:text-[#8EB69B] font-semibold rounded-xl hover:bg-[#DAF1DE]/10 dark:hover:bg-[#8EB69B]/10 transition-all cursor-pointer"
                     onClick={() => handleNavigate('tools')}
                   >
                     Explore All Tools
