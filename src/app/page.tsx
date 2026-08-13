@@ -43,6 +43,46 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>('landing')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
   const [selectedPlantBreedingTool, setSelectedPlantBreedingTool] = useState<string>('genetic-params')
+    // === MOBILE GESTURE BACK FIX ===
+  // Track view history so mobile swipe-back navigates within app instead of closing it
+  const viewHistoryRef = useRef<ViewType[]>(['landing'])
+  const isHandlingBackRef = useRef(false)
+  
+  // Push to browser history - creates entry for gesture back to work
+  const pushToHistory = useCallback((view: ViewType) => {
+    if (isHandlingBackRef.current) return  // Don't push while handling back
+    
+    const lastView = viewHistoryRef.current[viewHistoryRef.current.length - 1]
+    if (view !== lastView) {
+      viewHistoryRef.current.push(view)
+      window.history.pushState({ __bioalign_view: view }, '', window.location.pathname)
+    }
+  }, [])
+  
+  // Handle browser back button / mobile gesture back
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (isHandlingBackRef.current) return
+      isHandlingBackRef.current = true
+      setTimeout(() => { isHandlingBackRef.current = false }, 50)
+      
+      // If we have SPA history, go back within the app
+      if (viewHistoryRef.current.length > 1) {
+        viewHistoryRef.current.pop()  // Remove current
+        const prevView = viewHistoryRef.current[viewHistoryRef.current.length - 1]
+        setCurrentView(prevView)
+        window.scrollTo(0, 0)
+        return
+      }
+      // At root (landing) - let user leave site
+    }
+    
+    window.addEventListener('popstate', handlePopState)
+    // Set initial state - CRITICAL for mobile gesture support
+    window.history.replaceState({ __bioalign_view: 'landing' }, '', window.location.pathname)
+    
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
   // Main navigation handler - switches between views
   const handleNavigate = useCallback((view: string) => {
     setCurrentView(view as ViewType)
