@@ -152,28 +152,28 @@ const toolCategories: ToolCategory[] = [
     title: 'Sequence Analysis',
     description: 'DNA/RNA sequence tools for alignment, translation, and pattern discovery',
     tools: ['BLAST', 'Multiple Alignment', 'ORF Finder', 'Primer Design', 'Motif Search'],
-    color: 'from-[red-primary] to-[red-dark]'
+    color: 'from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark'
   },
   {
     icon: FlaskConical,
     title: 'Protein Analysis',
     description: 'Structure prediction, properties calculation, and domain identification',
     tools: ['Structure Prediction', 'Physicochemical Properties', 'Domain Finder', 'TMHMM'],
-    color: 'from-[red-primary] to-[red-dark]'
+    color: 'from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark'
   },
   {
     icon: BarChart3,
     title: 'Genomics & Expression',
     description: 'Genome browsing, variant analysis, and transcriptomics pipelines',
     tools: ['Genome Browser', 'Variant Calling', 'RNA-seq Analysis', 'DEG Analysis'],
-    color: 'from-[red-dark] to-[red-dark]'
+    color: 'from-green-hover dark:from-red-dark to-green-hover dark:to-red-dark'
   },
   {
     icon: Users,
     title: 'Phylogenetics & Evolution',
     description: 'Tree building, evolutionary analysis, and species comparison',
     tools: ['Tree Builder', 'Bootstrap Analysis', 'Distance Matrix', 'Consensus Tree'],
-    color: 'from-[red-primary] to-[red-dark]'
+    color: 'from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark'
   }
 ]
 
@@ -262,8 +262,8 @@ export default function HowToUseGuide() {
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background gradient decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[red-primary]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[red-primary]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/3 rounded-full blur-3xl" />
       </div>
 
@@ -281,7 +281,7 @@ export default function HowToUseGuide() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[red-primary]/10 text-[red-primary] text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-bg/50 dark:bg-red-bg/30 text-green-brand dark:text-red-brand text-sm font-medium mb-6"
           >
             <BookOpen className="w-4 h-4" />
             User Guide
@@ -289,7 +289,7 @@ export default function HowToUseGuide() {
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             How to{' '}
-            <span className="text-[red-primary]">Get Started</span>
+            <span className="text-green-brand dark:text-red-brand">Get Started</span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
             Follow these step-by-step guides to make the most of our bioinformatics platform.
@@ -328,23 +328,23 @@ export default function HowToUseGuide() {
                 <div className="relative h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
                   {/* Glow effect on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[red-primary]/5 via-transparent to-transparent rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-brand/5 dark:from-red-brand/5 via-transparent to-transparent rounded-2xl" />
                   </div>
 
                   {/* Step Number & Icon */}
                   <div className="flex items-start gap-5 mb-5">
                     <div className="relative flex-shrink-0">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[red-primary] to-[red-dark] flex items-center justify-center shadow-lg shadow-[red-primary]/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark flex items-center justify-center shadow-lg shadow-green-brand/20 dark:shadow-red-brand/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                         <step.icon className="w-7 h-7 text-white" strokeWidth={2} />
                       </div>
                       {/* Step Number Badge */}
-                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[red-primary] text-white text-sm font-bold flex items-center justify-center shadow-md">
+                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-green-brand dark:bg-red-brand text-white text-sm font-bold flex items-center justify-center shadow-md">
                         {step.number}
                       </div>
                     </div>
 
                     <div className="flex-1 pt-1">
-                      <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[red-primary] transition-colors duration-300">
+                      <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
                         {step.title}
                       </h4>
                       <p className="text-sm leading-relaxed text-muted-foreground">
@@ -365,7 +365,7 @@ export default function HowToUseGuide() {
                           transition={{ delay: tipIndex * 0.1 + 0.2 }}
                           className="flex items-start gap-2 text-xs text-muted-foreground"
                         >
-                          <ChevronRight className="w-3 h-3 text-[red-primary] mt-0.5 flex-shrink-0" />
+                          <ChevronRight className="w-3 h-3 text-green-brand dark:text-red-brand mt-0.5 flex-shrink-0" />
                           <span>{tip}</span>
                         </motion.div>
                       ))}
@@ -374,15 +374,15 @@ export default function HowToUseGuide() {
 
                   {/* Corner accent */}
                   <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-[red-primary] to-transparent rounded-br" />
-                    <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-[red-primary] to-transparent rounded-br" />
+                    <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-green-brand dark:from-red-brand to-transparent rounded-br" />
+                    <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-green-brand dark:from-red-brand to-transparent rounded-br" />
                   </div>
                 </div>
 
                 {/* Connector line (except last item on desktop) */}
                 {index < gettingStartedSteps.length - 1 && index % 2 === 0 && (
                   <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-[red-primary]/30" />
+                    <ArrowRight className="w-6 h-6 text-green-brand/30 dark:text-red-brand/30" />
                   </div>
                 )}
               </motion.div>
@@ -432,7 +432,7 @@ export default function HowToUseGuide() {
                   </div>
 
                   {/* Content */}
-                  <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[red-primary] transition-colors duration-300">
+                  <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
                     {category.title}
                   </h4>
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
@@ -444,7 +444,7 @@ export default function HowToUseGuide() {
                     {category.tools.map((tool) => (
                       <span
                         key={tool}
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-[red-primary]/10 text-[red-primary]/80 group-hover:bg-[red-primary]/15 transition-colors duration-300"
+                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-bg dark:bg-red-bg text-green-brand/80 dark:text-red-brand/80 group-hover:bg-green-brand/15 dark:group-hover:bg-red-brand/15 transition-colors duration-300"
                       >
                         {tool}
                       </span>
@@ -487,14 +487,14 @@ export default function HowToUseGuide() {
                 <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
                   {/* Icon with decorative ring */}
                   <div className="relative mb-6">
-                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[red-primary]/10 group-hover:bg-[red-primary]/20 transition-colors duration-300 animate-pulse-slow" />
-                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[red-primary] to-[red-dark] flex items-center justify-center shadow-lg shadow-[red-primary]/20 group-hover:scale-110 transition-transform duration-300">
+                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-green-brand/10 dark:bg-red-brand/10 group-hover:bg-green-brand/20 dark:group-hover:bg-red-brand/20 transition-colors duration-300 animate-pulse-slow" />
+                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark flex items-center justify-center shadow-lg shadow-green-brand/20 dark:shadow-red-brand/20 group-hover:scale-110 transition-transform duration-300">
                       <navStep.icon className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                   </div>
 
                   {/* Content */}
-                  <h4 className="text-xl font-semibold text-foreground mb-3 group-hover:text-[red-primary] transition-colors duration-300">
+                  <h4 className="text-xl font-semibold text-foreground mb-3 group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
                     {navStep.title}
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
@@ -502,9 +502,9 @@ export default function HowToUseGuide() {
                   </p>
 
                   {/* Action hint */}
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-[red-primary]/5 group-hover:bg-[red-primary]/10 transition-colors duration-300">
-                    <ChevronRight className="w-4 h-4 text-[red-primary] mt-0.5 flex-shrink-0" />
-                    <span className="text-xs font-medium text-[red-primary]/90">
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-green-bg/50 dark:bg-red-bg/50 group-hover:bg-green-brand/10 dark:group-hover:bg-red-brand/10 transition-colors duration-300">
+                    <ChevronRight className="w-4 h-4 text-green-brand dark:text-red-brand mt-0.5 flex-shrink-0" />
+                    <span className="text-xs font-medium text-green-brand/90 dark:text-red-brand/90">
                       {navStep.action}
                     </span>
                   </div>
@@ -549,18 +549,18 @@ export default function HowToUseGuide() {
                 }}
                 className="group"
               >
-                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-red-primary/10 hover:border-red-primary/20 transition-all duration-300 relative overflow-hidden">
+                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-green-brand/10 dark:hover:shadow-red-brand/10 hover:border-green-brand/20 dark:hover:border-red-brand/20 transition-all duration-300 relative overflow-hidden">
                   {/* Decorative background element */}
-                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-[red-primary]/5 group-hover:bg-[red-primary]/10 transition-colors duration-300" />
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-green-brand/5 dark:bg-red-brand/5 group-hover:bg-green-brand/10 dark:group-hover:bg-red-brand/10 transition-colors duration-300" />
 
                   <div className="relative">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[red-primary]/10 to-[red-primary]/5 flex items-center justify-center group-hover:from-[red-primary] group-hover:to-[red-dark] transition-all duration-300">
-                        <tip.icon className="w-6 h-6 text-[red-primary] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-green-brand/10 to-green-brand/5 dark:from-red-brand/10 dark:to-red-brand/5 flex items-center justify-center group-hover:from-green-brand dark:group-hover:from-red-brand group-hover:to-green-hover dark:group-hover:to-red-dark transition-all duration-300">
+                        <tip.icon className="w-6 h-6 text-green-brand dark:text-red-brand group-hover:text-white transition-colors duration-300" strokeWidth={2} />
                       </div>
 
                       <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[red-primary] transition-colors duration-300">
+                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
                           {tip.title}
                         </h4>
                         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -607,10 +607,10 @@ export default function HowToUseGuide() {
                   >
                     <AccordionTrigger className="py-5 text-left hover:no-underline group">
                       <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[red-primary]/10 flex items-center justify-center text-[red-primary] font-bold text-sm group-data-[state=open]:from-[red-primary] group-data-[state=open]:to-[red-dark] group-data-[state=open]:text-white transition-all duration-300">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-brand/10 dark:bg-red-brand/10 flex items-center justify-center text-green-brand dark:text-red-brand font-bold text-sm group-data-[state=open]:from-green-brand dark:group-data-[state=open]:from-red-brand group-data-[state=open]:to-green-hover dark:group-data-[state=open]:to-red-dark group-data-[state=open]:text-white transition-all duration-300">
                           Q{index + 1}
                         </div>
-                        <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[red-primary] transition-colors duration-300 text-left">
+                        <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300 text-left">
                           {item.question}
                         </span>
                       </div>
@@ -635,7 +635,7 @@ export default function HowToUseGuide() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-20"
         >
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[red-primary] via-[red-dark] to-[red-dark] p-8 sm:p-12 lg:p-16 text-center">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-brand via-green-hover dark:from-red-brand dark:via-red-dark dark:to-red-dark p-8 sm:p-12 lg:p-16 text-center">
             {/* Background decorations */}
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />

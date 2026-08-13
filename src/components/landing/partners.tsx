@@ -55,7 +55,7 @@ export default function PartnersSection() {
     <section className="relative py-20 md:py-28 overflow-hidden bg-background">
       {/* Subtle background gradient */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-primary/[0.02] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-green-brand/[0.02] dark:bg-red-brand/[0.02] rounded-full blur-3xl" />
       </div>
 
       {/* Top border accent */}
@@ -84,7 +84,7 @@ export default function PartnersSection() {
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-4">
             Integrated with{' '}
-            <span className="text-red-primary">Leading Databases</span>
+            <span className="text-green-brand dark:text-red-brand">Leading Databases</span>
           </h2>
           <p className="max-w-xl mx-auto text-base sm:text-lg text-muted-foreground leading-relaxed">
             Direct access to the world's most comprehensive biological data repositories for your research.
@@ -185,10 +185,10 @@ function PartnerLogo({ partner }: { partner: typeof partners[0] }) {
     >
       {/* Logo Icon */}
       <div className="relative mb-2 md:mb-3 grayscale group-hover:grayscale-0 transition-all duration-300">
-        <Icon className="w-6 h-6 md:w-8 md:h-8 text-gray-500 group-hover:text-red-primary transition-colors duration-300" />
+        <Icon className="w-6 h-6 md:w-8 md:h-8 text-gray-500 group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300" />
         
         {/* Subtle glow on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-red-primary/30 scale-150 -z-10" />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-green-brand/30 dark:bg-red-brand/30 scale-150 -z-10" />
       </div>
 
       {/* Logo Name */}
@@ -198,7 +198,7 @@ function PartnerLogo({ partner }: { partner: typeof partners[0] }) {
       </span>
 
       {/* Hover underline effect */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover:w-3/4 h-0.5 bg-red-primary rounded-full transition-all duration-300" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover:w-3/4 h-0.5 bg-green-brand dark:bg-red-brand rounded-full transition-all duration-300" />
     </a>
   );
 }

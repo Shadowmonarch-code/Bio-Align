@@ -42,13 +42,28 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* BioAlign Scientific Red Palette */
-  --color-red-primary: #DC2626;
-  --color-red-dark: #B91C1C;
-  --color-red-bright: #EF4444;
+  /* ============================================
+     DUAL-THEME COLOR SYSTEM
+     Light Mode: WHITE + GREEN (Fresh, Scientific)
+     Dark Mode: BLACK + RED (Bold, Special)
+     ============================================ */
+  
+  /* Light Mode Greens */
+  --color-green-brand: #16A34A;
+  --color-green-hover: #15803D;
+  --color-green-bright: #22C55E;
+  --color-green-soft: #86EFAC;
+  --color-green-pale: #DCFCE7;
+  --color-green-bg: #F0FDF4;
+  
+  /* Dark Mode Reds */
+  --color-red-brand: #EF4444;
+  --color-red-hover: #F87171;
+  --color-red-dark: #DC2626;
+  --color-red-deep: #B91C1C;
   --color-red-soft: #FCA5A5;
-  --color-red-light: #FEE2E2;
-  --color-red-bg: #FEF2F2;
+  --color-red-bg: #450A0A;
+  --color-red-surface: #7F1D1D;
   
   /* Extended professional palette */
   --color-surface: var(--surface);
@@ -57,63 +72,63 @@
 }
 
 /* ============================================
-   BIOALIGN LIGHT MODE PALETTE
-   Clean White + Scientific Red Accent
-   Professional Research Environment
+   LIGHT MODE - WHITE + GREEN THEME
+   Clean, Fresh, Scientific Research Environment
+   High contrast, excellent readability
    ============================================ */
 :root {
   --radius: 0.625rem;
   
   /* Core background - Pure White */
   --background: #FFFFFF;
-  --foreground: #0F172A;  /* Deep slate for text */
+  --foreground: #0F172A;  /* Deep slate - maximum contrast on white */
   
-  /* Card surfaces - Clean white */
+  /* Card surfaces - Pure White */
   --card: #FFFFFF;
   --card-foreground: #0F172A;
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
   
-  /* Primary actions - Scientific Red (brand accent) */
-  --primary: #DC2626;
-  --primary-foreground: #FFFFFF;
+  /* Primary actions - Green Brand Color */
+  --primary: #16A34A;
+  --primary-foreground: #FFFFFF;  /* White text on green = perfect readability */
   
-  /* Secondary surfaces - Very light gray */
+  /* Secondary surfaces - Cool Gray */
   --secondary: #F8FAFC;
-  --secondary-foreground: #475569;
+  --secondary-foreground: #334155;  /* Darker gray for readability */
   
-  /* Muted elements - Light gray */
+  /* Muted elements - Soft Gray */
   --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --muted-foreground: #64748B;  /* Readable muted text */
   
-  /* Accent elements - Soft red tint */
-  --accent: #FEF2F2;
-  --accent-foreground: #991B1B;
+  /* Accent elements - Pale Green (visible on white) */
+  --accent: #F0FDF4;
+  --accent-foreground: #166534;  /* Dark green text on pale bg */
   
-  /* Destructive/Errors */
+  /* Destructive/Errors - Standard Red */
   --destructive: #DC2626;
   
-  /* Borders & Inputs - Subtle gray */
+  /* Borders - Visible but subtle */
   --border: #E2E8F0;
   --input: #E2E8F0;
-  --ring: #DC2626;
+  --ring: #16A34A;  /* Green focus ring */
   
-  /* Chart colors - Scientific red palette */
-  --chart-1: #DC2626;
-  --chart-2: #EF4444;
-  --chart-3: #B91C1C;
-  --chart-4: #FCA5A5;
-  --chart-5: #991B1B;
+  /* Chart colors - Green palette for light mode */
+  --chart-1: #16A34A;
+  --chart-2: #22C55E;
+  --chart-3: #15803D;
+  --chart-4: #86EFAC;
+  --chart-5: #166534;
   
-  /* Sidebar */
+  /* Sidebar - Light clean */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0F172A;
-  --sidebar-primary: #DC2626;
+  --sidebar-primary: #16A34A;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #FEF2F2;
-  --sidebar-accent-foreground: #991B1B;
+  --sidebar-accent: #F0FDF4;
+  --sidebar-accent-foreground: #166534;
   --sidebar-border: #E2E8F0;
-  --sidebar-ring: #DC2626;
+  --sidebar-ring: #16A34A;
   
   /* Surface variants */
   --surface: #FFFFFF;
@@ -122,53 +137,53 @@
 }
 
 /* ============================================
-   BIOALIGN DARK MODE PALETTE
-   Deep Black + Scientific Red Accent
-   Computational Research Laboratory
+   DARK MODE - BLACK + RED THEME
+   Bold, Special, Computational Laboratory
+   Maximum contrast, striking appearance
    ============================================ */
 .dark {
   /* Core background - Pure Black */
   --background: #000000;
-  --foreground: #F8FAFC;  /* Near-white for text */
+  --foreground: #F8FAFC;  /* Near-white - max contrast on black */
   
-  /* Card surfaces - Dark elevated */
+  /* Card surfaces - Very Dark (not pure black for depth) */
   --card: #0A0A0A;
   --card-foreground: #F8FAFC;
   --popover: #0A0A0A;
   --popover-foreground: #F8FAFC;
   
-  /* Primary actions - Bright Red (consistent brand) */
+  /* Primary actions - Bright Red (visible on black!) */
   --primary: #EF4444;
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #000000;  /* Black text on red = bold look */
   
-  /* Secondary surfaces - Very dark gray */
+  /* Secondary surfaces - Near Black */
   --secondary: #050505;
-  --secondary-foreground: #A1A1AA;
+  --secondary-foreground: #CBD5E1;  /* Light gray - readable */
   
-  /* Muted elements - Dark neutral */
+  /* Muted elements - Dark Neutral */
   --muted: #111111;
-  --muted-foreground: #A1A1AA;
+  --muted-foreground: #9CA3AF;  /* Medium gray - visible on black */
   
-  /* Accent elements - Dark red background */
+  /* Accent elements - Deep Red Surface */
   --accent: #450A0A;
-  --accent-foreground: #FCA5A5;
+  --accent-foreground: #FCA5A5;  /* Light red text - readable */
   
-  /* Destructive/Errors */
+  /* Destructive - Bright Red */
   --destructive: #EF4444;
   
-  /* Borders & Inputs - Dark gray */
+  /* Borders - Dark Gray (visible on black) */
   --border: #1F2937;
   --input: #1F2937;
-  --ring: #EF4444;
+  --ring: #EF4444;  /* Red focus ring */
   
-  /* Chart colors - Dark mode scientific palette */
+  /* Chart colors - Red palette for dark mode */
   --chart-1: #EF4444;
-  --chart-2: #DC2626;
-  --chart-3: #FCA5A5;
-  --chart-4: #F87171;
+  --chart-2: #F87171;
+  --chart-3: #DC2626;
+  --chart-4: #FCA5A5;
   --chart-5: #B91C1C;
   
-  /* Sidebar */
+  /* Sidebar - Dark sleek */
   --sidebar: #000000;
   --sidebar-foreground: #F8FAFC;
   --sidebar-primary: #EF4444;
@@ -220,202 +235,147 @@
   background: #4B5563;
 }
 
-/* Glassmorphism utilities - Clean professional styling */
+/* Glassmorphism utilities - Theme-aware */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.90);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .dark .glass {
-  background: rgba(10, 10, 10, 0.85);
-  border: 1px solid rgba(31, 41, 55, 0.5);
+  background: rgba(10, 10, 10, 0.90);
+  border: 1px solid rgba(31, 41, 55, 0.6);
 }
 
-/* Glass card for tools catalog */
+/* Glass card - High visibility */
 .glass-card {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.80);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.15);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .glass-card {
-  background: rgba(10, 10, 10, 0.72);
-  border: 1px solid rgba(31, 41, 55, 0.4);
+  background: rgba(10, 10, 10, 0.80);
+  border: 1px solid rgba(31, 41, 55, 0.30);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(220, 38, 38, 0.3);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(22, 163, 74, 0.40);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(220, 38, 38, 0.08);
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(22, 163, 74, 0.10);
 }
 
 .dark .glass-card:hover {
-  background: rgba(17, 17, 17, 0.82);
+  background: rgba(17, 17, 17, 0.95);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 10px 15px -3px rgba(239, 68, 68, 0.12);
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(239, 68, 68, 0.20);
 }
 
 /* ============================================
-   SCIENTIFIC ANIMATION KEYFRAMES
-   DNA helix, molecular networks, data flow
+   ANIMATION KEYFRAMES
+   Theme-aware colors
    ============================================ */
 
-/* DNA Helix rotation */
-@keyframes dnaRotate {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
-}
-
-/* Floating molecular particles */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-/* Pulsing glow effect - Red based */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.25); }
-  50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.45); }
+@keyframes pulse-glow-light {
+  0%, 100% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.20); }
+  50% { box-shadow: 0 0 40px rgba(22, 163, 74, 0.35); }
 }
 
-/* Shimmer effect for loading states */
+@keyframes pulse-glow-dark {
+  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.25); }
+  50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.45); }
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
-/* Fade in up animation */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Slide in from left */
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Scale in effect */
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Molecular node pulse */
 @keyframes molecularPulse {
-  0%, 100% { 
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 1;
-    transform: scale(1.2);
-  }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Data flow animation */
 @keyframes dataFlow {
-  0% { 
-    stroke-dashoffset: 100;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% { 
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
 }
 
-/* Grid line shimmer */
 @keyframes gridShimmer {
-  0% { opacity: 0.03; }
-  50% { opacity: 0.08; }
-  100% { opacity: 0.03; }
+  0% { opacity: 0.02; }
+  50% { opacity: 0.05; }
+  100% { opacity: 0.02; }
 }
 
 /* Animation utility classes */
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
+.animate-float { animation: float 6s ease-in-out infinite; }
 
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
+.animate-pulse-glow { 
+  animation: pulse-glow-light 3s ease-in-out infinite;
+}
+.dark .animate-pulse-glow { 
+  animation: pulse-glow-dark 3s ease-in-out infinite;
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
-
 .dark .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
   background-size: 200% 100%;
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-slide-in-left { animation: slideInLeft 0.6s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.4s ease-out forwards; }
+.animate-molecular-pulse { animation: molecularPulse 3s ease-in-out infinite; }
 
-.animate-slide-in-left {
-  animation: slideInLeft 0.6s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.4s ease-out forwards;
-}
-
-.animate-molecular-pulse {
-  animation: molecularPulse 3s ease-in-out infinite;
-}
-
-/* Gradient text utility - Scientific red theme */
+/* Gradient text - Theme aware */
 .gradient-text {
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 50%, #166534 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #FCA5A5 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #F87171 50%, #FCA5A5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Particle effect container */
+/* Particle container */
 .particles-container {
   position: absolute;
   inset: 0;
@@ -430,90 +390,76 @@
   transition-duration: 150ms;
 }
 
-/* Hide scrollbar but keep functionality */
+/* Hide scrollbar */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
 /* ============================================
-   SCIENTIFIC GRID BACKGROUND UTILITIES
+   BACKGROUND UTILITIES
+   Subtle, theme-appropriate patterns
    ============================================ */
 
-/* Main scientific grid pattern - Subtle red tint */
+/* Scientific grid - Very subtle */
 .scientific-grid {
   background-image: 
-    linear-gradient(rgba(220, 38, 38, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(220, 38, 38, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(22, 163, 74, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 163, 74, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .dark .scientific-grid {
   background-image: 
-    linear-gradient(rgba(239, 68, 68, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(239, 68, 68, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(239, 68, 68, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
-/* Fine grid pattern for subtle backgrounds */
+/* Fine grid */
 .fine-grid {
   background-image: 
-    linear-gradient(rgba(100, 116, 139, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(100, 116, 139, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(100, 116, 139, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.05) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .dark .fine-grid {
   background-image: 
-    linear-gradient(rgba(100, 116, 139, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(100, 116, 139, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(100, 116, 139, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Dot matrix pattern - Red accent */
+/* Dot matrix */
 .dot-matrix {
-  background-image: radial-gradient(circle, rgba(220, 38, 38, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(22, 163, 74, 0.08) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .dot-matrix {
-  background-image: radial-gradient(circle, rgba(239, 68, 68, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(239, 68, 68, 0.10) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 /* ============================================
-   UTILITY CLASSES FOR CONSISTENT DESIGN
+   SECTION BACKGROUNDS
+   Clear visual separation
    ============================================ */
 
-/* Professional section backgrounds */
-.section-bg {
-  background-color: var(--background);
+.section-bg { background-color: var(--background); }
+.section-bg-alt { background-color: var(--secondary); }
+
+/* Tinted sections - Theme appropriate */
+.section-bg-accent {
+  background-color: #F0FDF4;  /* Pale green for light mode */
+}
+.dark .section-bg-accent {
+  background-color: #0A0505;  /* Very dark red tint for dark mode */
 }
 
-.dark .section-bg {
-  background-color: var(--background);
-}
-
-.section-bg-alt {
-  background-color: var(--surface);
-}
-
-.dark .section-bg-alt {
-  background-color: var(--surface);
-}
-
-/* Section with subtle red tint for variety */
-.section-bg-red {
-  background-color: #FEF2F2;
-}
-
-.dark .section-bg-red {
-  background-color: #0A0505;
-}
-
-/* Professional card styles */
+/* Professional card styles - HIGH VISIBILITY */
 .pro-card {
   background-color: var(--card);
   border: 1px solid var(--border);
@@ -522,32 +468,32 @@
 }
 
 .pro-card:hover {
-  border-color: #DC2626;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #16A34A;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .dark .pro-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(239, 68, 68, 0.15);
+  border-color: #EF4444;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.10);
 }
 
-/* Text gradient for headings - Scientific red based */
+/* Text gradients - Readable in both modes */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #EF4444 0%, #FCA5A5 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Text gradient with bright accents */
 .text-gradient-science {
-  background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #FCA5A5 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -560,56 +506,54 @@
   background-clip: text;
 }
 
-/* Glow effects - Red accent */
+/* Glow effects - Theme appropriate */
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 30px rgba(22, 163, 74, 0.12);
 }
-
 .dark .glow-emerald {
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.18);
 }
 
-/* Border glow on hover */
-.hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-
+.hover-glow { transition: box-shadow 0.3s ease; }
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.12);
 }
-
 .dark .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.20);
 }
 
 /* ============================================
-   SCIENTIFIC GRADIENT UTILITIES
-   BioAlign Brand Identity
+   GRADIENT UTILITIES
+   Theme-specific brand colors
    ============================================ */
 
-/* Primary gradient - Red brand colors */
 .gradient-primary {
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+}
+.dark .gradient-primary {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
 }
 
-/* Secondary gradient - Lighter reds */
 .gradient-secondary {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 50%, #15803D 100%);
+}
+.dark .gradient-secondary {
+  background: linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%);
 }
 
-/* Light gradient - Soft reds */
 .gradient-light {
+  background: linear-gradient(135deg, #86EFAC 0%, #DCFCE7 50%, #F0FDF4 100%);
+}
+.dark .gradient-light {
   background: linear-gradient(135deg, #FCA5A5 0%, #FEE2E2 50%, #FEF2F2 100%);
 }
 
-/* Text gradient - BioAlign red brand */
 .text-gradient-botanical {
-  background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #FCA5A5 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .dark .text-gradient-botanical {
   background: linear-gradient(135deg, #EF4444 0%, #FCA5A5 50%, #FEE2E2 100%);
   -webkit-background-clip: text;
@@ -617,74 +561,88 @@
   background-clip: text;
 }
 
-/* Premium button gradient - Red primary */
+/* Button gradient - High contrast */
 .gradient-btn-primary {
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
 }
-
 .gradient-btn-primary:hover {
-  background: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
+  background: linear-gradient(135deg, #15803D 0%, #166534 100%);
 }
-
 .dark .gradient-btn-primary {
   background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
 }
-
 .dark .gradient-btn-primary:hover {
   background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
 }
 
 /* ============================================
    BADGE STYLES
-   Scientific status indicators
+   High contrast, always readable
    ============================================ */
 
 .badge-success {
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: #F0FDF4;
+  color: #166534;  /* Dark green on pale green */
+  border: 1px solid #BBF7D0;
 }
 
 .dark .badge-success {
   background-color: #450A0A;
-  color: #FCA5A5;
+  color: #FCA5A5;  /* Light red on dark red */
+  border: 1px solid #7F1D1D;
 }
 
 .badge-info {
-  background-color: #FEF2F2;
-  color: #B91C1C;
+  background-color: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
 }
 
 .dark .badge-info {
   background-color: #450A0A;
-  color: #EF4444;
+  color: #F87171;
+  border: 1px solid #7F1D1D;
 }
 
 /* ============================================
    AI STATUS INDICATOR
-   Pulsing red dot
+   Theme-appropriate pulse
    ============================================ */
 
 .ai-status-dot {
   position: relative;
 }
-
 .ai-status-dot::before {
   content: '';
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #EF4444;
+  background: #22C55E;
   animation: aiPulse 2s ease-in-out infinite;
+}
+.dark .ai-status-dot::before {
+  background: #EF4444;
 }
 
 @keyframes aiPulse {
-  0%, 100% { 
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% { 
-    transform: scale(1.5);
-    opacity: 0.5;
-  }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+}
+
+/* ============================================
+   SPECIAL MODE INDICATORS
+   Visual cues for the dual-theme experience
+   ============================================ */
+
+/* Light mode indicator - Green glow */
+.light-mode-indicator {
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(34, 197, 94, 0.05));
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+/* Dark mode indicator - Red glow */
+.dark-mode-indicator {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }

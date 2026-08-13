@@ -378,12 +378,12 @@ export default function Navbar({ onNavigate }: NavbarProps) {
               }}
             >
               <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 rounded-lg bg-red-primary/20 blur-lg group-hover:bg-red-primary/30 transition-colors duration-300" />
-                <Dna className="relative size-8 text-red-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <div className="absolute inset-0 rounded-lg bg-green-brand/20 dark:bg-red-brand/20 blur-lg group-hover:bg-green-brand/30 dark:group-hover:bg-red-brand/30 transition-colors duration-300" />
+                <Dna className="relative size-8 text-green-brand dark:text-red-brand transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 <span className="text-foreground">Bio</span>
-                <span className="text-red-primary">Align</span>
+                <span className="text-green-brand dark:text-red-brand">Align</span>
               </span>
             </a>
           </motion.div>
@@ -403,7 +403,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                   "hover:text-foreground hover:bg-accent/10",
                   activeSection === link.href.substring(1) || 
                   (link.href.substring(1) === 'coffee' && activeSection === 'pricing')
-                    ? "text-red-primary font-semibold"
+                    ? "text-green-brand dark:text-red-brand font-semibold"
                     : "text-muted-foreground"
                 )}
               >
@@ -413,7 +413,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                   (link.href.substring(1) === 'coffee' && activeSection === 'pricing')) && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute inset-0 rounded-md bg-red-primary/10 border border-red-primary/20"
+                    className="absolute inset-0 rounded-md bg-green-brand/10 dark:bg-red-brand/10 border border-green-brand/20 dark:border-red-brand/20"
                     transition={{
                       type: "spring",
                       stiffness: 380,
@@ -501,8 +501,8 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                   onClick={() => onNavigate?.("dashboard")}
                   className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-accent/10 cursor-pointer"
                 >
-                  <div className="size-7 rounded-full bg-red-primary/10 flex items-center justify-center">
-                    <span className="text-xs font-medium text-red-primary">{getUserInitials()}</span>
+                  <div className="size-7 rounded-full bg-green-brand dark:red-brand/10 flex items-center justify-center">
+                    <span className="text-xs font-medium text-green-brand dark:red-brand">{getUserInitials()}</span>
                   </div>
                   <span className="text-sm font-medium">{session.user.name || 'User'}</span>
                 </Button>
@@ -546,7 +546,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                 <Button
                   size="sm"
                   onClick={handleGetStarted}
-                  className="hidden sm:inline-flex bg-red-primary hover:bg-red-dark text-white shadow-lg shadow-red-primary/25 hover:shadow-red-primary/40 transition-all duration-300 group cursor-pointer"
+                  className="hidden sm:inline-flex bg-green-brand hover:bg-green-hover dark:bg-red-brand dark:hover:bg-green-hover dark:red-dark text-white shadow-lg shadow-green-brand/25 dark:shadow-red-brand/30 hover:shadow-green-brand/35 dark:hover:shadow-red-brand/45 transition-all duration-300 group cursor-pointer"
                 >
                   Get Started
                   <ArrowRight className="size-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -570,10 +570,10 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                   <SheetHeader className="p-6 pb-4">
                     <div className="flex items-center justify-between">
                       <SheetTitle className="flex items-center gap-2.5">
-                        <Dna className="size-6 text-red-primary" />
+                        <Dna className="size-6 text-green-brand dark:red-brand" />
                         <span className="text-xl font-bold">
                           <span className="text-foreground">Bio</span>
-                          <span className="text-red-primary">Align</span>
+                          <span className="text-green-brand dark:red-brand">Align</span>
                         </span>
                       </SheetTitle>
                     </div>
@@ -589,8 +589,8 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                     {session?.user ? (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="size-9 rounded-full bg-red-primary/10 flex items-center justify-center">
-                            <User className="size-4 text-red-primary" />
+                          <div className="size-9 rounded-full bg-green-brand dark:red-brand/10 flex items-center justify-center">
+                            <User className="size-4 text-green-brand dark:red-brand" />
                           </div>
                           <div>
                             <p className="text-sm font-medium">{session.user.name || 'User'}</p>
@@ -625,7 +625,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                         </Button>
                         <Button
                           size="sm"
-                          className="flex-1 bg-red-primary hover:bg-red-dark text-white cursor-pointer"
+                          className="flex-1 bg-green-brand dark:red-brand hover:bg-green-hover dark:red-dark text-white cursor-pointer"
                           onClick={() => {
                             setIsMobileOpen(false);
                             handleGetStarted();
@@ -655,7 +655,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                               "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 no-underline cursor-pointer",
                               "hover:bg-accent/10",
                               activeSection === link.href.substring(1)
-                                ? "bg-red-primary/10 text-red-primary font-medium"
+                                ? "bg-green-brand dark:red-brand/10 text-green-brand dark:red-brand font-medium"
                                 : "text-muted-foreground hover:text-foreground"
                             )}
                           >
@@ -720,7 +720,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                 {/* Search Header */}
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Search className="size-5 text-red-primary" />
+                    <Search className="size-5 text-green-brand dark:red-brand" />
                     Search Biological Databases
                   </h3>
                   <Button
@@ -741,7 +741,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                     placeholder="Type to search... (NCBI, UniProt, PDB, PubMed, KEGG...)"
                     value={searchQuery}
                     onChange={(e) => handleDatabaseSearch(e.target.value)}
-                    className="pl-12 pr-4 py-3 text-base h-14 border-2 focus:border-red-primary/50"
+                    className="pl-12 pr-4 py-3 text-base h-14 border-2 focus:border-green-brand dark:red-brand/50"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') setShowSearch(false);
@@ -765,14 +765,14 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                                 openDatabaseLink(db.url, db.name);
                                 setShowSearch(false);
                               }}
-                              className="flex items-center gap-3 p-4 rounded-xl border-2 hover:border-red-primary/50 hover:bg-red-primary/5 transition-all cursor-pointer text-left group"
+                              className="flex items-center gap-3 p-4 rounded-xl border-2 hover:border-green-brand dark:red-brand/50 hover:bg-green-brand dark:red-brand/5 transition-all cursor-pointer text-left group"
                             >
                               <div className={`w-4 h-4 rounded-full ${db.color} group-hover:scale-110 transition-transform`} />
                               <div className="flex-1">
-                                <p className="font-semibold text-sm group-hover:text-red-primary transition-colors">{db.name}</p>
+                                <p className="font-semibold text-sm group-hover:text-green-brand dark:red-brand transition-colors">{db.name}</p>
                                 <p className="text-xs text-muted-foreground">{db.description}</p>
                               </div>
-                              <ExternalLink className="size-4 text-muted-foreground group-hover:text-red-primary transition-colors" />
+                              <ExternalLink className="size-4 text-muted-foreground group-hover:text-green-brand dark:red-brand transition-colors" />
                             </button>
                           ))}
                         </div>
@@ -794,10 +794,10 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                               openDatabaseLink(db.url, db.name);
                               setShowSearch(false);
                             }}
-                            className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 hover:border-red-primary/50 hover:bg-red-primary/5 transition-all cursor-pointer group"
+                            className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 hover:border-green-brand dark:red-brand/50 hover:bg-green-brand dark:red-brand/5 transition-all cursor-pointer group"
                           >
                             <div className={`w-6 h-6 rounded-full ${db.color} group-hover:scale-110 transition-transform`} />
-                            <span className="text-xs font-medium text-center group-hover:text-red-primary transition-colors">{db.name}</span>
+                            <span className="text-xs font-medium text-center group-hover:text-green-brand dark:red-brand transition-colors">{db.name}</span>
                           </button>
                         ))}
                       </div>
@@ -810,7 +810,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                             <button
                               key={term}
                               onClick={() => handleDatabaseSearch(term)}
-                              className="px-3 py-1 text-xs bg-muted hover:bg-red-primary/10 hover:text-red-primary rounded-full transition-colors cursor-pointer"
+                              className="px-3 py-1 text-xs bg-muted hover:bg-green-brand dark:red-brand/10 hover:text-green-brand dark:red-brand rounded-full transition-colors cursor-pointer"
                             >
                               {term}
                             </button>
@@ -831,7 +831,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
         <DialogContent className="sm:max-w-md p-0 overflow-hidden">
           <div className="relative">
             {/* Header gradient */}
-            <div className="bg-gradient-to-br from-red-primary to-red-dark p-6 text-white">
+            <div className="bg-gradient-to-br from-green-brand dark:red-brand to-green-hover dark:red-dark p-6 text-white">
               <DialogTitle className="text-xl font-bold text-center">
                 {authMode === 'signin' ? 'Welcome Back' : 'Join BioAlign'}
               </DialogTitle>
@@ -897,7 +897,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
 
               {authMode === 'signin' && (
                 <div className="flex justify-end">
-                  <button type="button" className="text-xs text-red-primary hover:underline">
+                  <button type="button" className="text-xs text-green-brand dark:red-brand hover:underline">
                     Forgot password?
                   </button>
                 </div>
@@ -905,7 +905,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
 
               <Button 
                 type="submit" 
-                className="w-full bg-red-primary hover:bg-red-dark text-white cursor-pointer"
+                className="w-full bg-green-brand dark:red-brand hover:bg-green-hover dark:red-dark text-white cursor-pointer"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -936,7 +936,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                     <button 
                       type="button" 
                       onClick={() => setAuthMode('signup')}
-                      className="text-red-primary hover:underline font-medium cursor-pointer"
+                      className="text-green-brand dark:red-brand hover:underline font-medium cursor-pointer"
                     >
                       Sign up
                     </button>
@@ -947,7 +947,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
                     <button 
                       type="button" 
                       onClick={() => setAuthMode('signin')}
-                      className="text-red-primary hover:underline font-medium cursor-pointer"
+                      className="text-green-brand dark:red-brand hover:underline font-medium cursor-pointer"
                     >
                       Sign in
                     </button>
@@ -963,7 +963,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
       <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
         <DialogContent className="sm:max-w-md p-0 overflow-hidden">
           <div className="relative">
-            <div className="bg-gradient-to-br from-red-dark to-teal-700 p-6 text-white">
+            <div className="bg-gradient-to-br from-green-hover dark:red-dark to-teal-700 p-6 text-white">
               <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
                 <Phone className="size-5" />
                 Contact Us
@@ -977,14 +977,14 @@ export default function Navbar({ onNavigate }: NavbarProps) {
               {/* Email Contact */}
               <a
                 href="mailto:toufikmahata20@gmail.com"
-                className="flex items-center gap-4 p-4 rounded-lg border hover:border-red-primary/30 hover:bg-red-primary/5 transition-all no-underline group"
+                className="flex items-center gap-4 p-4 rounded-lg border hover:border-green-brand dark:red-brand/30 hover:bg-green-brand dark:red-brand/5 transition-all no-underline group"
               >
                 <div className="size-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Mail className="size-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Email</p>
-                  <p className="text-sm text-muted-foreground group-hover:text-red-primary transition-colors">
+                  <p className="text-sm text-muted-foreground group-hover:text-green-brand dark:red-brand transition-colors">
                     toufikmahata20@gmail.com
                   </p>
                 </div>
@@ -993,14 +993,14 @@ export default function Navbar({ onNavigate }: NavbarProps) {
               {/* Phone Contact */}
               <a
                 href="tel:+916296159691"
-                className="flex items-center gap-4 p-4 rounded-lg border hover:border-red-primary/30 hover:bg-red-primary/5 transition-all no-underline group"
+                className="flex items-center gap-4 p-4 rounded-lg border hover:border-green-brand dark:red-brand/30 hover:bg-green-brand dark:red-brand/5 transition-all no-underline group"
               >
                 <div className="size-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Phone className="size-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Phone</p>
-                  <p className="text-sm text-muted-foreground group-hover:text-red-primary transition-colors">
+                  <p className="text-sm text-muted-foreground group-hover:text-green-brand dark:red-brand transition-colors">
                     +91 62961 56961
                   </p>
                 </div>
