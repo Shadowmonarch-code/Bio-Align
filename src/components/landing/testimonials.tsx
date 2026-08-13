@@ -91,7 +91,7 @@ function StarRating({ rating = 5 }: { rating?: number }) {
       {Array.from({ length: rating }).map((_, i) => (
         <Star
           key={i}
-          className="w-4 h-4 fill-green-brand dark:fill-red-brand text-green-brand dark:text-red-brand"
+          className="w-4 h-4 fill-amber-400 text-amber-400"
           strokeWidth={0}
         />
       ))}
@@ -109,16 +109,16 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       }}
       className="group relative h-full"
     >
-      <div className="relative h-full p-6 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-green-brand/10 dark:hover:shadow-red-brand/10 hover:border-green-brand/20 dark:hover:border-red-brand/20 transition-all duration-300 overflow-hidden">
+      <div className="relative h-full p-6 rounded-2xl border border-gray-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-emerald-500/8 dark:hover:shadow-red-500/10 hover:border-emerald-300/50 dark:hover:border-red-700/40 transition-all duration-300 overflow-hidden">
         {/* Gradient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-brand/5 dark:from-red-brand/5 via-transparent to-transparent rounded-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 dark:from-red-950/30 via-transparent to-teal-50/30 dark:to-orange-950/20 rounded-2xl" />
         </div>
 
         {/* Quote icon */}
         <div className="relative mb-4">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-brand/10 to-green-bg/5 dark:from-red-brand/10 dark:to-red-bg/5 flex items-center justify-center group-hover:from-green-brand/20 dark:group-hover:from-red-brand/20 group-hover:to-green-bg/10 dark:group-hover:to-red-bg/10 transition-colors duration-300">
-            <Quote className="w-5 h-5 text-green-brand dark:text-red-brand" />
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-red-950/40 dark:to-orange-950/20 flex items-center justify-center group-hover:from-emerald-200 dark:group-hover:from-red-900/50 group-hover:to-teal-100 dark:group-hover:to-orange-900/30 transition-colors duration-300">
+            <Quote className="w-5 h-5 text-emerald-600 dark:text-red-400" />
           </div>
         </div>
 
@@ -127,37 +127,37 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
           <StarRating />
         </div>
 
-        {/* Quote text */}
+        {/* Quote text - Clear readable */}
         <blockquote className="relative mb-6">
-          <p className="text-sm leading-relaxed text-muted-foreground italic">
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 italic">
             &ldquo;{testimonial.quote}&rdquo;
           </p>
         </blockquote>
 
-        {/* Author info */}
-        <div className="relative flex items-center gap-3 pt-4 border-t border-border/50">
-          <Avatar className="h-11 w-11 ring-2 ring-green-brand/20 dark:ring-red-brand/20 group-hover:ring-green-brand/40 dark:group-hover:ring-red-brand/40 transition-all duration-300">
-            <AvatarFallback className="bg-gradient-to-br from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark text-white font-semibold text-sm">
+        {/* Author info - High contrast */}
+        <div className="relative flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-zinc-800/80">
+          <Avatar className="h-11 w-11 ring-2 ring-emerald-200/50 dark:ring-red-800/40 group-hover:ring-emerald-400/60 dark:group-hover:ring-red-600/50 transition-all duration-300">
+            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-red-500 dark:to-orange-600 text-white font-semibold text-sm">
               {testimonial.initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground text-sm truncate group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
+            <p className="font-semibold text-gray-900 dark:text-white text-sm truncate group-hover:text-emerald-700 dark:group-hover:text-red-400 transition-colors duration-300">
               {testimonial.name}
             </p>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
               {testimonial.title}
             </p>
-            <p className="text-xs text-green-brand/80 dark:text-red-brand/80 font-medium truncate">
+            <p className="text-xs text-emerald-600 dark:text-red-400 font-medium truncate mt-0.5">
               {testimonial.institution}
             </p>
           </div>
         </div>
 
         {/* Subtle corner accent */}
-        <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-green-brand dark:from-red-brand to-transparent rounded-br" />
-          <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-green-brand dark:from-red-brand to-transparent rounded-br" />
+        <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden rounded-tr-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-emerald-500 dark:from-red-500 to-transparent rounded-br" />
+          <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-emerald-500 dark:from-red-500 to-transparent rounded-br" />
         </div>
       </div>
     </motion.div>
@@ -167,10 +167,33 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
 export default function TestimonialsSection() {
   return (
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background gradient decoration */}
+      {/* Rich background gradient decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-400/5 dark:bg-red-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-teal-400/5 dark:bg-orange-500/5 rounded-full blur-3xl" />
+        
+        {/* Animated subtle particles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full bg-emerald-300/30 dark:bg-red-400/25"
+            style={{
+              left: `${10 + Math.random() * 80}%`,
+              top: `${10 + Math.random() * 80}%`,
+            }}
+            animate={{
+              opacity: [0.2, 0.6, 0.2],
+              scale: [1, 1.4, 1],
+              y: [0, -25, 0],
+            }}
+            transition={{
+              duration: 5 + i * 0.8,
+              repeat: Infinity,
+              delay: i * 0.9,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -182,11 +205,19 @@ export default function TestimonialsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-emerald-50 dark:bg-red-950/40 text-emerald-700 dark:text-red-300 border border-emerald-200/50 dark:border-red-800/30 mb-6">
+            <Star className="w-4 h-4 fill-current" />
+            Testimonials
+          </div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
             Trusted by{' '}
-            <span className="text-green-brand dark:text-red-brand">Researchers Worldwide</span>
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-red-500 dark:to-orange-400 bg-clip-text text-transparent">
+              Researchers Worldwide
+            </span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
             Join thousands of scientists who have transformed their research workflow.
             See what leading experts say about their experience with BioAlign.
           </p>
@@ -209,7 +240,7 @@ export default function TestimonialsSection() {
           ))}
         </motion.div>
 
-        {/* Trust indicators */}
+        {/* Trust indicators - Enhanced card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -217,42 +248,42 @@ export default function TestimonialsSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 px-8 rounded-2xl bg-white dark:bg-black backdrop-blur-sm border border-border/50">
-            <div className="flex items-center gap-2">
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 px-8 rounded-2xl bg-white dark:bg-zinc-950 backdrop-blur-sm border border-gray-200/60 dark:border-zinc-800/60 shadow-sm">
+            <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {['SC', 'JM', 'AP', 'CR'].map((initials) => (
                   <div
                     key={initials}
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-green-brand to-green-hover dark:from-red-brand dark:to-red-dark flex items-center justify-center text-white text-xs font-bold ring-2 ring-background"
+                    className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-red-500 dark:to-orange-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white dark:ring-zinc-950"
                   >
                     {initials}
                   </div>
                 ))}
               </div>
-              <span className="text-sm font-medium text-muted-foreground">
-                <span className="text-foreground font-bold">4.9/5</span> average rating
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <span className="text-gray-900 dark:text-white font-bold">4.9/5</span> average rating
               </span>
             </div>
-            <div className="h-6 w-px bg-border hidden sm:block" />
+            <div className="h-7 w-px bg-gray-200 dark:bg-zinc-700 hidden sm:block" />
             <div className="flex items-center gap-2">
               <StarRating rating={5} />
-              <span className="text-sm font-medium text-muted-foreground">
-                <span className="text-foreground font-bold">2,500+</span> reviews
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <span className="text-gray-900 dark:text-white font-bold">2,500+</span> reviews
               </span>
             </div>
-            <div className="h-6 w-px bg-border hidden sm:block" />
+            <div className="h-7 w-px bg-gray-200 dark:bg-zinc-700 hidden sm:block" />
             <div className="flex items-center gap-2">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className="w-3.5 h-3.5 fill-green-brand dark:fill-red-brand text-green-brand dark:text-red-brand"
+                    className="w-4 h-4 fill-amber-400 text-amber-400"
                     strokeWidth={0}
                   />
                 ))}
               </div>
-              <span className="text-sm font-medium text-muted-foreground">
-                <span className="text-foreground font-bold">98%</span> satisfaction
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <span className="text-gray-900 dark:text-white font-bold">98%</span> satisfaction
               </span>
             </div>
           </div>

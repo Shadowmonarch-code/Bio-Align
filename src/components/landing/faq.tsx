@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
-import { HelpCircle, FileText, Shield, DollarSign, GitBranch, Code, Users, Database, Smartphone, Rocket } from 'lucide-react'
+import { HelpCircle, FileText, Shield, DollarSign, GitBranch, Code, Users, Database, Smartphone, Rocket, MessageCircle } from 'lucide-react'
 
 interface FAQItem {
   id: string
@@ -114,10 +114,13 @@ const itemVariants = {
 export default function FAQSection() {
   return (
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background gradient decoration */}
+      {/* Rich background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-green-brand/5 dark:bg-red-brand/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-400/5 dark:bg-red-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-teal-400/5 dark:bg-orange-500/5 rounded-full blur-3xl" />
+        
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(239,68,68,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(239,68,68,0.03)_1px,transparent_1px)]" style={{ backgroundSize: '40px 40px' }} />
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -129,17 +132,25 @@ export default function FAQSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-emerald-50 dark:bg-red-950/40 text-emerald-700 dark:text-red-300 border border-emerald-200/50 dark:border-red-800/30 mb-6">
+            <HelpCircle className="w-4 h-4" />
+            Support
+          </div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
             Frequently Asked{' '}
-            <span className="text-green-brand dark:text-red-brand">Questions</span>
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-red-500 dark:to-orange-400 bg-clip-text text-transparent">
+              Questions
+            </span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
             Everything you need to know about BioAlign. Can&apos;t find what you&apos;re looking for?
             Feel free to contact our support team.
           </p>
         </motion.div>
 
-        {/* FAQ Accordion */}
+        {/* FAQ Accordion - Enhanced styling */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -151,20 +162,20 @@ export default function FAQSection() {
               <motion.div key={item.id} variants={itemVariants}>
                 <AccordionItem
                   value={item.id}
-                  className="group border border-border/50 bg-card/70 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-primary/30 data-[state=open]:bg-card/90 overflow-hidden"
+                  className="group border border-gray-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-950 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md hover:border-emerald-300/50 dark:hover:border-red-700/40 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-emerald-400/60 dark:data-[state=open]:border-red-600/50 data-[state=open]:bg-white dark:data-[state=open]:bg-zinc-950 overflow-hidden"
                 >
                   <AccordionTrigger className="py-5 text-left hover:no-underline group">
                     <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-green-brand/10 to-green-bg/5 dark:from-red-brand/10 dark:to-red-bg/5 flex items-center justify-center group-data-[state=open]:from-green-brand dark:group-data-[state=open]:from-red-brand group-data-[state=open]:to-green-hover dark:group-data-[state=open]:to-red-dark transition-all duration-300">
-                        <item.icon className="w-5 h-5 text-green-brand dark:text-red-brand group-data-[state=open]:text-white transition-colors duration-300" />
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-red-950/40 dark:to-orange-950/20 flex items-center justify-center group-data-[state=open]:from-emerald-500 dark:group-data-[state=open]:from-red-500 group-data-[state=open]:to-teal-500 dark:group-data-[state=open]:to-orange-500 transition-all duration-300">
+                        <item.icon className="w-5 h-5 text-emerald-600 dark:text-red-400 group-data-[state=open]:text-white transition-colors duration-300" />
                       </div>
-                      <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors duration-300">
+                      <span className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-red-400 transition-colors duration-300 text-left">
                         {item.question}
                       </span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pb-5 pl-14 pr-4">
-                    <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm sm:text-base">
                       {item.answer}
                     </p>
                   </AccordionContent>
@@ -174,7 +185,7 @@ export default function FAQSection() {
           </Accordion>
         </motion.div>
 
-        {/* Contact CTA */}
+        {/* Contact CTA - Enhanced card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -182,12 +193,16 @@ export default function FAQSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-12 text-center"
         >
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-green-bg/50 via-white/80 to-orange-500/5 dark:from-red-bg/30 dark:via-gray-900/40 dark:to-orange-500/5 backdrop-blur-sm border border-border/50">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <p className="text-foreground font-medium">
+          <div className="relative inline-flex flex-col sm:flex-row items-center gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-red-950/30 dark:via-zinc-950 dark:to-orange-950/20 backdrop-blur-sm border border-emerald-200/50 dark:border-red-800/30 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/30 dark:bg-red-900/20 rounded-full blur-2xl -z-0" />
+            
+            <div className="relative flex flex-col sm:flex-row items-center gap-3">
+              <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-red-400" />
+              <p className="text-gray-800 dark:text-gray-200 font-medium">
                 Still have questions?
               </p>
-              <button className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-green-brand dark:bg-red-brand hover:bg-green-hover dark:hover:bg-red-dark rounded-lg shadow-md shadow-green-brand/20 dark:shadow-red-brand/20 hover:shadow-green-brand/30 dark:hover:shadow-red-brand/30 transition-all duration-300 hover:-translate-y-0.5">
+              <button className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 dark:bg-red-500 hover:bg-emerald-700 dark:hover:bg-red-600 rounded-lg shadow-md shadow-emerald-500/20 dark:shadow-red-500/20 hover:shadow-emerald-500/30 dark:hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer">
                 Contact Support
                 <svg
                   className="w-4 h-4 group-hover:translate-x-1 transition-transform"
@@ -200,10 +215,10 @@ export default function FAQSection() {
                 </svg>
               </button>
             </div>
-            <span className="hidden sm:block w-px h-8 bg-border" />
-            <p className="text-sm text-muted-foreground">
+            <span className="hidden sm:block w-px h-8 bg-emerald-200 dark:bg-red-800/30" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Or join our{' '}
-              <a href="#" className="text-green-brand dark:text-red-brand hover:underline font-medium">
+              <a href="#" className="text-emerald-600 dark:text-red-400 hover:underline font-medium">
                 Community Slack
               </a>{' '}
               for instant help
