@@ -195,10 +195,7 @@ export default function FooterSection() {
             <p className="text-sm text-gray-500 text-center md:text-left">
               © {new Date().getFullYear()} BioAlign. Developed by{' '}
               <span className="text-emerald-300 font-medium">Toufik Mahata</span>, CBSH, RPCAU.
-            </p>
-            
-            
-              
+            </p> 
               {/* Scroll to Top Button */}
               <button
                 onClick={scrollToTop}
