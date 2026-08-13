@@ -196,7 +196,7 @@ export default function SupportPage({ onBack }: SupportProps) {
           
           <div className="grid md:grid-cols-3 gap-6">
             <a
-              href="https://github.com/toufikmahata"
+              href="https://github.com/Shadowmonarch-code/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all no-underline group"
@@ -209,22 +209,10 @@ export default function SupportPage({ onBack }: SupportProps) {
               <ExternalLink className="size-4 ml-auto opacity-50 group-hover:opacity-100" />
             </a>
             
-            <a
-              href="https://twitter.com/toufikmahata"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all no-underline group"
-            >
-              <Twitter className="size-6" />
-              <div>
-                <p className="font-medium group-hover:text-green-brand dark:group-hover:text-red-brand transition-colors">Follow on Twitter</p>
-                <p className="text-xs text-white/60">Stay updated</p>
-              </div>
-              <ExternalLink className="size-4 ml-auto opacity-50 group-hover:opacity-100" />
-            </a>
+            
             
             <a
-              href="https://linkedin.com/in/toufikmahata"
+              href="https://www.linkedin.com/in/toufik-mahata-549376214/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all no-underline group"
