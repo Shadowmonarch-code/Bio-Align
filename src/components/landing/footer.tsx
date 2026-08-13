@@ -50,9 +50,8 @@ const footerLinks = {
 
 // Social links configuration
 const socialLinks = [
-  { name: 'GitHub', icon: Github, href: 'https://github.com/toufikmahata', ariaLabel: 'Visit GitHub' },
-  { name: 'Twitter/X', icon: Twitter, href: 'https://twitter.com/toufikmahata', ariaLabel: 'Follow on Twitter' },
-  { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/in/toufikmahata', ariaLabel: 'Connect on LinkedIn' },
+  { name: 'GitHub', icon: Github, href: 'https://github.com/Shadowmonarch-code', ariaLabel: 'Visit GitHub' },
+  { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/in/toufik-mahata-549376214/', ariaLabel: 'Connect on LinkedIn' },
 ];
 
 export default function FooterSection() {
