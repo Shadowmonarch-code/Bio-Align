@@ -160,7 +160,30 @@ export default function Home() {
             </div>
           </div>
         </section>
+// Use ref to track view history for back button support
+const viewHistoryRef = useRef<ViewType[]>(['landing'])
 
+// Helper to push view to history
+const pushToHistory = useCallback((view: ViewType) => {
+  if (view !== viewHistoryRef.current[viewHistoryRef.current.length - 1]) {
+    viewHistoryRef.current.push(view)
+    window.history.pushState({ view }, '', window.location.pathname)
+  }
+}, [])
+
+// Browser back/forward button handler
+useEffect(() => {
+  const handlePopState = (event: PopStateEvent) => {
+    if (viewHistoryRef.current.length > 1) {
+      viewHistoryRef.current.pop()
+      const previousView = viewHistoryRef.current[viewHistoryRef.current.length - 1]
+      setCurrentView(previousView)
+      window.scrollTo(0, 0)
+    }
+  }
+  window.addEventListener("popstate", handlePopState)
+  // ...
+}, [])
         {/* Research Workflow */}
         <section id="workflow" className="py-24 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
