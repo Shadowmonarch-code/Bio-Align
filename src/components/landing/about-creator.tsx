@@ -225,7 +225,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
                       <Mail className="w-4 h-4" />
                     </a>
                     <a href={creator.socials.github} className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition-all hover:scale-110 border border-white/10">
-                      <Github className="https://github.com/Shadowmonarch-code/" />
+                      <Github className="w-4 h-4" />
                     </a>
                     <a href={creator.socials.twitter} className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition-all hover:scale-110 border border-white/10">
                       <Twitter className="w-4 h-4" />
