@@ -1,0 +1,681 @@
+     1→'use client'
+     2→
+     3→import { motion } from 'framer-motion'
+     4→import { 
+     5→  Search, 
+     6→  MousePointerClick, 
+     7→  ExternalLink, 
+     8→  BookOpen,
+     9→  ArrowRight,
+    10→  Lightbulb,
+    11→  Rocket,
+    12→  Target,
+    13→  CheckCircle2,
+    14→  ChevronRight,
+    15→  Dna,
+    16→  FlaskConical,
+    17→  BarChart3,
+    18→  Users,
+    19→  Globe
+    20→} from 'lucide-react'
+    21→import {
+    22→  Accordion,
+    23→  AccordionContent,
+    24→  AccordionItem,
+    25→  AccordionTrigger
+    26→} from '@/components/ui/accordion'
+    27→
+    28→// Animation variants
+    29→const containerVariants = {
+    30→  hidden: { opacity: 0 },
+    31→  visible: {
+    32→    opacity: 1,
+    33→    transition: {
+    34→      staggerChildren: 0.1
+    35→    }
+    36→  }
+    37→}
+    38→
+    39→const itemVariants = {
+    40→  hidden: { opacity: 0, y: 30 },
+    41→  visible: {
+    42→    opacity: 1,
+    43→    y: 0,
+    44→    transition: {
+    45→      duration: 0.5,
+    46→      ease: [0.25, 0.46, 0.45, 0.94] as const
+    47→    }
+    48→  }
+    49→}
+    50→
+    51→const fadeInUp = {
+    52→  hidden: { opacity: 0, y: 20 },
+    53→  visible: {
+    54→    opacity: 1,
+    55→    y: 0,
+    56→    transition: { duration: 0.6 }
+    57→  }
+    58→}
+    59→
+    60→// Step interface for getting started
+    61→interface Step {
+    62→  number: number
+    63→  icon: React.ElementType
+    64→  title: string
+    65→  description: string
+    66→  tips?: string[]
+    67→}
+    68→
+    69→// Tool category interface
+    70→interface ToolCategory {
+    71→  icon: React.ElementType
+    72→  title: string
+    73→  description: string
+    74→  tools: string[]
+    75→  color: string
+    76→}
+    77→
+    78→// Navigation step interface
+    79→interface NavStep {
+    80→  icon: React.ElementType
+    81→  title: string
+    82→  description: string
+    83→  action: string
+    84→}
+    85→
+    86→// Tip interface
+    87→interface Tip {
+    88→  icon: React.ElementType
+    89→  title: string
+    90→  content: string
+    91→}
+    92→
+    93→// FAQ item interface
+    94→interface FAQItem {
+    95→  id: string
+    96→  question: string
+    97→  answer: string
+    98→}
+    99→
+   100→// Getting Started Steps
+   101→const gettingStartedSteps: Step[] = [
+   102→  {
+   103→    number: 1,
+   104→    icon: Globe,
+   105→    title: 'Create Your Account',
+   106→    description: 'Sign up for free using your email, Google, or GitHub account. No credit card required to get started with our comprehensive bioinformatics toolkit.',
+   107→    tips: [
+   108→      'Use your institutional email for academic benefits',
+   109→      'Enable two-factor authentication for security',
+   110→      'Complete your profile for personalized recommendations'
+   111→    ]
+   112→  },
+   113→  {
+   114→    number: 2,
+   115→    icon: Search,
+   116→    title: 'Explore Available Tools',
+   117→    description: 'Browse our extensive library of 50+ bioinformatics tools organized by category. Use the search function or filter by analysis type to find exactly what you need.',
+   118→    tips: [
+   119→      'Try the AI-powered tool recommender',
+   120→      'Bookmark frequently used tools for quick access',
+   121→      'Check out featured workflows for inspiration'
+   122→    ]
+   123→  },
+   124→  {
+   125→    number: 3,
+   126→    icon: MousePointerClick,
+   127→    title: 'Upload Your Data',
+   128→    description: 'Upload your sequences, structures, or datasets in any supported format. Our intelligent system auto-detects file types and suggests appropriate analysis tools.',
+   129→    tips: [
+   130→      'Supported formats: FASTA, FASTQ, GenBank, PDB, VCF, and more',
+   131→      'Maximum file size: 500MB (Pro: 2GB)',
+   132→      'Drag and drop or use direct database import'
+   133→    ]
+   134→  },
+   135→  {
+   136→    number: 4,
+   137→    icon: Rocket,
+   138→    title: 'Run Analysis & Get Results',
+   139→    description: 'Configure your analysis parameters and launch the job. Monitor progress in real-time, then explore interactive results with publication-ready visualizations.',
+   140→    tips: [
+   141→      'Results are stored securely for 30 days (free) / 1 year (Pro)',
+   142→      'Export in multiple formats including PDF, SVG, and raw data',
+   143→      'Share results with collaborators via secure links'
+   144→    ]
+   145→  }
+   146→]
+   147→
+   148→// Tool Categories
+   149→const toolCategories: ToolCategory[] = [
+   150→  {
+   151→    icon: Dna,
+   152→    title: 'Sequence Analysis',
+   153→    description: 'DNA/RNA sequence tools for alignment, translation, and pattern discovery',
+   154→    tools: ['BLAST', 'Multiple Alignment', 'ORF Finder', 'Primer Design', 'Motif Search'],
+   155→    color: 'from-[#10B981] to-[#047857]'
+   156→  },
+   157→  {
+   158→    icon: FlaskConical,
+   159→    title: 'Protein Analysis',
+   160→    description: 'Structure prediction, properties calculation, and domain identification',
+   161→    tools: ['Structure Prediction', 'Physicochemical Properties', 'Domain Finder', 'TMHMM'],
+   162→    color: 'from-[#10B981] to-[#065F46]'
+   163→  },
+   164→  {
+   165→    icon: BarChart3,
+   166→    title: 'Genomics & Expression',
+   167→    description: 'Genome browsing, variant analysis, and transcriptomics pipelines',
+   168→    tools: ['Genome Browser', 'Variant Calling', 'RNA-seq Analysis', 'DEG Analysis'],
+   169→    color: 'from-[#059669] to-[#065F46]'
+   170→  },
+   171→  {
+   172→    icon: Users,
+   173→    title: 'Phylogenetics & Evolution',
+   174→    description: 'Tree building, evolutionary analysis, and species comparison',
+   175→    tools: ['Tree Builder', 'Bootstrap Analysis', 'Distance Matrix', 'Consensus Tree'],
+   176→    color: 'from-[#10B981] to-[#064E3B]'
+   177→  }
+   178→]
+   179→
+   180→// Navigation Steps
+   181→const navigationSteps: NavStep[] = [
+   182→  {
+   183→    icon: BookOpen,
+   184→    title: 'Use the Main Navigation',
+   185→    description: 'Access all major sections from the top navigation bar including Tools, Projects, Documentation, and Community resources.',
+   186→    action: 'Click on any nav item to expand sub-menus'
+   187→  },
+   188→  {
+   189→    icon: Target,
+   190→    title: 'Tool Discovery Page',
+   191→    description: 'Browse tools by category, popularity, or recent updates. Each tool card shows key features and estimated runtime.',
+   192→    action: 'Use filters to narrow down by organism, data type, or analysis type'
+   193→  },
+   194→  {
+   195→    icon: ExternalLink,
+   196→    title: 'Quick Actions Panel',
+   197→    description: 'Access recently used tools, ongoing jobs, and saved projects from the sidebar for efficient workflow management.',
+   198→    action: 'Pin your favorite tools for instant access'
+   199→  }
+   200→]
+   201→
+   202→// Tips for Best Results
+   203→const bestTips: Tip[] = [
+   204→  {
+   205→    icon: Lightbulb,
+   206→    title: 'Start Simple, Then Refine',
+   207→    content: 'Begin with default parameters for your first analysis. Once you understand the baseline results, adjust parameters systematically to optimize for your specific research questions.'
+   208→  },
+   209→  {
+   210→    icon: CheckCircle2,
+   211→    title: 'Validate Your Data First',
+   212→    content: 'Always run quality control checks before main analyses. Use our built-in QC tools to identify issues like low-quality sequences, contamination, or format errors early.'
+   213→  },
+   214→  {
+   215→    icon: ArrowRight,
+   216→    title: 'Chain Analyses Together',
+   217→    content: 'Our pipeline feature lets you connect output from one tool as input to another. Build reproducible workflows that save time and ensure consistency across projects.'
+   218→  },
+   219→  {
+   220→    icon: Rocket,
+   221→    title: 'Leverage AI Assistance',
+   222→    content: 'Our AI copilot can help interpret results, suggest next steps, and even recommend optimal parameters based on your data characteristics and research goals.'
+   223→  }
+   224→]
+   225→
+   226→// FAQ Items
+   227→const faqItems: FAQItem[] = [
+   228→  {
+   229→    id: 'account-setup',
+   230→    question: 'How do I set up my account and what are the requirements?',
+   231→    answer: 'Creating an account is simple and free! Just click "Sign Up" and choose your preferred method: email/password, Google OAuth, or GitHub authentication. No special requirements needed—just a valid email address. Academic users can verify their status for extended free tier benefits including additional storage and premium tool access.'
+   232→  },
+   233→  {
+   234→    id: 'file-upload',
+   235→    question: 'What files can I upload and how do I prepare them?',
+   236→    answer: 'We support all major bioinformatics formats: FASTA, FASTQ, GenBank, EMBL, PDB, VCF, BAM/SAM, BED, GFF/GTF, Newick trees, CSV/TSV, and more. Files should be properly formatted and under the size limit (500MB free, 2GB Pro). Our auto-detection will identify the format, but you can also specify it manually. For large datasets, consider using our direct database import from NCBI, UniProt, or Ensembl.'
+   237→  },
+   238→  {
+   239→    id: 'tool-selection',
+   240→    question: 'How do I choose the right tool for my analysis?',
+   241→    answer: 'Each tool page includes detailed descriptions, example use cases, and input/output specifications. Use our AI-powered tool recommender—simply describe your goal and upload a sample of your data, and we\'ll suggest the best options. You can also browse by category, compare similar tools side-by-side, or check our pre-built workflow templates for common analysis types.'
+   242→  },
+   243→  {
+   244→    id: 'results-interpretation',
+   245→    question: 'How do I interpret and export my results?',
+   246→    answer: 'Results are presented with interactive visualizations, downloadable tables, and detailed explanations. Each result includes an interpretation guide specific to that analysis type. Export options include publication-ready figures (PDF, SVG, PNG), raw data files, and shareable interactive reports. Our AI assistant can also help explain complex results in plain language.'
+   247→  },
+   248→  {
+   249→    id: 'troubleshooting',
+   250→    question: 'What if my analysis fails or gives unexpected results?',
+   251→    answer: 'First, check the job log for error messages and warnings. Common issues include unsupported characters in sequences, files exceeding size limits, or incompatible parameter combinations. Our help documentation includes troubleshooting guides for each tool. If you need further assistance, contact support or post in our community forum—we typically respond within hours.'
+   252→  },
+   253→  {
+   254→    id: 'collaboration',
+   255→    question: 'Can I work with my team on the same project?',
+   256→    answer: 'Absolutely! Collaboration is a core feature. Create shared workspaces, invite team members with role-based permissions (Admin, Editor, Viewer), and see real-time changes. Comments and annotations can be added to any analysis. Enterprise plans include advanced features like SSO, audit logs, and centralized billing.'
+   257→  }
+   258→]
+   259→
+   260→export default function HowToUseGuide() {
+   261→  return (
+   262→    <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+   263→      {/* Background gradient decoration */}
+   264→      <div className="absolute inset-0 -z-10">
+   265→        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
+   266→        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
+   267→        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/3 rounded-full blur-3xl" />
+   268→      </div>
+   269→
+   270→      <div className="max-w-7xl mx-auto">
+   271→        {/* Section Header */}
+   272→        <motion.div
+   273→          initial={{ opacity: 0, y: 20 }}
+   274→          whileInView={{ opacity: 1, y: 0 }}
+   275→          viewport={{ once: true, margin: '-100px' }}
+   276→          transition={{ duration: 0.6 }}
+   277→          className="text-center mb-20"
+   278→        >
+   279→          <motion.div
+   280→            initial={{ opacity: 0, scale: 0.9 }}
+   281→            whileInView={{ opacity: 1, scale: 1 }}
+   282→            viewport={{ once: true }}
+   283→            transition={{ duration: 0.5, delay: 0.1 }}
+   284→            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 text-[#10B981] text-sm font-medium mb-6"
+   285→          >
+   286→            <BookOpen className="w-4 h-4" />
+   287→            User Guide
+   288→          </motion.div>
+   289→          
+   290→          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+   291→            How to{' '}
+   292→            <span className="text-[#10B981]">Get Started</span>
+   293→          </h2>
+   294→          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
+   295→            Follow these step-by-step guides to make the most of our bioinformatics platform.
+   296→            From your first analysis to advanced workflows — we&apos;ve got you covered.
+   297→          </p>
+   298→        </motion.div>
+   299→
+   300→        {/* Getting Started Section */}
+   301→        <motion.div
+   302→          variants={containerVariants}
+   303→          initial="hidden"
+   304→          whileInView="visible"
+   305→          viewport={{ once: true, margin: '-50px' }}
+   306→          className="mb-24"
+   307→        >
+   308→          <motion.div variants={fadeInUp} className="text-center mb-12">
+   309→            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+   310→              Getting Started
+   311→            </h3>
+   312→            <p className="text-muted-foreground max-w-xl mx-auto">
+   313→              New to BioAlign? Follow these four simple steps to run your first analysis in minutes.
+   314→            </p>
+   315→          </motion.div>
+   316→
+   317→          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+   318→            {gettingStartedSteps.map((step, index) => (
+   319→              <motion.div
+   320→                key={step.number}
+   321→                variants={itemVariants}
+   322→                whileHover={{
+   323→                  y: -8,
+   324→                  transition: { duration: 0.3, ease: 'easeOut' }
+   325→                }}
+   326→                className="group relative"
+   327→              >
+   328→                <div className="relative h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
+   329→                  {/* Glow effect on hover */}
+   330→                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+   331→                    <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/5 via-transparent to-transparent rounded-2xl" />
+   332→                  </div>
+   333→
+   334→                  {/* Step Number & Icon */}
+   335→                  <div className="flex items-start gap-5 mb-5">
+   336→                    <div className="relative flex-shrink-0">
+   337→                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg shadow-[#10B981]/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+   338→                        <step.icon className="w-7 h-7 text-white" strokeWidth={2} />
+   339→                      </div>
+   340→                      {/* Step Number Badge */}
+   341→                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#10B981] text-white text-sm font-bold flex items-center justify-center shadow-md">
+   342→                        {step.number}
+   343→                      </div>
+   344→                    </div>
+   345→
+   346→                    <div className="flex-1 pt-1">
+   347→                      <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+   348→                        {step.title}
+   349→                      </h4>
+   350→                      <p className="text-sm leading-relaxed text-muted-foreground">
+   351→                        {step.description}
+   352→                      </p>
+   353→                    </div>
+   354→                  </div>
+   355→
+   356→                  {/* Tips */}
+   357→                  {step.tips && (
+   358→                    <div className="space-y-2 pl-[68px]">
+   359→                      {step.tips.map((tip, tipIndex) => (
+   360→                        <motion.div
+   361→                          key={tipIndex}
+   362→                          initial={{ opacity: 0, x: -10 }}
+   363→                          whileInView={{ opacity: 1, x: 0 }}
+   364→                          viewport={{ once: true }}
+   365→                          transition={{ delay: tipIndex * 0.1 + 0.2 }}
+   366→                          className="flex items-start gap-2 text-xs text-muted-foreground"
+   367→                        >
+   368→                          <ChevronRight className="w-3 h-3 text-[#10B981] mt-0.5 flex-shrink-0" />
+   369→                          <span>{tip}</span>
+   370→                        </motion.div>
+   371→                      ))}
+   372→                    </div>
+   373→                  )}
+   374→
+   375→                  {/* Corner accent */}
+   376→                  <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+   377→                    <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-[#10B981] to-transparent rounded-br" />
+   378→                    <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-[#10B981] to-transparent rounded-br" />
+   379→                  </div>
+   380→                </div>
+   381→
+   382→                {/* Connector line (except last item on desktop) */}
+   383→                {index < gettingStartedSteps.length - 1 && index % 2 === 0 && (
+   384→                  <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 z-10">
+   385→                    <ArrowRight className="w-6 h-6 text-[#10B981]/30" />
+   386→                  </div>
+   387→                )}
+   388→              </motion.div>
+   389→            ))}
+   390→          </div>
+   391→        </motion.div>
+   392→
+   393→        {/* Understanding Tool Categories Section */}
+   394→        <motion.div
+   395→          initial={{ opacity: 0, y: 20 }}
+   396→          whileInView={{ opacity: 1, y: 0 }}
+   397→          viewport={{ once: true, margin: '-50px' }}
+   398→          transition={{ duration: 0.6 }}
+   399→          className="mb-24"
+   400→        >
+   401→          <motion.div className="text-center mb-12">
+   402→            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+   403→              Understanding Tool Categories
+   404→            </h3>
+   405→            <p className="text-muted-foreground max-w-xl mx-auto">
+   406→              Our tools are organized into intuitive categories to help you find exactly what you need.
+   407→            </p>
+   408→          </motion.div>
+   409→
+   410→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+   411→            {toolCategories.map((category, index) => (
+   412→              <motion.div
+   413→                key={category.title}
+   414→                initial={{ opacity: 0, y: 30 }}
+   415→                whileInView={{ opacity: 1, y: 0 }}
+   416→                viewport={{ once: true }}
+   417→                transition={{ delay: index * 0.1, duration: 0.5 }}
+   418→                whileHover={{
+   419→                  y: -8,
+   420→                  scale: 1.02,
+   421→                  transition: { duration: 0.3 }
+   422→                }}
+   423→                className="group relative"
+   424→              >
+   425→                <div className="h-full p-6 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
+   426→                  {/* Gradient header bar */}
+   427→                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${category.color} opacity-80`} />
+   428→
+   429→                  {/* Icon */}
+   430→                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+   431→                    <category.icon className="w-6 h-6 text-white" strokeWidth={2} />
+   432→                  </div>
+   433→
+   434→                  {/* Content */}
+   435→                  <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+   436→                    {category.title}
+   437→                  </h4>
+   438→                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+   439→                    {category.description}
+   440→                  </p>
+   441→
+   442→                  {/* Tools list */}
+   443→                  <div className="flex flex-wrap gap-1.5">
+   444→                    {category.tools.map((tool) => (
+   445→                      <span
+   446→                        key={tool}
+   447→                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-[#10B981]/10 text-[#10B981]/80 group-hover:bg-[#10B981]/15 transition-colors duration-300"
+   448→                      >
+   449→                        {tool}
+   450→                      </span>
+   451→                    ))}
+   452→                  </div>
+   453→                </div>
+   454→              </motion.div>
+   455→            ))}
+   456→          </div>
+   457→        </motion.div>
+   458→
+   459→        {/* How to Navigate Tools Section */}
+   460→        <motion.div
+   461→          variants={containerVariants}
+   462→          initial="hidden"
+   463→          whileInView="visible"
+   464→          viewport={{ once: true, margin: '-50px' }}
+   465→          className="mb-24"
+   466→        >
+   467→          <motion.div variants={fadeInUp} className="text-center mb-12">
+   468→            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+   469→              How to Navigate Tools
+   470→            </h3>
+   471→            <p className="text-muted-foreground max-w-xl mx-auto">
+   472→              Learn the most efficient ways to find and access the tools you need.
+   473→            </p>
+   474→          </motion.div>
+   475→
+   476→          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+   477→            {navigationSteps.map((navStep, index) => (
+   478→              <motion.div
+   479→                key={navStep.title}
+   480→                variants={itemVariants}
+   481→                whileHover={{
+   482→                  y: -8,
+   483→                  transition: { duration: 0.3 }
+   484→                }}
+   485→                className="group relative"
+   486→              >
+   487→                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
+   488→                  {/* Icon with decorative ring */}
+   489→                  <div className="relative mb-6">
+   490→                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[#10B981]/10 group-hover:bg-[#10B981]/20 transition-colors duration-300 animate-pulse-slow" />
+   491→                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg shadow-[#10B981]/20 group-hover:scale-110 transition-transform duration-300">
+   492→                      <navStep.icon className="w-8 h-8 text-white" strokeWidth={2} />
+   493→                    </div>
+   494→                  </div>
+   495→
+   496→                  {/* Content */}
+   497→                  <h4 className="text-xl font-semibold text-foreground mb-3 group-hover:text-[#10B981] transition-colors duration-300">
+   498→                    {navStep.title}
+   499→                  </h4>
+   500→                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+   501→                    {navStep.description}
+   502→                  </p>
+   503→
+   504→                  {/* Action hint */}
+   505→                  <div className="flex items-start gap-2 p-3 rounded-lg bg-[#10B981]/5 group-hover:bg-[#10B981]/10 transition-colors duration-300">
+   506→                    <ChevronRight className="w-4 h-4 text-[#10B981] mt-0.5 flex-shrink-0" />
+   507→                    <span className="text-xs font-medium text-[#10B981]/90">
+   508→                      {navStep.action}
+   509→                    </span>
+   510→                  </div>
+   511→                </div>
+   512→              </motion.div>
+   513→            ))}
+   514→          </div>
+   515→        </motion.div>
+   516→
+   517→        {/* Tips for Best Results Section */}
+   518→        <motion.div
+   519→          initial={{ opacity: 0, y: 20 }}
+   520→          whileInView={{ opacity: 1, y: 0 }}
+   521→          viewport={{ once: true, margin: '-50px' }}
+   522→          transition={{ duration: 0.6 }}
+   523→          className="mb-24"
+   524→        >
+   525→          <motion.div className="text-center mb-12">
+   526→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 text-sm font-medium mb-4">
+   527→              <Lightbulb className="w-4 h-4" />
+   528→              Pro Tips
+   529→            </div>
+   530→            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+   531→              Tips for Best Results
+   532→            </h3>
+   533→            <p className="text-muted-foreground max-w-xl mx-auto">
+   534→              Expert recommendations to maximize the quality and efficiency of your analyses.
+   535→            </p>
+   536→          </motion.div>
+   537→
+   538→          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+   539→            {bestTips.map((tip, index) => (
+   540→              <motion.div
+   541→                key={tip.title}
+   542→                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+   543→                whileInView={{ opacity: 1, x: 0 }}
+   544→                viewport={{ once: true }}
+   545→                transition={{ delay: index * 0.1, duration: 0.5 }}
+   546→                whileHover={{
+   547→                  scale: 1.02,
+   548→                  transition: { duration: 0.3 }
+   549→                }}
+   550→                className="group"
+   551→              >
+   552→                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-gradient-to-br from-white/80 to-white/60 dark:from-gray-900/60 dark:to-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#10B981]/10 hover:border-[#10B981]/20 transition-all duration-300 relative overflow-hidden">
+   553→                  {/* Decorative background element */}
+   554→                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-[#10B981]/5 group-hover:bg-[#10B981]/10 transition-colors duration-300" />
+   555→
+   556→                  <div className="relative">
+   557→                    <div className="flex items-start gap-4">
+   558→                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#10B981]/10 to-[#10B981]/5 flex items-center justify-center group-hover:from-[#10B981] group-hover:to-[#059669] transition-all duration-300">
+   559→                        <tip.icon className="w-6 h-6 text-[#10B981] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+   560→                      </div>
+   561→
+   562→                      <div className="flex-1">
+   563→                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+   564→                          {tip.title}
+   565→                        </h4>
+   566→                        <p className="text-sm text-muted-foreground leading-relaxed">
+   567→                          {tip.content}
+   568→                        </p>
+   569→                      </div>
+   570→                    </div>
+   571→                  </div>
+   572→                </div>
+   573→              </motion.div>
+   574→            ))}
+   575→          </div>
+   576→        </motion.div>
+   577→
+   578→        {/* FAQ Accordion Section */}
+   579→        <motion.div
+   580→          initial={{ opacity: 0, y: 20 }}
+   581→          whileInView={{ opacity: 1, y: 0 }}
+   582→          viewport={{ once: true, margin: '-50px' }}
+   583→          transition={{ duration: 0.6 }}
+   584→        >
+   585→          <motion.div className="text-center mb-12">
+   586→            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+   587→              Frequently Asked Questions
+   588→            </h3>
+   589→            <p className="text-muted-foreground max-w-xl mx-auto">
+   590→              Quick answers to common questions about using BioAlign effectively.
+   591→            </p>
+   592→          </motion.div>
+   593→
+   594→          <div className="max-w-4xl mx-auto">
+   595→            <Accordion type="single" collapsible className="w-full space-y-3">
+   596→              {faqItems.map((item, index) => (
+   597→                <motion.div
+   598→                  key={item.id}
+   599→                  initial={{ opacity: 0, y: 20 }}
+   600→                  whileInView={{ opacity: 1, y: 0 }}
+   601→                  viewport={{ once: true }}
+   602→                  transition={{ delay: index * 0.08, duration: 0.4 }}
+   603→                >
+   604→                  <AccordionItem
+   605→                    value={item.id}
+   606→                    className="group border border-border/50 bg-card/70 backdrop-blur-xl rounded-xl px-6 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 data-[state=open]:shadow-lg data-[state=open]:border-primary/30 data-[state=open]:bg-card/90 overflow-hidden"
+   607→                  >
+   608→                    <AccordionTrigger className="py-5 text-left hover:no-underline group">
+   609→                      <div className="flex items-center gap-4">
+   610→                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center text-[#10B981] font-bold text-sm group-data-[state=open]:from-[#10B981] group-data-[state=open]:to-[#059669] group-data-[state=open]:text-white transition-all duration-300">
+   611→                          Q{index + 1}
+   612→                        </div>
+   613→                        <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[#10B981] transition-colors duration-300 text-left">
+   614→                          {item.question}
+   615→                        </span>
+   616→                      </div>
+   617→                    </AccordionTrigger>
+   618→                    <AccordionContent className="pb-5 pl-12 pr-4">
+   619→                      <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+   620→                        {item.answer}
+   621→                      </p>
+   622→                    </AccordionContent>
+   623→                  </AccordionItem>
+   624→                </motion.div>
+   625→              ))}
+   626→            </Accordion>
+   627→          </div>
+   628→        </motion.div>
+   629→
+   630→        {/* CTA Section */}
+   631→        <motion.div
+   632→          initial={{ opacity: 0, y: 20 }}
+   633→          whileInView={{ opacity: 1, y: 0 }}
+   634→          viewport={{ once: true, margin: '-50px' }}
+   635→          transition={{ duration: 0.6, delay: 0.2 }}
+   636→          className="mt-20"
+   637→        >
+   638→          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#10B981] via-[#047857] to-[#065F46] p-8 sm:p-12 lg:p-16 text-center">
+   639→            {/* Background decorations */}
+   640→            <div className="absolute inset-0 overflow-hidden">
+   641→              <div className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+   642→              <div className="absolute -bottom-1/2 -right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+   643→            </div>
+   644→
+   645→            <div className="relative z-10">
+   646→              <motion.div
+   647→                initial={{ opacity: 0, scale: 0.8 }}
+   648→                whileInView={{ opacity: 1, scale: 1 }}
+   649→                viewport={{ once: true }}
+   650→                transition={{ duration: 0.5, delay: 0.3 }}
+   651→                className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
+   652→              >
+   653→                <Rocket className="w-8 h-8 text-white" strokeWidth={2} />
+   654→              </motion.div>
+   655→
+   656→              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+   657→                Ready to Start Your Analysis?
+   658→              </h3>
+   659→              <p className="max-w-xl mx-auto text-white/80 mb-8 text-lg">
+   660→                Join thousands of researchers who trust BioAlign for their bioinformatics needs.
+   661→                Get started in minutes with our free tier.
+   662→              </p>
+   663→
+   664→              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+   665→                <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+   666→                  Start Free Trial
+   667→                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+   668→                </button>
+   669→                <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white border-2 border-white/30 hover:border-white/60 hover:bg-white/10 rounded-xl transition-all duration-300">
+   670→                  View Documentation
+   671→                  <ExternalLink className="w-5 h-5" />
+   672→                </button>
+   673→              </div>
+   674→            </div>
+   675→          </div>
+   676→        </motion.div>
+   677→      </div>
+   678→    </section>
+   679→  )
+   680→}
+   681→

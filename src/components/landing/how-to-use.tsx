@@ -152,28 +152,28 @@ const toolCategories: ToolCategory[] = [
     title: 'Sequence Analysis',
     description: 'DNA/RNA sequence tools for alignment, translation, and pattern discovery',
     tools: ['BLAST', 'Multiple Alignment', 'ORF Finder', 'Primer Design', 'Motif Search'],
-    color: 'from-[#10B981] to-[#047857]'
+    color: 'from-[green-primary] to-[green-dark]'
   },
   {
     icon: FlaskConical,
     title: 'Protein Analysis',
     description: 'Structure prediction, properties calculation, and domain identification',
     tools: ['Structure Prediction', 'Physicochemical Properties', 'Domain Finder', 'TMHMM'],
-    color: 'from-[#10B981] to-[#065F46]'
+    color: 'from-[green-primary] to-[green-dark]'
   },
   {
     icon: BarChart3,
     title: 'Genomics & Expression',
     description: 'Genome browsing, variant analysis, and transcriptomics pipelines',
     tools: ['Genome Browser', 'Variant Calling', 'RNA-seq Analysis', 'DEG Analysis'],
-    color: 'from-[#059669] to-[#065F46]'
+    color: 'from-[green-dark] to-[green-dark]'
   },
   {
     icon: Users,
     title: 'Phylogenetics & Evolution',
     description: 'Tree building, evolutionary analysis, and species comparison',
     tools: ['Tree Builder', 'Bootstrap Analysis', 'Distance Matrix', 'Consensus Tree'],
-    color: 'from-[#10B981] to-[#064E3B]'
+    color: 'from-[green-primary] to-[green-dark]'
   }
 ]
 
@@ -262,8 +262,8 @@ export default function HowToUseGuide() {
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background gradient decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[green-primary]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[green-primary]/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/3 rounded-full blur-3xl" />
       </div>
 
@@ -281,7 +281,7 @@ export default function HowToUseGuide() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 text-[#10B981] text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[green-primary]/10 text-[green-primary] text-sm font-medium mb-6"
           >
             <BookOpen className="w-4 h-4" />
             User Guide
@@ -289,7 +289,7 @@ export default function HowToUseGuide() {
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             How to{' '}
-            <span className="text-[#10B981]">Get Started</span>
+            <span className="text-[green-primary]">Get Started</span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
             Follow these step-by-step guides to make the most of our bioinformatics platform.
@@ -328,23 +328,23 @@ export default function HowToUseGuide() {
                 <div className="relative h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 overflow-hidden">
                   {/* Glow effect on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/5 via-transparent to-transparent rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[green-primary]/5 via-transparent to-transparent rounded-2xl" />
                   </div>
 
                   {/* Step Number & Icon */}
                   <div className="flex items-start gap-5 mb-5">
                     <div className="relative flex-shrink-0">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg shadow-[#10B981]/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[green-primary] to-[green-dark] flex items-center justify-center shadow-lg shadow-[green-primary]/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                         <step.icon className="w-7 h-7 text-white" strokeWidth={2} />
                       </div>
                       {/* Step Number Badge */}
-                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#10B981] text-white text-sm font-bold flex items-center justify-center shadow-md">
+                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[green-primary] text-white text-sm font-bold flex items-center justify-center shadow-md">
                         {step.number}
                       </div>
                     </div>
 
                     <div className="flex-1 pt-1">
-                      <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+                      <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[green-primary] transition-colors duration-300">
                         {step.title}
                       </h4>
                       <p className="text-sm leading-relaxed text-muted-foreground">
@@ -365,7 +365,7 @@ export default function HowToUseGuide() {
                           transition={{ delay: tipIndex * 0.1 + 0.2 }}
                           className="flex items-start gap-2 text-xs text-muted-foreground"
                         >
-                          <ChevronRight className="w-3 h-3 text-[#10B981] mt-0.5 flex-shrink-0" />
+                          <ChevronRight className="w-3 h-3 text-[green-primary] mt-0.5 flex-shrink-0" />
                           <span>{tip}</span>
                         </motion.div>
                       ))}
@@ -374,15 +374,15 @@ export default function HowToUseGuide() {
 
                   {/* Corner accent */}
                   <div className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-[#10B981] to-transparent rounded-br" />
-                    <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-[#10B981] to-transparent rounded-br" />
+                    <div className="absolute top-0 right-0 w-1 h-8 bg-gradient-to-b from-[green-primary] to-transparent rounded-br" />
+                    <div className="absolute top-0 right-0 w-8 h-1 bg-gradient-to-l from-[green-primary] to-transparent rounded-br" />
                   </div>
                 </div>
 
                 {/* Connector line (except last item on desktop) */}
                 {index < gettingStartedSteps.length - 1 && index % 2 === 0 && (
                   <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-[#10B981]/30" />
+                    <ArrowRight className="w-6 h-6 text-[green-primary]/30" />
                   </div>
                 )}
               </motion.div>
@@ -432,7 +432,7 @@ export default function HowToUseGuide() {
                   </div>
 
                   {/* Content */}
-                  <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+                  <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[green-primary] transition-colors duration-300">
                     {category.title}
                   </h4>
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
@@ -444,7 +444,7 @@ export default function HowToUseGuide() {
                     {category.tools.map((tool) => (
                       <span
                         key={tool}
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-[#10B981]/10 text-[#10B981]/80 group-hover:bg-[#10B981]/15 transition-colors duration-300"
+                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-[green-primary]/10 text-[green-primary]/80 group-hover:bg-[green-primary]/15 transition-colors duration-300"
                       >
                         {tool}
                       </span>
@@ -487,14 +487,14 @@ export default function HowToUseGuide() {
                 <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
                   {/* Icon with decorative ring */}
                   <div className="relative mb-6">
-                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[#10B981]/10 group-hover:bg-[#10B981]/20 transition-colors duration-300 animate-pulse-slow" />
-                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg shadow-[#10B981]/20 group-hover:scale-110 transition-transform duration-300">
+                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[green-primary]/10 group-hover:bg-[green-primary]/20 transition-colors duration-300 animate-pulse-slow" />
+                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[green-primary] to-[green-dark] flex items-center justify-center shadow-lg shadow-[green-primary]/20 group-hover:scale-110 transition-transform duration-300">
                       <navStep.icon className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                   </div>
 
                   {/* Content */}
-                  <h4 className="text-xl font-semibold text-foreground mb-3 group-hover:text-[#10B981] transition-colors duration-300">
+                  <h4 className="text-xl font-semibold text-foreground mb-3 group-hover:text-[green-primary] transition-colors duration-300">
                     {navStep.title}
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
@@ -502,9 +502,9 @@ export default function HowToUseGuide() {
                   </p>
 
                   {/* Action hint */}
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-[#10B981]/5 group-hover:bg-[#10B981]/10 transition-colors duration-300">
-                    <ChevronRight className="w-4 h-4 text-[#10B981] mt-0.5 flex-shrink-0" />
-                    <span className="text-xs font-medium text-[#10B981]/90">
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-[green-primary]/5 group-hover:bg-[green-primary]/10 transition-colors duration-300">
+                    <ChevronRight className="w-4 h-4 text-[green-primary] mt-0.5 flex-shrink-0" />
+                    <span className="text-xs font-medium text-[green-primary]/90">
                       {navStep.action}
                     </span>
                   </div>
@@ -549,18 +549,18 @@ export default function HowToUseGuide() {
                 }}
                 className="group"
               >
-                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-gradient-to-br from-white/80 to-white/60 dark:from-gray-900/60 dark:to-gray-900/40 backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-[#10B981]/10 hover:border-[#10B981]/20 transition-all duration-300 relative overflow-hidden">
+                <div className="h-full p-6 lg:p-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-green-primary/10 hover:border-green-primary/20 transition-all duration-300 relative overflow-hidden">
                   {/* Decorative background element */}
-                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-[#10B981]/5 group-hover:bg-[#10B981]/10 transition-colors duration-300" />
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-[green-primary]/5 group-hover:bg-[green-primary]/10 transition-colors duration-300" />
 
                   <div className="relative">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#10B981]/10 to-[#10B981]/5 flex items-center justify-center group-hover:from-[#10B981] group-hover:to-[#059669] transition-all duration-300">
-                        <tip.icon className="w-6 h-6 text-[#10B981] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[green-primary]/10 to-[green-primary]/5 flex items-center justify-center group-hover:from-[green-primary] group-hover:to-[green-dark] transition-all duration-300">
+                        <tip.icon className="w-6 h-6 text-[green-primary] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
                       </div>
 
                       <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[#10B981] transition-colors duration-300">
+                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-[green-primary] transition-colors duration-300">
                           {tip.title}
                         </h4>
                         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -607,10 +607,10 @@ export default function HowToUseGuide() {
                   >
                     <AccordionTrigger className="py-5 text-left hover:no-underline group">
                       <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center text-[#10B981] font-bold text-sm group-data-[state=open]:from-[#10B981] group-data-[state=open]:to-[#059669] group-data-[state=open]:text-white transition-all duration-300">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[green-primary]/10 flex items-center justify-center text-[green-primary] font-bold text-sm group-data-[state=open]:from-[green-primary] group-data-[state=open]:to-[green-dark] group-data-[state=open]:text-white transition-all duration-300">
                           Q{index + 1}
                         </div>
-                        <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[#10B981] transition-colors duration-300 text-left">
+                        <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[green-primary] transition-colors duration-300 text-left">
                           {item.question}
                         </span>
                       </div>
@@ -635,7 +635,7 @@ export default function HowToUseGuide() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-20"
         >
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#10B981] via-[#047857] to-[#065F46] p-8 sm:p-12 lg:p-16 text-center">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[green-primary] via-[green-dark] to-[green-dark] p-8 sm:p-12 lg:p-16 text-center">
             {/* Background decorations */}
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />

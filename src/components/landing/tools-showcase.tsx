@@ -69,7 +69,7 @@ const tools: Tool[] = [
     description: "Multiple sequence alignment for large datasets",
     category: "sequence",
     icon: <AlignLeft className="w-5 h-5" />,
-    color: "from-emerald-400 via-teal-400 to-cyan-500",
+    color: "from-green-soft via-green-primary to-green-bright",
   },
   {
     id: "muscle",
@@ -111,7 +111,7 @@ const tools: Tool[] = [
     description: "Identify transmembrane helices in proteins",
     category: "protein",
     icon: <Eye className="w-5 h-5" />,
-    color: "from-teal-400 via-emerald-400 to-green-500",
+    color: "from-green-soft via-green-primary to-green-bright",
   },
 
   // Phylogenetics
@@ -121,7 +121,7 @@ const tools: Tool[] = [
     description: "Construct phylogenetic trees using NJ algorithm",
     category: "phylogenetics",
     icon: <GitBranch className="w-5 h-5" />,
-    color: "from-lime-400 via-green-500 to-emerald-600",
+    color: "from-green-soft via-green-primary to-green-dark",
   },
   {
     id: "maximum-likelihood",
@@ -137,7 +137,7 @@ const tools: Tool[] = [
     description: "Interactive visualization of phylogenetic trees",
     category: "phylogenetics",
     icon: <TreePine className="w-5 h-5" />,
-    color: "from-green-400 via-emerald-400 to-teal-500",
+    color: "from-green-soft via-green-primary to-green-bright",
   },
 
   // Utilities
@@ -230,12 +230,12 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
   }, [activeCategory, searchQuery]);
 
   return (
-    <section className="relative py-24 overflow-hidden bg-gradient-to-b from-background via-white to-background dark:via-[#0A0A0A]">
+    <section className="relative py-24 overflow-hidden bg-white dark:bg-black">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/[0.02] rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-primary/[0.02] rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -249,7 +249,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
         >
           <Badge 
             variant="outline" 
-            className="mb-4 px-3 py-1 text-sm border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
+            className="mb-4 px-3 py-1 text-sm border-green-primary/30 text-green-primary bg-green-primary/5"
           >
             <Dna className="w-3.5 h-3.5 mr-1.5" />
             Bioinformatics Toolkit
@@ -275,13 +275,13 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
           className="max-w-xl mx-auto mb-10"
         >
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-green-primary transition-colors" />
             <Input
               type="text"
               placeholder="Search tools by name or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 h-12 text-base rounded-xl border-border/50 bg-card/80 backdrop-blur-sm focus:border-emerald-500 focus:ring-emerald-500/20 shadow-sm hover:shadow-md transition-shadow"
+              className="pl-12 pr-4 h-12 text-base rounded-xl border-border/50 bg-white dark:bg-black backdrop-blur-sm focus:border-green-primary focus:ring-green-primary/20 shadow-sm hover:shadow-md transition-shadow"
             />
           </div>
         </motion.div>
@@ -303,8 +303,8 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
                 onClick={() => setActiveCategory(category.id)}
                 className={`gap-2 rounded-full px-4 sm:px-5 transition-all duration-300 ${
                   activeCategory === category.id
-                    ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                    : "hover:bg-emerald-500/5 hover:border-emerald-500/30 hover:text-emerald-500"
+                    ? "bg-green-primary hover:bg-green-dark text-white shadow-lg shadow-green-primary/25"
+                    : "hover:bg-green-primary/5 hover:border-green-primary/30 hover:text-green-primary"
                 }`}
               >
                 {category.icon}
@@ -338,7 +338,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
                 }}
                 className="group relative"
               >
-                <div className="h-full p-5 rounded-2xl border border-border/50 bg-white/80 dark:bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 hover:border-emerald-500/20 transition-all duration-300">
+                <div className="h-full p-5 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-green-primary/5 hover:border-green-primary/20 transition-all duration-300">
                   {/* Icon & Badge Container */}
                   <div className="flex items-start justify-between mb-4">
                     <div className={`inline-flex p-2.5 rounded-xl bg-gradient-to-br ${tool.color} shadow-lg`}>
@@ -355,7 +355,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
                   </div>
 
                   {/* Tool Info */}
-                  <h3 className="font-semibold text-lg mb-1.5 group-hover:text-emerald-500 transition-colors">
+                  <h3 className="font-semibold text-lg mb-1.5 group-hover:text-green-primary transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">
@@ -367,7 +367,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => onLaunchTool?.(tool.id)}
-                    className="w-full gap-2 rounded-lg text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 group/btn cursor-pointer"
+                    className="w-full gap-2 rounded-lg text-green-primary hover:bg-green-primary/10 hover:text-green-dark group/btn cursor-pointer"
                   >
                     <Play className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                     Launch Tool
@@ -375,7 +375,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
                   </Button>
 
                   {/* Hover gradient effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.02] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-primary/0 to-green-primary/0 group-hover:from-green-primary/[0.02] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
                 </div>
               </motion.div>
             ))}
@@ -411,7 +411,7 @@ export default function ToolsShowcase({ onLaunchTool }: ToolsShowcaseProps) {
             variant="outline"
             size="lg"
             onClick={() => onLaunchTool?.('all')}
-            className="gap-2 rounded-full px-8 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer"
+            className="gap-2 rounded-full px-8 border-green-primary/30 text-green-primary hover:bg-green-primary hover:text-white hover:border-green-primary transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-green-primary/20 cursor-pointer"
           >
             Explore All 50+ Tools
             <ChevronRight className="w-4 h-4" />

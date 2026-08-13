@@ -51,7 +51,7 @@ const creators = [
       { icon: Code2, label: 'Scientific Software Development', color: 'text-cyan-500' },
       { icon: FlaskConical, label: 'Open-Source Research Tools', color: 'text-red-500' }
     ],
-    badge: { text: 'Creator', gradient: 'from-emerald-500 to-purple-600' }
+    badge: { text: 'Creator', gradient: 'from-green-primary to-purple-600' }
   },
   {
     id: 'nitesh',
@@ -72,10 +72,10 @@ const creators = [
     interests: [
       { icon: Microscope, label: 'Genomics & Transcriptomics', color: 'text-green-500' },
       { icon: Cpu, label: 'AI/ML Predictive Modelling', color: 'text-orange-500' },
-      { icon: Leaf, label: 'Molecular Breeding', color: 'text-emerald-500' },
+      { icon: Leaf, label: 'Molecular Breeding', color: 'text-green-primary' },
       { icon: Database, label: 'Genomic Diversity Analysis', color: 'text-teal-500' }
     ],
-    badge: { text: 'Co-Creator & Mentor', gradient: 'from-emerald-600 to-teal-700' }
+    badge: { text: 'Co-Creator & Mentor', gradient: 'from-green-dark to-teal-700' }
   }
 ];
 
@@ -85,7 +85,7 @@ const sharedInterests = [
   { icon: Brain, label: 'AI for Life Sciences', color: 'text-purple-500' },
   { icon: Microscope, label: 'Genomics, Proteomics & Structural Biology', color: 'text-green-500' },
   { icon: Cpu, label: 'Machine Learning in Biotechnology', color: 'text-orange-500' },
-  { icon: Leaf, label: 'Precision Agriculture & Ag-Bioinformatics', color: 'text-emerald-500' },
+  { icon: Leaf, label: 'Precision Agriculture & Ag-Bioinformatics', color: 'text-green-primary' },
   { icon: Code2, label: 'Scientific Software Development', color: 'text-cyan-500' },
   { icon: FlaskConical, label: 'Open-Source Research Tools', color: 'text-red-500' },
   { icon: BookOpen, label: 'Scientific Communication', color: 'text-yellow-600' },
@@ -102,14 +102,14 @@ export default function AboutCreator({ onBack }: AboutProps) {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-gradient-to-br from-emerald-500 via-rose-700 to-emerald-800 text-white py-20 overflow-hidden"
+        className="relative bg-gradient-to-br from-green-primary via-rose-700 to-green-dark text-white py-20 overflow-hidden"
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white rounded-full blur-3xl" />
-          <div className="absolute top-20 right-40 w-32 h-32 bg-emerald-300 rounded-full blur-2xl" />
+          <div className="absolute top-20 right-40 w-32 h-32 bg-green-bright rounded-full blur-2xl" />
           <div className="absolute bottom-32 left-40 w-48 h-48 bg-blue-300 rounded-full blur-2xl" />
         </div>
         
@@ -141,7 +141,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
               transition={{ delay: 0.2 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
             >
-              Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-emerald-200">Creators</span>
+              Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-green-soft">Creators</span>
             </motion.h1>
             
             <motion.p
@@ -237,7 +237,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           >
             <div className="bg-card border rounded-2xl p-8 md:p-12 shadow-sm relative overflow-hidden">
               {/* Accent bar */}
-              <div className={`absolute top-0 left-0 w-1.5 h-full ${index === 0 ? 'bg-emerald-500' : 'bg-emerald-600'}`} />
+              <div className={`absolute top-0 left-0 w-1.5 h-full ${index === 0 ? 'bg-green-primary' : 'bg-green-dark'}`} />
               
               <div className="flex items-start gap-6 mb-6">
                 <div className="hidden sm:block flex-shrink-0">
@@ -254,10 +254,10 @@ export default function AboutCreator({ onBack }: AboutProps) {
                 
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                    <User className={`size-6 ${index === 0 ? 'text-emerald-500' : 'text-emerald-600'}`} />
+                    <User className={`size-6 ${index === 0 ? 'text-green-primary' : 'text-green-dark'}`} />
                     About {creator.name.split(' ')[0]}
                     {index === 1 && (
-                      <span className="ml-2 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-normal">
+                      <span className="ml-2 text-xs bg-green-light dark:bg-green-dark/30 text-green-dark dark:text-green-primary px-2 py-0.5 rounded-full font-normal">
                         Ph.D.
                       </span>
                     )}
@@ -268,15 +268,15 @@ export default function AboutCreator({ onBack }: AboutProps) {
                       {creator.bio.split(' ').map((word, i) => {
                         const keywords = ['Bioinformatics', 'Artificial Intelligence', 'Computational Biology', 'Scientific Innovation', 'Genomics', 'Transcriptomics', 'AI/ML'];
                         if (keywords.some(k => word.includes(k))) {
-                          return <span key={i} className={`${index === 0 ? 'text-emerald-500' : 'text-emerald-600'} font-medium`}>{word} </span>;
+                          return <span key={i} className={`${index === 0 ? 'text-green-primary' : 'text-green-dark'} font-medium`}>{word} </span>;
                         }
                         return word + ' ';
                       })}
                     </p>
                     
-                    <div className={`bg-gradient-to-r ${index === 0 ? 'from-emerald-500/10 to-purple-500/10 border-emerald-500/20' : 'from-emerald-500/10 to-teal-500/10 border-emerald-500/20'} border rounded-xl p-6`}>
+                    <div className={`bg-gradient-to-r ${index === 0 ? 'from-green-primary/10 to-purple-500/10 border-green-primary/20' : 'from-green-primary/10 to-teal-500/10 border-green-primary/20'} border rounded-xl p-6`}>
                       <h3 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
-                        <Target className={`size-5 ${index === 0 ? 'text-emerald-500' : 'text-emerald-600'}`} />
+                        <Target className={`size-5 ${index === 0 ? 'text-green-primary' : 'text-green-dark'}`} />
                         {index === 0 ? 'BioAlign Vision' : 'Research Focus'}
                       </h3>
                       <p className="text-foreground/80 text-sm leading-relaxed">
@@ -304,7 +304,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
                     <p className="text-foreground">
                       "{creator.quote}"
                     </p>
-                    <footer className={`mt-2 ${index === 0 ? 'text-emerald-500' : 'text-emerald-600'} font-medium not-italic`}>
+                    <footer className={`mt-2 ${index === 0 ? 'text-green-primary' : 'text-green-dark'} font-medium not-italic`}>
                       — {creator.name}
                     </footer>
                   </blockquote>
@@ -345,7 +345,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-emerald-500/5 via-purple-500/5 to-emerald-500/5 border border-emerald-500/10 rounded-2xl p-8 md:p-12"
+          className="bg-gradient-to-br from-green-primary/5 via-purple-500/5 to-green-primary/5 border border-green-primary/10 rounded-2xl p-8 md:p-12"
         >
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-card px-4 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
@@ -361,7 +361,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
             
             <div className="flex flex-wrap justify-center gap-4">
               <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
-                <GraduationCap className="size-5 text-emerald-500" />
+                <GraduationCap className="size-5 text-green-primary" />
                 <span className="text-sm font-medium">Academic Excellence</span>
               </div>
               <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
@@ -369,7 +369,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
                 <span className="text-sm font-medium">Student Innovation</span>
               </div>
               <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
-                <Code2 className="size-5 text-emerald-600" />
+                <Code2 className="size-5 text-green-dark" />
                 <span className="text-sm font-medium">Open Source</span>
               </div>
             </div>
@@ -381,7 +381,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-emerald-500 via-rose-700 to-emerald-800 rounded-2xl p-8 md:p-12 text-white text-center"
+          className="bg-gradient-to-br from-green-primary via-rose-700 to-green-dark rounded-2xl p-8 md:p-12 text-white text-center"
         >
           <Heart className="size-12 mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-4">Get In Touch!</h2>
@@ -392,7 +392,7 @@ export default function AboutCreator({ onBack }: AboutProps) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="mailto:toufikmahata20@gmail.com"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-emerald-500 font-semibold rounded-xl hover:bg-white/90 transition-all no-underline"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-green-primary font-semibold rounded-xl hover:bg-white/90 transition-all no-underline"
             >
               <Mail className="size-5" />
               Contact Toufik

@@ -134,24 +134,24 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="h-full w-full bg-gradient-to-r from-[#10B981]/40 via-[#10B981]/20 to-transparent origin-left"
+            className="h-full w-full bg-gradient-to-r from-[green-primary]/40 via-[green-primary]/20 to-transparent origin-left"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#10B981]/60 via-[#10B981]/30 to-transparent animate-pulse" style={{ animationDuration: '2s' }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[green-primary]/60 via-[green-primary]/30 to-transparent animate-pulse" style={{ animationDuration: '2s' }} />
         </div>
       )}
 
       {/* Main Card */}
-      <div className="relative flex flex-col h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-card/70 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-500 overflow-hidden z-10">
+      <div className="relative flex flex-col h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-green-primary/15 hover:border-green-primary/30 transition-all duration-500 overflow-hidden z-10">
         {/* Background gradient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/10 via-transparent to-purple-500/5 rounded-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[green-primary]/10 via-transparent to-purple-500/5 rounded-2xl" />
         </div>
 
         {/* Animated corner accent */}
         <div className="absolute top-0 right-0 w-24 h-24 overflow-hidden rounded-tr-2xl">
           <div className="absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 -translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0">
-            <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-[#10B981] to-transparent" />
-            <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-[#10B981] to-transparent" />
+            <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-[green-primary] to-transparent" />
+            <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-[green-primary] to-transparent" />
           </div>
         </div>
 
@@ -159,20 +159,20 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
         <div className="relative flex items-center gap-4 mb-6">
           {/* Number Badge */}
           <div className="relative flex-shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
-            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg shadow-[#10B981]/30 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-[green-primary] to-[green-dark] rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[green-primary] to-[green-dark] flex items-center justify-center shadow-lg shadow-[green-primary]/30 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
               <Icon className="w-7 h-7 text-white" strokeWidth={2} />
             </div>
             
             {/* Step number overlay */}
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-background border-2 border-[#10B981] flex items-center justify-center">
-              <span className="text-xs font-bold text-[#10B981]">{step.number}</span>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-background border-2 border-[green-primary] flex items-center justify-center">
+              <span className="text-xs font-bold text-[green-primary]">{step.number}</span>
             </div>
           </div>
 
           {/* Title */}
           <div>
-            <h3 className="text-xl font-bold text-foreground group-hover:text-[#10B981] transition-colors duration-300">
+            <h3 className="text-xl font-bold text-foreground group-hover:text-[green-primary] transition-colors duration-300">
               {step.title}
             </h3>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -192,7 +192,7 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
               transition={{ delay: 0.1 * featureIndex + 0.2, duration: 0.4 }}
               className="flex items-start gap-3"
             >
-              <CheckCircle2 className="w-4 h-4 text-[#10B981] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+              <CheckCircle2 className="w-4 h-4 text-[green-primary] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
               <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
             </motion.li>
           ))}
@@ -207,7 +207,7 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
                 <div
                   key={i}
                   className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                    i <= index ? 'bg-[#10B981]' : 'bg-border'
+                    i <= index ? 'bg-[green-primary]' : 'bg-border'
                   }`}
                 />
               ))}
@@ -221,7 +221,7 @@ function StepCard({ step, index }: { step: WorkflowStep; index: number }) {
               whileInView={{ width: `${((index + 1) / 5) * 100}%` }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-              className="h-full bg-gradient-to-r from-[#10B981] to-[#047857] rounded-full"
+              className="h-full bg-gradient-to-r from-[green-primary] to-[green-dark] rounded-full"
             />
           </div>
         </div>
@@ -240,14 +240,14 @@ function VerticalConnector({ isLast }: { isLast: boolean }) {
         whileInView={{ scaleY: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-        className="w-0.5 h-8 bg-gradient-to-b from-[#10B981]/60 via-[#10B981]/30 to-transparent origin-top"
+        className="w-0.5 h-8 bg-gradient-to-b from-[green-primary]/60 via-[green-primary]/30 to-transparent origin-top"
       >
         {/* Animated pulse effect */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#10B981]/40 animate-ping" style={{ animationDuration: '1.5s' }} />
+        <div className="absolute left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[green-primary]/40 animate-ping" style={{ animationDuration: '1.5s' }} />
         
         {/* Arrow indicator */}
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-          <ArrowRight className="w-4 h-4 text-[#10B981] rotate-90 lg:rotate-0" />
+          <ArrowRight className="w-4 h-4 text-[green-primary] rotate-90 lg:rotate-0" />
         </div>
       </motion.div>
     </div>
@@ -278,9 +278,9 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
         />
         
         {/* Gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#10B981]/8 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[green-primary]/8 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#10B981]/3 rounded-full blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[green-primary]/3 rounded-full blur-[150px]" />
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -293,15 +293,15 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
           className="text-center mb-20"
         >
           {/* Label badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 mb-6">
-            <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-            <span className="text-sm font-medium text-[#10B981]">Research Pipeline</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[green-primary]/10 border border-[green-primary]/20 mb-6">
+            <div className="w-2 h-2 rounded-full bg-[green-primary] animate-pulse" />
+            <span className="text-sm font-medium text-[green-primary]">Research Pipeline</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground tracking-tight mb-6">
             Streamlined{' '}
             <span className="relative">
-              <span className="bg-gradient-to-r from-[#10B981] via-[#047857] to-[#10B981] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[green-primary] via-[green-dark] to-[green-primary] bg-clip-text text-transparent">
                 Research Workflow
               </span>
               <motion.div
@@ -309,7 +309,7 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-[#10B981] via-[#047857] to-transparent rounded-full origin-left"
+                className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-[green-primary] via-[green-dark] to-transparent rounded-full origin-left"
               />
             </span>
           </h2>
@@ -361,10 +361,10 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
           transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-20 text-center"
         >
-          <div className="relative inline-flex flex-col items-center p-8 sm:p-12 rounded-3xl bg-card/70 backdrop-blur-xl border border-border/50 shadow-2xl shadow-primary/10 overflow-hidden">
+          <div className="relative inline-flex flex-col items-center p-8 sm:p-12 rounded-3xl bg-white dark:bg-black backdrop-blur-xl border border-border/50 shadow-2xl shadow-green-primary/10 overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#10B981]/10 rounded-full blur-[80px]" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[green-primary]/10 rounded-full blur-[80px]" />
               <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[60px]" />
             </div>
 
@@ -384,7 +384,7 @@ export default function WorkflowSection({ onStartClick }: WorkflowSectionProps) 
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onStartClick}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[#10B981] to-[#047857] text-white font-semibold text-lg shadow-lg shadow-[#10B981]/30 transition-all duration-300 overflow-hidden cursor-pointer"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[green-primary] to-[green-dark] text-white font-semibold text-lg shadow-lg shadow-[green-primary]/30 transition-all duration-300 overflow-hidden cursor-pointer"
               >
                 {/* Button shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

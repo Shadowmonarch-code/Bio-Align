@@ -42,13 +42,13 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* BioAlign Forest Green Palette */
-  --color-forest-darkest: #051F20;
-  --color-forest-dark: #0B2B26;
-  --color-forest-deep: #163832;
-  --color-forest-primary: #235347;
-  --color-forest-sage: #8EB69B;
-  --color-forest-light: #DAF1DE;
+  /* BioAlign Scientific Green Palette */
+  --color-green-primary: #16A34A;
+  --color-green-dark: #15803D;
+  --color-green-bright: #22C55E;
+  --color-green-soft: #86EFAC;
+  --color-green-light: #DCFCE7;
+  --color-green-bg: #F0FDF4;
   
   /* Extended professional palette */
   --color-surface: var(--surface);
@@ -57,131 +57,131 @@
 }
 
 /* ============================================
-   BOTANICAL FOREST-GREEN LIGHT MODE PALETTE
-   Living Computational Ecosystem Theme
-   Based on: #DAF1DE → #8EB69B → #163832 → #051F20
+   BIOALIGN LIGHT MODE PALETTE
+   Clean White + Scientific Green Accent
+   Professional Research Environment
    ============================================ */
 :root {
   --radius: 0.625rem;
   
-  /* Core background - Pale mint cream */
-  --background: #DAF1DE;
-  --foreground: #051F20;  /* Deepest Green for text */
+  /* Core background - Pure White */
+  --background: #FFFFFF;
+  --foreground: #0F172A;  /* Deep slate for text */
   
   /* Card surfaces - Clean white */
   --card: #FFFFFF;
-  --card-foreground: #051F20;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #051F20;
+  --popover-foreground: #0F172A;
   
-  /* Primary actions - Forest Green (main brand color) */
-  --primary: #163832;
-  --primary-foreground: #DAF1DE;
+  /* Primary actions - Scientific Green (brand accent) */
+  --primary: #16A34A;
+  --primary-foreground: #FFFFFF;
   
-  /* Secondary surfaces - Very light forest tint */
-  --secondary: #F4FAF5;
-  --secondary-foreground: #235347;
+  /* Secondary surfaces - Very light gray */
+  --secondary: #F8FAFC;
+  --secondary-foreground: #475569;
   
-  /* Muted elements - Light sage */
-  --muted: #E8F5EE;
-  --muted-foreground: #235347;
+  /* Muted elements - Light gray */
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
   
-  /* Accent elements - Sage green tint */
-  --accent: #C5E6D5;
-  --accent-foreground: #163832;
+  /* Accent elements - Soft green tint */
+  --accent: #F0FDF4;
+  --accent-foreground: #166534;
   
   /* Destructive/Errors */
-  --destructive: #C95D53;
+  --destructive: #DC2626;
   
-  /* Borders & Inputs - Subtle sage border */
-  --border: #B8DCC8;
-  --input: #B8DCC8;
-  --ring: #163832;
+  /* Borders & Inputs - Subtle gray */
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #16A34A;
   
-  /* Chart colors - Botanical palette harmony */
-  --chart-1: #235347;
-  --chart-2: #8EB69B;
-  --chart-3: #163832;
-  --chart-4: #0B2B26;
-  --chart-5: #5A7D72;
+  /* Chart colors - Scientific green palette */
+  --chart-1: #16A34A;
+  --chart-2: #22C55E;
+  --chart-3: #15803D;
+  --chart-4: #86EFAC;
+  --chart-5: #166534;
   
   /* Sidebar */
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #051F20;
-  --sidebar-primary: #163832;
-  --sidebar-primary-foreground: #DAF1DE;
-  --sidebar-accent: #C5E6D5;
-  --sidebar-accent-foreground: #163832;
-  --sidebar-border: #B8DCC8;
-  --sidebar-ring: #163832;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #16A34A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0FDF4;
+  --sidebar-accent-foreground: #166534;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #16A34A;
   
   /* Surface variants */
-  --surface: #DAF1DE;
+  --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-overlay: rgba(255, 255, 255, 0.95);
 }
 
 /* ============================================
-   BOTANICAL FOREST-GREEN DARK MODE PALETTE
-   Deep forest tones - Rich, Premium, OLED-friendly
-   Living Computational Ecosystem Theme
+   BIOALIGN DARK MODE PALETTE
+   Deep Black + Scientific Green Accent
+   Computational Research Laboratory
    ============================================ */
 .dark {
-  /* Core background - Deepest Green */
-  --background: #051F20;
-  --foreground: #DAF1DE;  /* Pale Mint for text */
+  /* Core background - Pure Black */
+  --background: #000000;
+  --foreground: #F8FAFC;  /* Near-white for text */
   
-  /* Card surfaces - Dark Botanical */
-  --card: #0B2B26;
-  --card-foreground: #DAF1DE;
-  --popover: #0B2B26;
-  --popover-foreground: #DAF1DE;
+  /* Card surfaces - Dark elevated */
+  --card: #0A0A0A;
+  --card-foreground: #F8FAFC;
+  --popover: #0A0A0A;
+  --popover-foreground: #F8FAFC;
   
-  /* Primary actions - Forest Green (consistent) */
-  --primary: #163832;
-  --primary-foreground: #DAF1DE;
+  /* Primary actions - Bright Green (consistent brand) */
+  --primary: #16A34A;
+  --primary-foreground: #FFFFFF;
   
-  /* Secondary surfaces - Deep forest */
-  --secondary: #0A2421;
-  --secondary-foreground: #8EB69B;
+  /* Secondary surfaces - Very dark gray */
+  --secondary: #050505;
+  --secondary-foreground: #A1A1AA;
   
-  /* Muted elements - Dark botanical */
-  --muted: #0D2D29;
-  --muted-foreground: #8EB69B;
+  /* Muted elements - Dark neutral */
+  --muted: #111111;
+  --muted-foreground: #A1A1AA;
   
-  /* Accent elements - Forest green tint */
-  --accent: #163832;
-  --accent-foreground: #8EB69B;
+  /* Accent elements - Dark green background */
+  --accent: #052E16;
+  --accent-foreground: #86EFAC;
   
   /* Destructive/Errors */
-  --destructive: #E57373;
+  --destructive: #EF4444;
   
-  /* Borders & Inputs - Deep Teal Green definition */
-  --border: #235347;
-  --input: #163832;
-  --ring: #8EB69B;
+  /* Borders & Inputs - Dark gray */
+  --border: #1F2937;
+  --input: #1F2937;
+  --ring: #22C55E;
   
-  /* Chart colors - Dark botanical palette */
-  --chart-1: #8EB69B;
-  --chart-2: #A8CBB8;
-  --chart-3: #235347;
-  --chart-4: #C5E6D5;
-  --chart-5: #5A7D72;
+  /* Chart colors - Dark mode scientific palette */
+  --chart-1: #22C55E;
+  --chart-2: #16A34A;
+  --chart-3: #86EFAC;
+  --chart-4: #4ADE80;
+  --chart-5: #15803D;
   
   /* Sidebar */
-  --sidebar: #0B2B26;
-  --sidebar-foreground: #DAF1DE;
-  --sidebar-primary: #8EB69B;
-  --sidebar-primary-foreground: #051F20;
-  --sidebar-accent: #163832;
-  --sidebar-accent-foreground: #8EB69B;
-  --sidebar-border: #235347;
-  --sidebar-ring: #8EB69B;
+  --sidebar: #000000;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #22C55E;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #052E16;
+  --sidebar-accent-foreground: #86EFAC;
+  --sidebar-border: #1F2937;
+  --sidebar-ring: #22C55E;
   
   /* Surface variants */
-  --surface: #051F20;
-  --surface-elevated: #0B2B26;
-  --surface-overlay: rgba(11, 43, 38, 0.95);
+  --surface: #000000;
+  --surface-elevated: #0A0A0A;
+  --surface-overlay: rgba(0, 0, 0, 0.95);
 }
 
 @layer base {
@@ -209,7 +209,7 @@
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #2D2D2D;
+  background: #374151;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -217,20 +217,20 @@
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+  background: #4B5563;
 }
 
-/* Glassmorphism utilities - Forest green styling */
+/* Glassmorphism utilities - Clean professional styling */
 .glass {
-  background: rgba(218, 241, 222, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(184, 220, 200, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .dark .glass {
-  background: rgba(11, 43, 38, 0.85);
-  border: 1px solid rgba(26, 64, 57, 0.5);
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(31, 41, 55, 0.5);
 }
 
 /* Glass card for tools catalog */
@@ -238,28 +238,28 @@
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(35, 83, 71, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .glass-card {
-  background: rgba(11, 43, 38, 0.72);
-  border: 1px solid rgba(26, 64, 57, 0.4);
+  background: rgba(10, 10, 10, 0.72);
+  border: 1px solid rgba(31, 41, 55, 0.4);
 }
 
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(35, 83, 71, 0.2);
+  border-color: rgba(22, 163, 74, 0.3);
   box-shadow: 
-    0 4px 6px -1px rgba(5, 31, 32, 0.05),
-    0 10px 15px -3px rgba(35, 83, 71, 0.08);
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(22, 163, 74, 0.08);
 }
 
 .dark .glass-card:hover {
-  background: rgba(15, 50, 44, 0.82);
+  background: rgba(17, 17, 17, 0.82);
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 10px 15px -3px rgba(142, 182, 155, 0.12);
+    0 10px 15px -3px rgba(34, 197, 94, 0.12);
 }
 
 /* ============================================
@@ -279,10 +279,10 @@
   50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-/* Pulsing glow effect - Forest green based */
+/* Pulsing glow effect - Green based */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(35, 83, 71, 0.25); }
-  50% { box-shadow: 0 0 40px rgba(35, 83, 71, 0.45); }
+  0%, 100% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.25); }
+  50% { box-shadow: 0 0 40px rgba(22, 163, 74, 0.45); }
 }
 
 /* Shimmer effect for loading states */
@@ -400,16 +400,16 @@
   animation: molecularPulse 3s ease-in-out infinite;
 }
 
-/* Gradient text utility - Forest green theme */
+/* Gradient text utility - Scientific green theme */
 .gradient-text {
-  background: linear-gradient(135deg, #235347 0%, #163832 50%, #0B2B26 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 50%, #166534 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #C5E6D5 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 50%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -441,45 +441,45 @@
 }
 
 /* ============================================
-   FOREST GRID BACKGROUND UTILITIES
+   SCIENTIFIC GRID BACKGROUND UTILITIES
    ============================================ */
 
-/* Main scientific grid pattern - Botanical forest green */
+/* Main scientific grid pattern - Subtle green tint */
 .scientific-grid {
   background-image: 
-    linear-gradient(rgba(35, 83, 71, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(35, 83, 71, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(22, 163, 74, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 163, 74, 0.04) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .dark .scientific-grid {
   background-image: 
-    linear-gradient(rgba(142, 182, 155, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(142, 182, 155, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
 }
 
 /* Fine grid pattern for subtle backgrounds */
 .fine-grid {
   background-image: 
-    linear-gradient(rgba(90, 125, 114, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(90, 125, 114, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(100, 116, 139, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .dark .fine-grid {
   background-image: 
-    linear-gradient(rgba(106, 148, 136, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(106, 148, 136, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(100, 116, 139, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.04) 1px, transparent 1px);
 }
 
-/* Dot matrix pattern - Forest green */
+/* Dot matrix pattern - Green accent */
 .dot-matrix {
-  background-image: radial-gradient(circle, rgba(35, 83, 71, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(22, 163, 74, 0.1) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .dot-matrix {
-  background-image: radial-gradient(circle, rgba(142, 182, 155, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(34, 197, 94, 0.12) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -504,6 +504,15 @@
   background-color: var(--surface);
 }
 
+/* Section with subtle green tint for variety */
+.section-bg-green {
+  background-color: #F0FDF4;
+}
+
+.dark .section-bg-green {
+  background-color: #020D06;
+}
+
 /* Professional card styles */
 .pro-card {
   background-color: var(--card);
@@ -513,51 +522,51 @@
 }
 
 .pro-card:hover {
-  border-color: var(--primary);
+  border-color: #16A34A;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .pro-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(142, 182, 155, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.15);
 }
 
-/* Text gradient for headings - Forest green based */
+/* Text gradient for headings - Scientific green based */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #235347 0%, #163832 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #8EB69B 0%, #C5E6D5 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Text gradient with sage accents */
+/* Text gradient with bright accents */
 .text-gradient-science {
-  background: linear-gradient(135deg, #235347 0%, #8EB69B 50%, #DAF1DE 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-science {
-  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #DAF1DE 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 50%, #DCFCE7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glow effects - Forest green */
+/* Glow effects - Green accent */
 .glow-emerald {
-  box-shadow: 0 0 30px rgba(35, 83, 71, 0.15);
+  box-shadow: 0 0 30px rgba(22, 163, 74, 0.15);
 }
 
 .dark .glow-emerald {
-  box-shadow: 0 0 30px rgba(142, 182, 155, 0.2);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
 }
 
 /* Border glow on hover */
@@ -566,61 +575,116 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(35, 83, 71, 0.15);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.15);
 }
 
 .dark .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(142, 182, 155, 0.25);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
 }
 
 /* ============================================
-   BOTANICAL GRADIENT UTILITIES
-   Living Computational Ecosystem Theme
+   SCIENTIFIC GRADIENT UTILITIES
+   BioAlign Brand Identity
    ============================================ */
 
-/* Primary gradient - Deep forest (darkest to forest) */
+/* Primary gradient - Green brand colors */
 .gradient-primary {
-  background: linear-gradient(135deg, #051F20 0%, #0B2B26 50%, #163832 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
 }
 
-/* Secondary gradient - Forest to sage */
+/* Secondary gradient - Lighter greens */
 .gradient-secondary {
-  background: linear-gradient(135deg, #163832 0%, #235347 50%, #8EB69B 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 50%, #15803D 100%);
 }
 
-/* Light gradient - Teal to mint */
+/* Light gradient - Soft greens */
 .gradient-light {
-  background: linear-gradient(135deg, #235347 0%, #8EB69B 50%, #DAF1DE 100%);
+  background: linear-gradient(135deg, #86EFAC 0%, #DCFCE7 50%, #F0FDF4 100%);
 }
 
-/* Text gradient - Botanical theme */
+/* Text gradient - BioAlign green brand */
 .text-gradient-botanical {
-  background: linear-gradient(135deg, #163832 0%, #235347 50%, #8EB69B 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 50%, #86EFAC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dark .text-gradient-botanical {
-  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 50%, #DAF1DE 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #86EFAC 50%, #DCFCE7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Premium button gradient */
+/* Premium button gradient - Green primary */
 .gradient-btn-primary {
-  background: linear-gradient(135deg, #163832 0%, #235347 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
 }
 
 .gradient-btn-primary:hover {
-  background: linear-gradient(135deg, #1a453d 0%, #2a6054 100%);
+  background: linear-gradient(135deg, #15803D 0%, #166534 100%);
 }
 
 .dark .gradient-btn-primary {
-  background: linear-gradient(135deg, #8EB69B 0%, #A8CBB8 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
 }
 
 .dark .gradient-btn-primary:hover {
-  background: linear-gradient(135deg, #9ec5ab 0%, #b6dbbf 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+}
+
+/* ============================================
+   BADGE STYLES
+   Scientific status indicators
+   ============================================ */
+
+.badge-success {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.dark .badge-success {
+  background-color: #052E16;
+  color: #86EFAC;
+}
+
+.badge-info {
+  background-color: #F0FDF4;
+  color: #15803D;
+}
+
+.dark .badge-info {
+  background-color: #052E16;
+  color: #22C55E;
+}
+
+/* ============================================
+   AI STATUS INDICATOR
+   Pulsing green dot
+   ============================================ */
+
+.ai-status-dot {
+  position: relative;
+}
+
+.ai-status-dot::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #22C55E;
+  animation: aiPulse 2s ease-in-out infinite;
+}
+
+@keyframes aiPulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
 }

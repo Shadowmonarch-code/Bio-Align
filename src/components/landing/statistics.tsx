@@ -35,7 +35,7 @@ const statsData: StatItem[] = [
     label: "Integrated Tools",
     description: "Comprehensive bioinformatics suite",
     icon: <Wrench className="w-7 h-7" />,
-    gradient: "from-emerald-500 to-red-600",
+    gradient: "from-green-primary to-red-600",
   },
   {
     id: "analyses",
@@ -53,7 +53,7 @@ const statsData: StatItem[] = [
     label: "Active Researchers",
     description: "Trusted by scientists worldwide",
     icon: <Users className="w-7 h-7" />,
-    gradient: "from-green-500 to-emerald-500",
+    gradient: "from-green-500 to-green-primary",
   },
   {
     id: "countries",
@@ -159,9 +159,9 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }) {
       }}
       className="group relative"
     >
-      <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 overflow-hidden">
+      <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-sm shadow-sm hover:shadow-xl hover:shadow-green-primary/5 hover:border-green-primary/20 transition-all duration-300 overflow-hidden">
         {/* Background gradient on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
         {/* Icon container */}
         <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
@@ -171,7 +171,7 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }) {
         </div>
 
         {/* Value */}
-        <div className="text-3xl sm:text-4xl font-bold tracking-tight mb-2 text-foreground group-hover:text-emerald-500 transition-colors duration-300">
+        <div className="text-3xl sm:text-4xl font-bold tracking-tight mb-2 text-foreground group-hover:text-green-primary transition-colors duration-300">
           <AnimatedCounter 
             value={stat.value} 
             suffix={stat.suffix} 
@@ -189,7 +189,7 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }) {
         </p>
 
         {/* Decorative corner element */}
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-500/5 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-primary/5 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
     </motion.div>
   );
@@ -202,7 +202,7 @@ export default function Statistics() {
   return (
     <section 
       ref={sectionRef}
-      className="relative py-24 overflow-hidden bg-gradient-to-b from-background via-emerald-500/[0.02] to-background dark:via-emerald-500/[0.03]"
+      className="relative py-24 overflow-hidden bg-white dark:bg-black"
     >
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -210,7 +210,7 @@ export default function Statistics() {
         <div 
           className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `linear-gradient(#10B981 1px, transparent 1px), linear-gradient(90deg, #10B981 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(green-primary 1px, transparent 1px), linear-gradient(90deg, green-primary 1px, transparent 1px)`,
             backgroundSize: '60px 60px'
           }}
         />
@@ -220,13 +220,13 @@ export default function Statistics() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 1 }}
-          className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-emerald-500/[0.05] rounded-full blur-[120px]"
+          className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-green-primary/[0.05] rounded-full blur-[120px]"
         />
         <motion.div 
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 1, delay: 0.2 }}
-          className="absolute -bottom-40 right-1/4 w-[400px] h-[400px] bg-emerald-500/[0.04] rounded-full blur-[100px]"
+          className="absolute -bottom-40 right-1/4 w-[400px] h-[400px] bg-green-primary/[0.04] rounded-full blur-[100px]"
         />
       </div>
 
@@ -244,10 +244,10 @@ export default function Statistics() {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-primary/10 border border-green-primary/20 mb-6"
           >
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-medium text-emerald-500">Platform Impact</span>
+            <TrendingUp className="w-4 h-4 text-green-primary" />
+            <span className="text-sm font-medium text-green-primary">Platform Impact</span>
           </motion.div>
           
           <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
@@ -277,19 +277,19 @@ export default function Statistics() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-8 py-6 px-8 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm">
+          <div className="inline-flex flex-wrap items-center justify-center gap-8 py-6 px-8 rounded-2xl border border-border/50 bg-white dark:bg-black backdrop-blur-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Zap className="w-5 h-5 text-emerald-500" />
+              <Zap className="w-5 h-5 text-green-primary" />
               <span className="text-sm font-medium">Lightning Fast</span>
             </div>
             <div className="w-px h-6 bg-border hidden sm:block" />
             <div className="flex items-center gap-2 text-muted-foreground">
-              <ShieldCheck className="w-5 h-5 text-emerald-500" />
+              <ShieldCheck className="w-5 h-5 text-green-primary" />
               <span className="text-sm font-medium">Secure & Private</span>
             </div>
             <div className="w-px h-6 bg-border hidden sm:block" />
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Globe className="w-5 h-5 text-emerald-500" />
+              <Globe className="w-5 h-5 text-green-primary" />
               <span className="text-sm font-medium">Global Infrastructure</span>
             </div>
           </div>

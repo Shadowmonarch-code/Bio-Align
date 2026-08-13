@@ -116,8 +116,8 @@ export default function FAQSection() {
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background gradient decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[green-primary]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[green-primary]/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -131,7 +131,7 @@ export default function FAQSection() {
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Frequently Asked{' '}
-            <span className="text-[#10B981]">Questions</span>
+            <span className="text-[green-primary]">Questions</span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
             Everything you need to know about BioAlign. Can&apos;t find what you&apos;re looking for?
@@ -155,10 +155,10 @@ export default function FAQSection() {
                 >
                   <AccordionTrigger className="py-5 text-left hover:no-underline group">
                     <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-[#10B981]/10 to-[#10B981]/5 flex items-center justify-center group-data-[state=open]:from-[#10B981] group-data-[state=open]:to-[#059669] transition-all duration-300">
-                        <item.icon className="w-5 h-5 text-[#10B981] group-data-[state=open]:text-white transition-colors duration-300" />
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-[green-primary]/10 to-[green-primary]/5 flex items-center justify-center group-data-[state=open]:from-[green-primary] group-data-[state=open]:to-[green-dark] transition-all duration-300">
+                        <item.icon className="w-5 h-5 text-[green-primary] group-data-[state=open]:text-white transition-colors duration-300" />
                       </div>
-                      <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[#10B981] transition-colors duration-300">
+                      <span className="font-semibold text-base sm:text-lg text-foreground group-hover:text-[green-primary] transition-colors duration-300">
                         {item.question}
                       </span>
                     </div>
@@ -182,12 +182,12 @@ export default function FAQSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-12 text-center"
         >
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#10B981]/5 via-white/80 to-orange-500/5 dark:from-[#10B981]/10 dark:via-gray-900/40 dark:to-orange-500/5 backdrop-blur-sm border border-border/50">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[green-primary]/5 via-white/80 to-orange-500/5 dark:from-[green-primary]/10 dark:via-gray-900/40 dark:to-orange-500/5 backdrop-blur-sm border border-border/50">
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <p className="text-foreground font-medium">
                 Still have questions?
               </p>
-              <button className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[#10B981] hover:bg-[#9B0F1A] rounded-lg shadow-md shadow-red-500/20 hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5">
+              <button className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[green-primary] hover:bg-[#9B0F1A] rounded-lg shadow-md shadow-red-500/20 hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5">
                 Contact Support
                 <svg
                   className="w-4 h-4 group-hover:translate-x-1 transition-transform"
@@ -203,7 +203,7 @@ export default function FAQSection() {
             <span className="hidden sm:block w-px h-8 bg-border" />
             <p className="text-sm text-muted-foreground">
               Or join our{' '}
-              <a href="#" className="text-[#10B981] hover:underline font-medium">
+              <a href="#" className="text-[green-primary] hover:underline font-medium">
                 Community Slack
               </a>{' '}
               for instant help
