@@ -590,21 +590,7 @@ export default function Home() {
         </section>
 
 
-        {/* Testimonials */}
-        <section
-          id="testimonials"
-          className="py-24 relative"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            <TestimonialsSection />
-
-            <div className="flex justify-end mt-8 pt-6 border-t border-border/50">
-              <BackToTopLink />
-            </div>
-
-          </div>
-        </section>
+      
 
 
         {/* FAQ */}
